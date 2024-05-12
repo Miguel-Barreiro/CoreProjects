@@ -1,8 +1,8 @@
 {
   "name": "com.miguel.core",
   "version": "0.1.0",
-  "displayName": "Package Example",
-  "description": "This is an example package",
+  "displayName": "Core Modules for Miguel's games",
+  "description": "This is a collection of core modules for Miguel's games",
   "dependencies": {
   },
   
