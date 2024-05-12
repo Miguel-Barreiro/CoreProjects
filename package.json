@@ -1,0 +1,13 @@
+{
+  "name": "com.miguel.core",
+  "version": "0.1.",
+  "displayName": "Package Example",
+  "description": "This is an example package",
+  "dependencies": {
+  },
+  
+  "author": {
+    "name": "miguel",
+    "email": "miguel@example.com"
+  }
+}
