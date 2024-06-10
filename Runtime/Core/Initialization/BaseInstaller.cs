@@ -8,7 +8,6 @@ using Object = System.Object;
 
 namespace Core.Initialization
 {
-    [RequireComponent(typeof(RunnableContext))]
     public abstract class BaseInstaller : MonoInstaller, IDisposable
     {
         public bool Complete => runnableContext != null && runnableContext.Initialized;
