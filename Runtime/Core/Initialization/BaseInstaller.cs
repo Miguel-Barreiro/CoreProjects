@@ -11,7 +11,8 @@ namespace Core.Initialization
 {
     public abstract class BaseInstaller : MonoInstaller, IDisposable
     {
-        public bool InstallComplete => runnableContext != null && runnableContext.Initialized;
+        public abstract bool InstallComplete { get; }
+        
         public bool LoadedComplete => loadedSystems;
         public bool StartedComplete => startedSystems;
         
@@ -32,8 +33,8 @@ namespace Core.Initialization
             InjectInstances();
             
             InitializeInstances();
-            
-            // Complete = true;
+
+            OnComplete();
         }
 
 
@@ -53,6 +54,7 @@ namespace Core.Initialization
             Clear();
         }
 
+        protected virtual void OnComplete() { }
 
         #region System Installation
 
@@ -194,6 +196,9 @@ namespace Core.Initialization
 
         protected bool loadedSystems = false;
         protected bool startedSystems = false;
+        
+        
+        protected RunnableContext RunnableContext => runnableContext;
         
         protected void Clear()
         {

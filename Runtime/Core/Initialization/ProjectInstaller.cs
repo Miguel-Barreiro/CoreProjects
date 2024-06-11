@@ -5,10 +5,18 @@ namespace Core.Initialization
 {
     public abstract class ProjectInstaller : BaseInstaller
     {
+        public override bool InstallComplete => installComplete;
+        private bool installComplete = false;
+        
         protected override void InstantiateInternalSystems() 
         {
             BuildScenesController();
             BuildGameLoopSystem();
+        }
+
+        protected override void OnComplete()
+        {
+            installComplete = true;
         }
 
         private void BuildScenesController()
