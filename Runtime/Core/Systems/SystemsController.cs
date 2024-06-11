@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -25,12 +26,16 @@ namespace Core.Systems
                 }
             }
         }
-        
-        
+
+
         public void Initialize()
+        {
+            initialized = false;
+        }
+
+        public void Start()
         {
             initialized = true;
         }
-        
     }
 }

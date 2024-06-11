@@ -8,13 +8,11 @@ namespace Core.Initialization
         public void Install()
         {
             RunnableContext runnableContext = GetComponent<RunnableContext>();
-            if (!Complete)
+            if (!InstallComplete)
             {
                 runnableContext.Run();
             }
-
         }
-
     }
 }
 

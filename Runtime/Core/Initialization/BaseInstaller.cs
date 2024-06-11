@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 using Object = System.Object;
@@ -10,7 +11,9 @@ namespace Core.Initialization
 {
     public abstract class BaseInstaller : MonoInstaller, IDisposable
     {
-        public bool Complete => runnableContext != null && runnableContext.Initialized;
+        public bool InstallComplete => runnableContext != null && runnableContext.Initialized;
+        public bool LoadedComplete => loadedSystems;
+        public bool StartedComplete => startedSystems;
         
         protected abstract void Instantiate();
         protected virtual void InstantiateInternalSystems() { } 
@@ -133,6 +136,49 @@ namespace Core.Initialization
             Container.Unbind<T>();
         }
         
+        
+        public async UniTask LoadSystems()
+        {
+            if (loadedSystems)
+            {
+                return;
+            }
+            
+            List<UniTask> loadTasks = new (10);
+            foreach (Object system in ownedSystems)
+            {
+                if(system is ILoadSystem loadSystem)
+                {
+                    UniTask<bool> uniTask = loadSystem.Load(out Action retryAction);
+                    loadTasks.Add(uniTask);
+                }
+            }
+            
+            await UniTask.WhenAll(loadTasks);
+            loadedSystems = true;
+        }
+
+        public async UniTask StartSystems()
+        {
+            if (startedSystems)
+            {
+                return;
+            }
+            
+            List<UniTask> loadTasks = new (10);
+            foreach (Object system in ownedSystems)
+            {
+                if(system is ILoadSystem loadSystem)
+                {
+                    UniTask<bool> uniTask = loadSystem.Load(out Action retryAction);
+                    loadTasks.Add(uniTask);
+                }
+            }
+            
+            await UniTask.WhenAll(loadTasks);
+            startedSystems = true;
+        }
+
 
 #endregion
         
@@ -146,6 +192,9 @@ namespace Core.Initialization
         protected readonly List<Object> ownedSystems = new ();
         protected readonly List<GameObject> ownedGameObjectSystems = new ();
 
+        protected bool loadedSystems = false;
+        protected bool startedSystems = false;
+        
         protected void Clear()
         {
             injectableGameObjects.Clear();
