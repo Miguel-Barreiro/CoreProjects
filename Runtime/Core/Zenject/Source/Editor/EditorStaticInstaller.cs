@@ -1,5 +1,7 @@
+using Core.Zenject.Source.Install;
+using Core.Zenject.Source.Install.Contexts;
 
-namespace Zenject
+namespace Core.Zenject.Source.Editor
 {
     // Derive from this class, add [InitializeOnLoad], and then call Install
     // in a static constructor to add some editor time bindings

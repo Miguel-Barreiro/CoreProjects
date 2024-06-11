@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Runtime.AnimatorInterfaces
 {
     public class AnimatorIkHandlerManager : MonoBehaviour
     {

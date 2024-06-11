@@ -1,7 +1,7 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿#nullable enable
 
-#nullable enable
+using System;
+using Cysharp.Threading.Tasks;
 
 namespace Core.Systems
 {

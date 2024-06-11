@@ -1,13 +1,22 @@
 using System;
-using ModestTree;
+using Core.Zenject.Source.Binding.Binders.GameObject;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Install;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Core.Zenject.Source.Providers.PrefabProviders;
+using Core.Zenject.Source.Providers.SubContainerCreators;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder.SubContainerBinder
 {
     [NoReflectionBaking]
     public class FactorySubContainerBinderBase<TContract>
     {
         public FactorySubContainerBinderBase(
-            DiContainer bindContainer, BindInfo bindInfo, FactoryBindInfo factoryBindInfo, object subIdentifier)
+            DiContainer bindContainer, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo, object subIdentifier)
         {
             FactoryBindInfo = factoryBindInfo;
             SubIdentifier = subIdentifier;
@@ -34,7 +43,7 @@ namespace Zenject
             set { FactoryBindInfo.ProviderFunc = value; }
         }
 
-        protected BindInfo BindInfo
+        protected BindInfo.BindInfo BindInfo
         {
             get;
             private set;

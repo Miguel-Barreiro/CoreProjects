@@ -1,6 +1,9 @@
-using ModestTree;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Validation;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Injection
 {
     [ZenjectAllowDuringValidation]
     [NoReflectionBaking]

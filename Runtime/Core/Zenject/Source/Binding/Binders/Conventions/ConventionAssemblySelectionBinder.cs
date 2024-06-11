@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Conventions
 {
     [NoReflectionBaking]
     public class ConventionAssemblySelectionBinder

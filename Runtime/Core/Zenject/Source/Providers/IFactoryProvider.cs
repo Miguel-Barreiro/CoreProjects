@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Validation;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers
 {
     public abstract class IFactoryProviderBase<TContract> : IProvider
     {

@@ -2,14 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
-using ModestTree.Util;
-using Zenject.Internal;
-#if !NOT_UNITY3D
+using Core.Zenject.Source.Binding.Binders;
+using Core.Zenject.Source.Binding.Binders.ConcreteBinders;
+using Core.Zenject.Source.Binding.Binders.Conventions;
+using Core.Zenject.Source.Binding.Binders.Factory;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryToChoiceBinder;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryToChoiceIdBinder;
+using Core.Zenject.Source.Binding.Binders.Factory.Pooling;
+using Core.Zenject.Source.Binding.Binders.FromBinders;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Binding.Finalizers;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Factories.Pooling;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Install;
+using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Providers;
+using Core.Zenject.Source.Providers.Decorator;
+using Core.Zenject.Source.Runtime;
+using Core.Zenject.Source.Util;
+using Core.Zenject.Source.Validation;
 using UnityEngine;
-#endif
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Main
 {
     public delegate bool BindingCondition(InjectContext c);
 

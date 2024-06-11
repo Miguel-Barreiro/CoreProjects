@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Validation;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers
 {
     // Zero params
 
@@ -221,13 +225,13 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TValue> _method;
 
         public MethodProviderWithContainer(
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TValue> method)
         {
@@ -287,13 +291,13 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TValue> _method;
 
         public MethodProviderWithContainer(
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TValue> method)
         {
@@ -355,13 +359,13 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TValue> _method;
 
         public MethodProviderWithContainer(
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TValue> method)
         {
@@ -425,13 +429,13 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TValue> _method;
 
         public MethodProviderWithContainer(
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TValue> method)
         {

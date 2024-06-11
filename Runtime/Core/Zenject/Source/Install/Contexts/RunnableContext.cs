@@ -1,9 +1,9 @@
-﻿using ModestTree;
+﻿using Core.Zenject.Source.Internal;
 using UnityEngine;
 
 #if !NOT_UNITY3D
 
-namespace Zenject
+namespace Core.Zenject.Source.Install.Contexts
 {
     public abstract class RunnableContext : Context
     {

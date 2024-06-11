@@ -1,6 +1,8 @@
+using Zenject;
+
 #if !ODIN_INSPECTOR
 
-namespace Zenject
+namespace Core.Zenject.Source.Editor.Editors
 {
     [NoReflectionBaking]
     public class ContextEditor : UnityInspectorListEditor

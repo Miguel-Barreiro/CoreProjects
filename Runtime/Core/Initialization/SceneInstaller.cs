@@ -1,4 +1,4 @@
-using Zenject;
+using Core.Zenject.Source.Install.Contexts;
 
 namespace Core.Initialization
 {

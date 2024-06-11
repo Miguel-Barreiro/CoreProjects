@@ -1,9 +1,11 @@
 #if !NOT_UNITY3D
 
 using System;
+using Core.Zenject.Source.Injection;
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.BindInfo
 {
     [NoReflectionBaking]
     public class GameObjectCreationParameters

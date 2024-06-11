@@ -1,6 +1,6 @@
 #if !NOT_UNITY3D
 
-namespace Zenject
+namespace Core.Zenject.Source.Runtime.Kernels
 {
     public class DefaultGameObjectKernel : MonoKernel
     {

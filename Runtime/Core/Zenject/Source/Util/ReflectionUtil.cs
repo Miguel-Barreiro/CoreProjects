@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Core.Zenject.Source.Internal;
 
-namespace ModestTree
+namespace Core.Zenject.Source.Util
 {
     public static class ReflectionUtil
     {
@@ -103,7 +104,7 @@ namespace ModestTree
 #if NET_4_6
             Action<TParam1, TParam2, TParam3, TParam4, TParam5> action)
 #else
-            ModestTree.Util.Action<TParam1, TParam2, TParam3, TParam4, TParam5> action)
+            Internal.Action<TParam1, TParam2, TParam3, TParam4, TParam5> action)
 #endif
         {
 #if UNITY_WSA && ENABLE_DOTNET && !UNITY_EDITOR
@@ -117,7 +118,7 @@ namespace ModestTree
 #if NET_4_6
             Action<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6> action)
 #else
-            ModestTree.Util.Action<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6> action)
+            Internal.Action<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6> action)
 #endif
         {
 #if UNITY_WSA && ENABLE_DOTNET && !UNITY_EDITOR

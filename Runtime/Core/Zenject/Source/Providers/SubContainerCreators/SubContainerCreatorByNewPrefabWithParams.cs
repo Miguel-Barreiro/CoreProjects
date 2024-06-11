@@ -3,10 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
-using Zenject.Internal;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers.PrefabProviders;
+using Core.Zenject.Source.Util;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.SubContainerCreators
 {
     [NoReflectionBaking]
     public class SubContainerCreatorByNewPrefabWithParams : ISubContainerCreator

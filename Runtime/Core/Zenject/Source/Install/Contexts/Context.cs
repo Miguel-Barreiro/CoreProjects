@@ -3,14 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
-namespace Zenject
+namespace Core.Zenject.Source.Install.Contexts
 {
     public abstract class Context : MonoBehaviour
     {

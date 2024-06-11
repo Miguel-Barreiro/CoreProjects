@@ -1,4 +1,7 @@
-namespace Zenject
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Main;
+
+namespace Core.Zenject.Source.Install
 {
     //
     // I'd recommmend using Installer<> instead, and then always use the approach

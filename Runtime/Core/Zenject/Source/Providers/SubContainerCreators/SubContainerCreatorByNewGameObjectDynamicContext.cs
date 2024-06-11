@@ -2,11 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Install;
+using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Util;
 using UnityEngine;
-using ModestTree;
-using Zenject.Internal;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.SubContainerCreators
 {
     [NoReflectionBaking]
     public abstract class SubContainerCreatorByNewGameObjectDynamicContext : SubContainerCreatorDynamicContext
@@ -184,7 +190,7 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4> _installerMethod;
 
@@ -192,7 +198,7 @@ namespace Zenject
             DiContainer container,
             GameObjectCreationParameters gameObjectBindInfo,
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4> installerMethod)
             : base(container, gameObjectBindInfo)
@@ -225,7 +231,7 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5> _installerMethod;
 
@@ -233,7 +239,7 @@ namespace Zenject
             DiContainer container,
             GameObjectCreationParameters gameObjectBindInfo,
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5> installerMethod)
             : base(container, gameObjectBindInfo)
@@ -268,7 +274,7 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6> _installerMethod;
 
@@ -276,7 +282,7 @@ namespace Zenject
             DiContainer container,
             GameObjectCreationParameters gameObjectBindInfo,
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6> installerMethod)
             : base(container, gameObjectBindInfo)
@@ -313,7 +319,7 @@ namespace Zenject
     {
         readonly
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10> _installerMethod;
 
@@ -321,7 +327,7 @@ namespace Zenject
             DiContainer container,
             GameObjectCreationParameters gameObjectBindInfo,
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
             Action<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10> installerMethod)
             : base(container, gameObjectBindInfo)

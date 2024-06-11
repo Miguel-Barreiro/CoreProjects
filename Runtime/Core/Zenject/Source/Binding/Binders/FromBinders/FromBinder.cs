@@ -1,20 +1,29 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
 using System.Linq;
-
-#if !NOT_UNITY3D
+using Core.Zenject.Source.Binding.Binders.ConcreteBinders;
+using Core.Zenject.Source.Binding.Binders.GameObject;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Binding.Finalizers;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Core.Zenject.Source.Providers.ComponentProviders;
+using Core.Zenject.Source.Providers.ComponentProviders.AddToGameObjectComponentProviders;
 using UnityEngine;
+using Zenject;
+#if !NOT_UNITY3D
 #endif
 
-using Zenject.Internal;
-
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.FromBinders
 {
     public abstract class FromBinder : ScopeConcreteIdArgConditionCopyNonLazyBinder
     {
         public FromBinder(
-            DiContainer bindContainer, BindInfo bindInfo,
+            DiContainer bindContainer, BindInfo.BindInfo bindInfo,
             BindStatement bindStatement)
             : base(bindInfo)
         {
@@ -174,7 +183,7 @@ namespace Zenject
 
 #if !NOT_UNITY3D
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentsOn(GameObject gameObject)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentsOn(UnityEngine.GameObject gameObject)
         {
             BindingUtil.AssertIsValidGameObject(gameObject);
             BindingUtil.AssertIsComponent(ConcreteTypes);
@@ -189,7 +198,7 @@ namespace Zenject
             return new ScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo);
         }
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentOn(GameObject gameObject)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentOn(UnityEngine.GameObject gameObject)
         {
             BindingUtil.AssertIsValidGameObject(gameObject);
             BindingUtil.AssertIsComponent(ConcreteTypes);
@@ -204,7 +213,7 @@ namespace Zenject
             return new ScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo);
         }
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentsOn(Func<InjectContext, GameObject> gameObjectGetter)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentsOn(Func<InjectContext, UnityEngine.GameObject> gameObjectGetter)
         {
             BindingUtil.AssertIsComponent(ConcreteTypes);
             BindingUtil.AssertTypesAreNotAbstract(ConcreteTypes);
@@ -218,7 +227,7 @@ namespace Zenject
             return new ScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo);
         }
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentOn(Func<InjectContext, GameObject> gameObjectGetter)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentOn(Func<InjectContext, UnityEngine.GameObject> gameObjectGetter)
         {
             BindingUtil.AssertIsComponent(ConcreteTypes);
             BindingUtil.AssertTypesAreNotAbstract(ConcreteTypes);
@@ -244,7 +253,7 @@ namespace Zenject
                 ctx => ctx.Container.Resolve<Context>().gameObject);
         }
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOn(GameObject gameObject)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOn(UnityEngine.GameObject gameObject)
         {
             BindingUtil.AssertIsValidGameObject(gameObject);
             BindingUtil.AssertIsComponent(ConcreteTypes);
@@ -259,7 +268,7 @@ namespace Zenject
             return new ScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo);
         }
 
-        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOn(Func<InjectContext, GameObject> gameObjectGetter)
+        public ScopeConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOn(Func<InjectContext, UnityEngine.GameObject> gameObjectGetter)
         {
             BindingUtil.AssertIsComponent(ConcreteTypes);
             BindingUtil.AssertTypesAreNotAbstract(ConcreteTypes);

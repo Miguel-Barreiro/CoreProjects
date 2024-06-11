@@ -1,6 +1,7 @@
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Runtime
 {
     public class GuiRenderer : MonoBehaviour
     {

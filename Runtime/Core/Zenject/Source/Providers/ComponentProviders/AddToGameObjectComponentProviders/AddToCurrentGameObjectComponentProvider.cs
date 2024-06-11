@@ -3,11 +3,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Util;
+using Core.Zenject.Source.Validation;
 using UnityEngine;
-using Zenject.Internal;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.ComponentProviders.AddToGameObjectComponentProviders
 {
     [NoReflectionBaking]
     public class AddToCurrentGameObjectComponentProvider : IProvider

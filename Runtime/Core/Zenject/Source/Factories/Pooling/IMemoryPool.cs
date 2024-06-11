@@ -1,6 +1,6 @@
 using System;
 
-namespace Zenject
+namespace Core.Zenject.Source.Factories.Pooling
 {
     public interface IMemoryPool
     {

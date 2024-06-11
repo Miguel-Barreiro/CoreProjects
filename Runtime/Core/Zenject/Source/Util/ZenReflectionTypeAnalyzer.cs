@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ModestTree;
-#if !NOT_UNITY3D
+using Core.Zenject.Source.Internal;
 using UnityEngine;
-#endif
+using Zenject;
 
-namespace Zenject.Internal
+namespace Core.Zenject.Source.Util
 {
     public static class ReflectionTypeAnalyzer
     {

@@ -1,6 +1,7 @@
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Factories.Pooling
 {
     // Zero parameters
     public class MonoPoolableMemoryPool<TValue> : MemoryPool<TValue>

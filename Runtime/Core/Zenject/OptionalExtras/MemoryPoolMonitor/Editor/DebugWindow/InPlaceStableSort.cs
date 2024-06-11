@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Zenject.MemoryPoolMonitor
+namespace Core.Zenject.OptionalExtras.MemoryPoolMonitor.Editor.DebugWindow
 {
     // Fastest known in place stable sort. No risk of exploding a stack. Cost: a relatively high number of moves. Stack can still be expensive too.
     // This is a merge sort with a smart in place merge that 'rotates' the sub arrays.

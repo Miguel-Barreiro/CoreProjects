@@ -1,7 +1,15 @@
 using System.Linq;
-using ModestTree;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Binding.Finalizers;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Factories.Pooling;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.Pooling
 {
     [NoReflectionBaking]
     public class MemoryPoolBindingFinalizer<TContract> : ProviderBindingFinalizer
@@ -10,7 +18,7 @@ namespace Zenject
         readonly FactoryBindInfo _factoryBindInfo;
 
         public MemoryPoolBindingFinalizer(
-            BindInfo bindInfo, FactoryBindInfo factoryBindInfo, MemoryPoolBindInfo poolBindInfo)
+            BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo, MemoryPoolBindInfo poolBindInfo)
             : base(bindInfo)
         {
             // Note that it doesn't derive from MemoryPool<TContract>

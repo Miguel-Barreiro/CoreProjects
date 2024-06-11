@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
+using Core.Zenject.Source.Factories.Pooling;
+using Core.Zenject.Source.Factories.Pooling.Util;
+using Core.Zenject.Source.Internal;
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.Profiling;
 using Zenject;
 
-namespace Zenject.MemoryPoolMonitor
+namespace Core.Zenject.OptionalExtras.MemoryPoolMonitor.Editor.DebugWindow
 {
     public class MpmView : IGuiRenderable, ITickable, IInitializable
     {

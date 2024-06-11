@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ModestTree;
-using Zenject.Internal;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Util;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Injection
 {
     [NoReflectionBaking]
     public class InjectContext : IDisposable

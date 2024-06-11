@@ -1,8 +1,10 @@
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
 using UnityEngine.SceneManagement;
 
-namespace Zenject
+namespace Core.Zenject.Source.Runtime
 {
     public class SceneContextRegistry
     {

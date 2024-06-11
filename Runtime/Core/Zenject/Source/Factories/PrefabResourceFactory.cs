@@ -1,9 +1,12 @@
 #if !NOT_UNITY3D
 
-using ModestTree;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Factories
 {
     // This factory type can be useful if you want to control where the prefab comes from at runtime
     // rather than from within the installers

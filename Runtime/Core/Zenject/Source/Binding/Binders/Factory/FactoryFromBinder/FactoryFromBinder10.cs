@@ -1,24 +1,30 @@
 using System;
-
+using Core.Zenject.Source.Binding.Binders.ConcreteBinders;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder.SubContainerBinder;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Zenject;
 #if !NOT_UNITY3D
 
 #endif
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder
 {
     [NoReflectionBaking]
     public class FactoryFromBinder<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TContract>
         : FactoryFromBinderBase
     {
         public FactoryFromBinder(
-            DiContainer container, BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
+            DiContainer container, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
             : base(container, typeof(TContract), bindInfo, factoryBindInfo)
         {
         }
 
         public ConditionCopyNonLazyBinder FromMethod(
 #if !NET_4_6
-            ModestTree.Util.
+            Internal.
 #endif
                 Func<DiContainer, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TContract> method)
         {

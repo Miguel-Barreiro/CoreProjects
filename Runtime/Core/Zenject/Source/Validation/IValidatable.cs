@@ -1,4 +1,4 @@
-namespace Zenject
+namespace Core.Zenject.Source.Validation
 {
     public interface IValidatable
     {

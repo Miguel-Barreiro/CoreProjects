@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers
 {
     [NoReflectionBaking]
     public class CachedOpenTypeProvider : IProvider

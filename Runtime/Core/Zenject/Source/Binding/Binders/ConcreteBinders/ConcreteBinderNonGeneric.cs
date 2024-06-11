@@ -1,14 +1,21 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Binding.Binders.Conventions;
+using Core.Zenject.Source.Binding.Binders.FromBinders;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Binding.Finalizers;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.ConcreteBinders
 {
     [NoReflectionBaking]
     public class ConcreteBinderNonGeneric : FromBinderNonGeneric
     {
         public ConcreteBinderNonGeneric(
-            DiContainer bindContainer, BindInfo bindInfo,
+            DiContainer bindContainer, BindInfo.BindInfo bindInfo,
             BindStatement bindStatement)
             : base(bindContainer, bindInfo, bindStatement)
         {

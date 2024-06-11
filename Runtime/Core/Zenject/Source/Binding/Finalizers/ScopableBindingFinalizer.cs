@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Finalizers
 {
     [NoReflectionBaking]
     public class ScopableBindingFinalizer : ProviderBindingFinalizer
@@ -10,7 +14,7 @@ namespace Zenject
         readonly Func<DiContainer, Type, IProvider> _providerFactory;
 
         public ScopableBindingFinalizer(
-            BindInfo bindInfo, Func<DiContainer, Type, IProvider> providerFactory)
+            BindInfo.BindInfo bindInfo, Func<DiContainer, Type, IProvider> providerFactory)
             : base(bindInfo)
         {
             _providerFactory = providerFactory;

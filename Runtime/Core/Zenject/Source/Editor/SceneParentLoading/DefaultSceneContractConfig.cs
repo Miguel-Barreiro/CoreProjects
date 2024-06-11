@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Zenject.Internal
+namespace Core.Zenject.Source.Editor.SceneParentLoading
 {
     public class DefaultSceneContractConfig : ScriptableObject
     {

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Factories.Pooling.Static;
+using Core.Zenject.Source.Internal;
 
-namespace Zenject
+namespace Core.Zenject.Source.Factories.Pooling.Util
 {
     public class DictionaryPool<TKey, TValue> : StaticMemoryPool<Dictionary<TKey, TValue>>
     {

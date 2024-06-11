@@ -1,24 +1,26 @@
 using System.Collections.Generic;
+using Core.Zenject.Source.Binding.BindInfo;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders
 {
     [NoReflectionBaking]
     public class CopyNonLazyBinder : NonLazyBinder
     {
-        List<BindInfo> _secondaryBindInfos;
+        List<BindInfo.BindInfo> _secondaryBindInfos;
 
-        public CopyNonLazyBinder(BindInfo bindInfo)
+        public CopyNonLazyBinder(BindInfo.BindInfo bindInfo)
             : base(bindInfo)
         {
         }
 
         // This is used in cases where you have multiple bindings that depend on each other so should
         // be inherited together (eg. FromIFactory)
-        internal void AddSecondaryCopyBindInfo(BindInfo bindInfo)
+        internal void AddSecondaryCopyBindInfo(BindInfo.BindInfo bindInfo)
         {
             if (_secondaryBindInfos == null)
             {
-                _secondaryBindInfos = new List<BindInfo>();
+                _secondaryBindInfos = new List<BindInfo.BindInfo>();
             }
             _secondaryBindInfos.Add(bindInfo);
         }

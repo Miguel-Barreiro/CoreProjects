@@ -1,8 +1,10 @@
 #if !ODIN_INSPECTOR
 
+using Core.Zenject.Source.Install.Contexts;
 using UnityEditor;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Editor.Editors
 {
     [CustomEditor(typeof(GameObjectContext))]
     [NoReflectionBaking]

@@ -1,15 +1,17 @@
-namespace Zenject
+using Zenject;
+
+namespace Core.Zenject.Source.Binding.Binders
 {
     [NoReflectionBaking]
     public class IfNotBoundBinder
     {
-        public IfNotBoundBinder(BindInfo bindInfo)
+        public IfNotBoundBinder(BindInfo.BindInfo bindInfo)
         {
             BindInfo = bindInfo;
         }
 
         // Do not use this
-        public BindInfo BindInfo
+        public BindInfo.BindInfo BindInfo
         {
             get;
             private set;

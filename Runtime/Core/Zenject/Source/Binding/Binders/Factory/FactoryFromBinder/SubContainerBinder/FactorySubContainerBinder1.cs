@@ -1,13 +1,21 @@
 using System;
+using Core.Zenject.Source.Binding.Binders.GameObject;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
+using Core.Zenject.Source.Providers.PrefabProviders;
+using Core.Zenject.Source.Providers.SubContainerCreators;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder.SubContainerBinder
 {
     [NoReflectionBaking]
     public class FactorySubContainerBinder<TParam1, TContract>
         : FactorySubContainerBinderWithParams<TContract>
     {
         public FactorySubContainerBinder(
-            DiContainer bindContainer, BindInfo bindInfo, FactoryBindInfo factoryBindInfo, object subIdentifier)
+            DiContainer bindContainer, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo, object subIdentifier)
             : base(bindContainer, bindInfo, factoryBindInfo, subIdentifier)
         {
         }

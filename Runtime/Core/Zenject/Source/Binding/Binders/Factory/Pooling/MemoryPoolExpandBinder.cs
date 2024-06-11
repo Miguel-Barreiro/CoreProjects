@@ -1,10 +1,15 @@
-namespace Zenject
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryArgumentsToChoiceBinder;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Main;
+using Zenject;
+
+namespace Core.Zenject.Source.Binding.Binders.Factory.Pooling
 {
     [NoReflectionBaking]
     public class MemoryPoolExpandBinder<TContract> : FactoryArgumentsToChoiceBinder<TContract>
     {
         public MemoryPoolExpandBinder(
-            DiContainer bindContainer, BindInfo bindInfo, FactoryBindInfo factoryBindInfo, MemoryPoolBindInfo poolBindInfo)
+            DiContainer bindContainer, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo, MemoryPoolBindInfo poolBindInfo)
             : base(bindContainer, bindInfo, factoryBindInfo)
         {
             MemoryPoolBindInfo = poolBindInfo;

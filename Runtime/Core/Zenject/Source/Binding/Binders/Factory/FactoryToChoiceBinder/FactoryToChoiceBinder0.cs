@@ -1,13 +1,18 @@
 using System;
-using ModestTree;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder.Untyped;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.FactoryToChoiceBinder
 {
     [NoReflectionBaking]
     public class FactoryToChoiceBinder<TContract> : FactoryFromBinder<TContract>
     {
         public FactoryToChoiceBinder(
-            DiContainer container, BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
+            DiContainer container, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
             : base(container, bindInfo, factoryBindInfo)
         {
         }

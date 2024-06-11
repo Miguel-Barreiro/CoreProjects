@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
-using ModestTree;
+using Core.Zenject.Source.Internal;
 
-namespace Zenject
+namespace Core.Zenject.Source.Main
 {
     [DebuggerStepThrough]
     public struct BindingId : IEquatable<BindingId>

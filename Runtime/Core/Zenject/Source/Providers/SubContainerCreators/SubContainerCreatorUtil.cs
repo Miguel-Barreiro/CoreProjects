@@ -1,10 +1,9 @@
-using System;
-using ModestTree;
-#if !NOT_UNITY3D
-using UnityEngine;
-#endif
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Runtime.Kernels;
+using Core.Zenject.Source.Util;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.SubContainerCreators
 {
     public static class SubContainerCreatorUtil
     {

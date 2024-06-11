@@ -2,9 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Main;
 using UnityEngine;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.ComponentProviders.AddToGameObjectComponentProviders
 {
     [NoReflectionBaking]
     public class AddToNewGameObjectComponentProvider : AddToGameObjectComponentProviderBase

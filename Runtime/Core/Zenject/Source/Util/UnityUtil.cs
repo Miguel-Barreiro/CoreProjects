@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace ModestTree.Util
+namespace Core.Zenject.Source.Util
 {
     public static class UnityUtil
     {

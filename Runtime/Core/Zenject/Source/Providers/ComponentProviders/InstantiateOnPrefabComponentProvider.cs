@@ -2,9 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using ModestTree;
+using Core.Zenject.Source.Injection;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Providers.PrefabCreators;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Providers.ComponentProviders
 {
     [NoReflectionBaking]
     public class InstantiateOnPrefabComponentProvider : IProvider

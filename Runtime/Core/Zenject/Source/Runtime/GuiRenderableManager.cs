@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModestTree;
-using ModestTree.Util;
+using Core.Zenject.Source.Internal;
+using Core.Zenject.Source.Util;
+using Zenject;
 
-namespace Zenject
+namespace Core.Zenject.Source.Runtime
 {
     // See comment in IGuiRenderable.cs for usage
     public class GuiRenderableManager

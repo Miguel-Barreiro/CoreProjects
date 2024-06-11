@@ -1,6 +1,6 @@
 using System;
 
-namespace Zenject
+namespace Core.Zenject.Source.Factories.Pooling
 {
     // Here we assume that each spawned object does the work of returning itself to the pool
     // in its own Dispose method

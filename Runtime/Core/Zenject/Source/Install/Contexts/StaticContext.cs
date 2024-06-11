@@ -1,6 +1,8 @@
+using Core.Zenject.Source.Main;
+
 #if !NOT_UNITY3D
 
-namespace Zenject
+namespace Core.Zenject.Source.Install.Contexts
 {
     // For some platforms, it's desirable to be able to add dependencies to Zenject before
     // Unity even starts up (eg. WSA as described here https://github.com/svermeulen/Zenject/issues/118)

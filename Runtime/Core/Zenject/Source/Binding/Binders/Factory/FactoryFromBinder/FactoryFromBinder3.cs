@@ -1,17 +1,24 @@
 using System;
-using System.Collections.Generic;
-#if !NOT_UNITY3D
+using Core.Zenject.Source.Binding.Binders.ConcreteBinders;
+using Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder.SubContainerBinder;
+using Core.Zenject.Source.Binding.Binders.Factory.Pooling;
+using Core.Zenject.Source.Binding.BindInfo;
+using Core.Zenject.Source.Factories;
+using Core.Zenject.Source.Factories.Pooling;
+using Core.Zenject.Source.Main;
+using Core.Zenject.Source.Providers;
 using UnityEngine;
+using Zenject;
+#if !NOT_UNITY3D
 #endif
-using ModestTree;
 
-namespace Zenject
+namespace Core.Zenject.Source.Binding.Binders.Factory.FactoryFromBinder
 {
     [NoReflectionBaking]
     public class FactoryFromBinder<TParam1, TParam2, TParam3, TContract> : FactoryFromBinderBase
     {
         public FactoryFromBinder(
-            DiContainer container, BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
+            DiContainer container, BindInfo.BindInfo bindInfo, FactoryBindInfo factoryBindInfo)
             : base(container, typeof(TContract), bindInfo, factoryBindInfo)
         {
         }

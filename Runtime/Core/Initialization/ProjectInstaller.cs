@@ -1,4 +1,5 @@
 ﻿using Core.Systems;
+using Core.View;
 using UnityEngine;
 
 namespace Core.Initialization
@@ -12,6 +13,7 @@ namespace Core.Initialization
         {
             BuildScenesController();
             BuildGameLoopSystem();
+            
         }
 
         protected override void OnComplete()
@@ -34,6 +36,14 @@ namespace Core.Initialization
             SystemsController systemsController = gameLoop.AddComponent<SystemsController>();
             gameLoop.transform.SetParent(transform);
             BindInstance(systemsController);
+        }
+        
+        private void BuildGenericGameobjePool()
+        {
+            GameObject gameLoop = new GameObject("GameobjectPool");
+            GenericGameObjectPool genericGameObjectPool = gameLoop.AddComponent<GenericGameObjectPool>();
+            gameLoop.transform.SetParent(transform);
+            BindInstance(genericGameObjectPool);
         }
 
     }

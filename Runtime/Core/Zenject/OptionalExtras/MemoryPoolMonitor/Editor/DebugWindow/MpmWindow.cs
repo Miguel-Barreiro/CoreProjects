@@ -1,10 +1,8 @@
-using System;
-using ModestTree;
-using UnityEngine;
+using Core.Zenject.Source.Editor.EditorWindow;
 using UnityEditor;
-using Zenject;
+using UnityEngine;
 
-namespace Zenject.MemoryPoolMonitor
+namespace Core.Zenject.OptionalExtras.MemoryPoolMonitor.Editor.DebugWindow
 {
     public class MpmWindow : ZenjectEditorWindow
     {
