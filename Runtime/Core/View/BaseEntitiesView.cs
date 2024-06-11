@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Core.View;
+﻿using System.Collections.Generic;
 using Core.Systems;
-using Core.Zenject.Source.Internal;
 using UnityEngine;
 using Zenject;
 
@@ -21,37 +18,12 @@ namespace Core.View
 
         protected class EntityViewAtributes
         {
-            private Dictionary<Type, Component> componentCache = new Dictionary<Type, Component>();
-            public GameObject GameObject { get; private set; }
-            
-            public EntityViewAtributes(GameObject gameObject)
+            public EntityViewAtributes(GameObject newGameObject)
             {
-                GameObject = gameObject;
+                GameObject = newGameObject;
             }
-            public T GetComponent<T>() where T : Component
-            {
-                Type type = typeof(T);
-                if (componentCache.TryGetValue(type, out Component component))
-                {
-                    return (T) component;
-                }
-                else
-                {
-                    T newComponent = GameObject.GetComponent<T>();
-                    if (newComponent == null)
-                    {
-                        newComponent = GameObject.GetComponentInChildren<T>();
-                    }
-                    if (newComponent == null)
-                    {
-                        Debug.LogError($"component {type} not found in {GameObject.name} in view system {typeof(TSystem).PrettyName()}");
-                        return null;
-                    }
 
-                    componentCache.Add(type, newComponent);
-                    return newComponent;
-                }
-            }
+            public GameObject GameObject { get; private set; }
         }
             
             
@@ -97,7 +69,7 @@ namespace Core.View
                 if (GameobjectsByEntityId.TryGetValue(deadEntity.ID, out EntityViewAtributes entityViewAtributes))
                 {
                     GameobjectsByEntityId.Remove(deadEntity.ID);
-                    Destroy(entityViewAtributes.GameObject);
+                    GenericGameObjectPool.DestroyGameObject(entityViewAtributes.GameObject);
                 }
             }
         }

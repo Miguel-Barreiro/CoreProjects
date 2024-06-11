@@ -13,7 +13,7 @@ namespace Core.Initialization
         {
             BuildScenesController();
             BuildGameLoopSystem();
-            
+            BuildGenericGameobjePool();
         }
 
         protected override void OnComplete()
@@ -40,7 +40,7 @@ namespace Core.Initialization
         
         private void BuildGenericGameobjePool()
         {
-            GameObject gameLoop = new GameObject("GameobjectPool");
+            GameObject gameLoop = new GameObject("GameObjectPool");
             GenericGameObjectPool genericGameObjectPool = gameLoop.AddComponent<GenericGameObjectPool>();
             gameLoop.transform.SetParent(transform);
             BindInstance(genericGameObjectPool);
