@@ -160,24 +160,21 @@ namespace Core.Initialization
             loadedSystems = true;
         }
 
-        public async UniTask StartSystems()
+        public void StartSystems()
         {
             if (startedSystems)
             {
                 return;
             }
             
-            List<UniTask> loadTasks = new (10);
             foreach (Object system in ownedSystems)
             {
-                if(system is ILoadSystem loadSystem)
+                if(system is IStartSystem startSystem)
                 {
-                    UniTask<bool> uniTask = loadSystem.Load(out Action retryAction);
-                    loadTasks.Add(uniTask);
+                    startSystem.Start();
                 }
             }
             
-            await UniTask.WhenAll(loadTasks);
             startedSystems = true;
         }
 
