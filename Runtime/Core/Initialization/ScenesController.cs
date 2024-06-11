@@ -76,7 +76,6 @@ namespace Core.Initialization
         private async UniTask FinishSetupSystems(BaseInstaller[] systemInstallers)
         {
             {
-                
                 bool systemsInitialized = false;
                 while (!systemsInitialized)
                 {
@@ -89,12 +88,11 @@ namespace Core.Initialization
                 {
                     loadingTasks.Add(baseInstaller.LoadSystems());
                 }
-
                 await UniTask.WhenAll(loadingTasks);
                 
                 foreach (BaseInstaller baseInstaller in systemInstallers)
                 {
-                    loadingTasks.Add(baseInstaller.StartSystems());
+                    baseInstaller.StartSystems();
                 }
             }
 
