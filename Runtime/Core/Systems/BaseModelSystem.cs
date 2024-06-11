@@ -19,7 +19,7 @@ namespace Core.Systems
         protected virtual void OnEntityCreated(T entity) { }
         protected virtual void OnEntityDestroyed(T entity) { }
         
-        internal void AddEntity(T entity)
+        public void AddEntity(T entity)
         {
             entity.ID = nextId++;
             entities.Add(entity.ID, entity);
