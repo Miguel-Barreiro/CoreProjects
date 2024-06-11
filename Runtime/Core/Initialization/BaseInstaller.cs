@@ -56,7 +56,6 @@ namespace Core.Initialization
         protected GameObject InstantiateAndBindPrefab<T>(T prefab, Transform parent = null) where T : MonoBehaviour
         {
             GameObject logicInstance = Instantiate(prefab.gameObject, parent);
-            AddSystemsFromGameobject(logicInstance);
             BindComponentInHierarchy<T>(logicInstance);
             return logicInstance;
         }		
@@ -64,7 +63,6 @@ namespace Core.Initialization
         protected GameObject InstantiatePrefab(GameObject prefab, Transform parent = null) 
         {
             GameObject logicInstance = Instantiate(prefab, parent);
-            AddSystemsFromGameobject(logicInstance);		
             return logicInstance;
         }
 
@@ -87,7 +85,16 @@ namespace Core.Initialization
 
         protected void BindComponentInHierarchy<T>(GameObject instance)
         {
-            T component = instance.GetComponentInChildren<T>();
+            T component = instance.GetComponent<T>();
+            if(component == null)
+            {
+                component = instance.GetComponentInChildren<T>();
+            }
+            if(component == null)
+            {
+                Debug.LogError($"ERROR: {typeof(T)} not found in {instance.name}");
+                return;
+            }
             Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
             AddSystem(component);
         }
