@@ -1,8 +1,9 @@
 ﻿namespace Core.Systems
 {
-    public interface IUpdateSystem
+    public interface IUpdateSystem : ISystem
     {
         bool Active { get; set; }
-        void Update();
+        void UpdateSystem(float deltaTime);
+        
     }
 }

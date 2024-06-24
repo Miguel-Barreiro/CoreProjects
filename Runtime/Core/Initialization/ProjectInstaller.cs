@@ -1,4 +1,5 @@
-﻿using Core.Systems;
+﻿using Core.Model;
+using Core.Systems;
 using Core.View;
 using UnityEngine;
 
@@ -14,6 +15,15 @@ namespace Core.Initialization
             BuildScenesController();
             BuildGameLoopSystem();
             BuildGenericGameobjePool();
+
+            BuildEntityManager();
+            BuildComponentSystemsLogic();
+        }
+
+        private void BuildComponentSystemsLogic()
+        {
+            ComponentSystemsContainer componentSystemsContainer = new ComponentSystemsContainer();
+            BindInstance(componentSystemsContainer);
         }
 
         protected override void OnComplete()
@@ -46,5 +56,10 @@ namespace Core.Initialization
             BindInstance(genericGameObjectPool);
         }
 
+        private void BuildEntityManager()
+        {
+            EntityLifetimeManager entityManagerComponent = EntityLifetimeManager.CreateInstance();
+            BindInstance(entityManagerComponent);
+        }        
     }
 }
