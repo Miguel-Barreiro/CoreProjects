@@ -14,7 +14,6 @@ namespace Core.View
         
         [SerializeField]
         protected readonly Dictionary<EntId, EntityViewAtributes> GameobjectsByEntityId = new();
-
         
         protected virtual void UpdateEntity(TEntity entity, EntityViewAtributes entityViewAtributes) { }
         protected virtual void OnSpawn(TEntity entity, GameObject newGameObject) { }

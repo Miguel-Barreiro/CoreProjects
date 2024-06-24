@@ -6,6 +6,7 @@ namespace Core.Model
     public interface IEntity
     {
         public EntId ID { get; }
+        public void Destroy();
     }
 
     public abstract class BaseEntity : IEntity
