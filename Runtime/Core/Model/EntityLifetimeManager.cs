@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils.Reflection;
+using UnityEngine;
 using Zenject;
 
 namespace Core.Model
@@ -9,8 +10,8 @@ namespace Core.Model
     
     public class EntityLifetimeManager : IInitSystem
     {
-        private readonly Dictionary<Type, ComponentSystemsContainer.SystemCache> systemByType = new();
-        private readonly Dictionary<Type, List<ComponentSystemsContainer.SystemCache>> systemsByComponentType = new ();
+        private readonly Dictionary<Type, EntitySystemsContainer.SystemCache> systemByType = new();
+        private readonly Dictionary<Type, List<EntitySystemsContainer.SystemCache>> systemsByComponentType = new ();
 
         // COMPONENT CACHING
         private readonly Dictionary<Type, List<Type>> componentsByEntityType = new ();
@@ -82,10 +83,10 @@ namespace Core.Model
                 List<BaseEntity> entities = entitiesByComponentType[componentType];
                 entities.Add(entity);
 
-                IEnumerable<ComponentSystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
-                foreach (ComponentSystemsContainer.SystemCache systemCache in componentSystems)
+                IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
+                foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
                 {
-                    BaseComponentSystem system = systemCache.System;
+                    BaseEntitySystem system = systemCache.System;
                     ARGUMENT[0] = entity;
                     systemCache.CachedOnNewEntityMethod?.Invoke(system, ARGUMENT);
                 }
@@ -103,10 +104,10 @@ namespace Core.Model
             List<Type> components = componentsByEntityType[entityType];
             foreach (Type componentType in components)
             {
-                IEnumerable<ComponentSystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
-                foreach (ComponentSystemsContainer.SystemCache systemCache in componentSystems)
+                IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
+                foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
                 {
-                    BaseComponentSystem system = systemCache.System;
+                    BaseEntitySystem system = systemCache.System;
                     ARGUMENT[0] = entity;
                     systemCache.CachedOnEntityDestroyedMethod?.Invoke(system, ARGUMENT);
                 }
@@ -130,6 +131,7 @@ namespace Core.Model
                 
                 IEnumerable<Type> componentTypes = GetEntityComponentTypes(entityType);
                 cachedComponentTypeList.AddRange(componentTypes);
+                cachedComponentTypeList.Add(entityType);
                 
                 foreach (Type componentType in cachedComponentTypeList)
                 {
@@ -153,17 +155,31 @@ namespace Core.Model
             }
         }
         
-        public IEnumerable<TComponent> GetAllEntitiesWithComponent<TComponent>() where TComponent : class, IComponent
+        public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
         {
-            entitiesByComponentType.TryGetValue(typeof(TComponent), out List<BaseEntity> entities);
-            
+            if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<BaseEntity> entities))
+            {
+                Debug.Log($"no entities of type {typeof(TEntity)} found");
+                yield break;
+            }
+
             foreach (BaseEntity entity in entities)
             {
-                yield return entity as TComponent;
+                yield return entity as TEntity;
             }
         }
 
+        public IEnumerable<IComponent> GetAllEntitiesByType(Type componentType)
+        {
+            entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities);
+            
+            foreach (BaseEntity entity in entities)
+            {
+                yield return entity as IComponent;
+            }
+        }
 
+        
         #endregion
 
 

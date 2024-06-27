@@ -1,10 +1,15 @@
-﻿using Core.Systems;
+﻿using System;
+using Core.Systems;
 
-namespace Core.Model.ModelSystems
+namespace Core.Model
 {
-    public interface IModelSystem : ISystem
+    public interface IModelSystem<T> : ISystem where T : IEntity 
     {
-        public bool Active { get; }
-    }
+        public void OnNew(T newEnt);
+        public void OnDestroy(T destroyedEnt);
+        public void Update(T entity, float deltaTime);
+        
+        public Type EntityType { get; }
 
+    }
 }

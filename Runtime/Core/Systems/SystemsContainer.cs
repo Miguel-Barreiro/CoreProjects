@@ -10,7 +10,7 @@ namespace Core.Systems
         private readonly Dictionary<Type, HashSet<Object>> systemsByInterface = new Dictionary<Type, HashSet<Object>>();
         private readonly List<Object> systems = new List<Object>();
 
-        private readonly ComponentSystemsContainer componentSystemsContainer = new ComponentSystemsContainer();
+        private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
         
         #region Public
         
@@ -31,9 +31,9 @@ namespace Core.Systems
             Type objectType = system.GetType();
             AddToInterfaces(system, objectType);
             systems.Add(system);
-            if (objectType.IsTypeOf<BaseComponentSystem>())
+            if (objectType.IsTypeOf<BaseEntitySystem>())
             {
-                componentSystemsContainer.AddComponentSystem(system as BaseComponentSystem);
+                entitySystemsContainer.AddComponentSystem(system as BaseEntitySystem);
             }
         }
         
@@ -42,9 +42,9 @@ namespace Core.Systems
             Type objectType = system.GetType();
             RemoveFromInterfaces(system, objectType);
             systems.Remove(system);
-            if (objectType.IsTypeOf<BaseComponentSystem>())
+            if (objectType.IsTypeOf<BaseEntitySystem>())
             {
-                componentSystemsContainer.RemoveComponentSystem(system as BaseComponentSystem);
+                entitySystemsContainer.RemoveComponentSystem(system as BaseEntitySystem);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Core.Systems
         
         public void Initialize()
         {
-            componentSystemsContainer.Init();
+            entitySystemsContainer.Init();
             
         }
 
@@ -85,14 +85,20 @@ namespace Core.Systems
 
         #endregion
 
-        public IEnumerable<ComponentSystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
+        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
         {
-            return componentSystemsContainer.GetComponentSystemsFor(componentType);
+            return entitySystemsContainer.GetComponentSystemsFor(componentType);
         }
 
-        public IEnumerable<BaseComponentSystem> GetAllComponentSystems()
+        internal IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllComponentSystemsByComponentType()
         {
-            return componentSystemsContainer.GetAllComponentSystems();
+            return entitySystemsContainer.GetAllComponentSystemsByComponentType();
+        }
+
+
+        internal IEnumerable<BaseEntitySystem> GetAllComponentSystems()
+        {
+            return entitySystemsContainer.GetAllComponentSystems();
         }
     }
 }

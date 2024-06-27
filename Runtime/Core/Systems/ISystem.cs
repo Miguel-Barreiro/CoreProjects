@@ -2,6 +2,7 @@
 {
     public interface ISystem
     {
+        public bool Active { get; set; }
         public SystemGroup Group { get; }
     }
 

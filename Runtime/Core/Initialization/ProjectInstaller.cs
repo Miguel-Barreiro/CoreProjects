@@ -22,8 +22,8 @@ namespace Core.Initialization
 
         private void BuildComponentSystemsLogic()
         {
-            ComponentSystemsContainer componentSystemsContainer = new ComponentSystemsContainer();
-            BindInstance(componentSystemsContainer);
+            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
+            BindInstance(entitySystemsContainer);
         }
 
         protected override void OnComplete()

@@ -10,9 +10,8 @@ namespace Core.View
         where TEntity : BaseEntity, IPositionEntity
     {
 
-        [Inject] private readonly GenericGameObjectPool GenericGameObjectPool = null!;
+        [Inject] private readonly GenericGameObjectPool genericGameObjectPool = null!;
         
-        [SerializeField]
         protected readonly Dictionary<EntId, EntityViewAtributes> GameobjectsByEntityId = new();
         
         protected virtual void UpdateEntity(TEntity entity, EntityViewAtributes entityViewAtributes) { }
@@ -32,7 +31,7 @@ namespace Core.View
         
         protected virtual GameObject Spawn(TEntity entity)
         {
-            GameObject newGameObject = GenericGameObjectPool.GetGameObjectFromPrefab(entity.Prefab);
+            GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entity.Prefab);
             newGameObject.transform.position = new Vector3(entity.Position.x, entity.Position.y, 0);
 
             GameobjectsByEntityId.Add(entity.ID, new EntityViewAtributes(newGameObject) );
@@ -43,12 +42,12 @@ namespace Core.View
         }
 
 
-        public override void OnNewEntity(TEntity newEntity)
+        public override void OnNew(TEntity newEntity)
         {
             Spawn(newEntity);
         }
 
-        public override void OnDestroyEntity(TEntity entity)
+        public override void OnDestroy(TEntity entity)
         {
             if (!GameobjectsByEntityId.ContainsKey(entity.ID))
             {
@@ -56,12 +55,12 @@ namespace Core.View
                 return;
             }
             EntityViewAtributes entityViewAtributes = GameobjectsByEntityId[entity.ID];
-            GenericGameObjectPool.DestroyGameObject(entityViewAtributes.GameObject);
+            genericGameObjectPool.DestroyGameObject(entityViewAtributes.GameObject);
             GameobjectsByEntityId.Remove(entity.ID);
         }
 
 
-        public override void UpdateEntity(TEntity entity, float deltaTime)
+        public override void Update(TEntity entity, float deltaTime)
         {
             if (!GameobjectsByEntityId.ContainsKey(entity.ID))
             {

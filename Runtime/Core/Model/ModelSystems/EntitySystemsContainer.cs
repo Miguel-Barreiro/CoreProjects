@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public class ComponentSystemsContainer
+    public class EntitySystemsContainer
     {
         
         private readonly Dictionary<Type, SystemCache> systemByType = new();
@@ -19,7 +19,16 @@ namespace Core.Model
             systemByType.Clear();
         }
         
-        internal IEnumerable<BaseComponentSystem> GetAllComponentSystems()
+        internal IEnumerable<(Type, List<SystemCache>)> GetAllComponentSystemsByComponentType()
+        {
+            foreach ((Type componentType, List<SystemCache> systemCaches)  in systemsByComponentType)
+            {
+                yield return (componentType, systemCaches);
+            }
+        }
+        
+        
+        internal IEnumerable<BaseEntitySystem> GetAllComponentSystems()
         {
             foreach (SystemCache systemCache in systemByType.Values)
             {
@@ -38,19 +47,19 @@ namespace Core.Model
             }
         }
 
-        internal void AddComponentSystem(BaseComponentSystem system) 
+        internal void AddComponentSystem(BaseEntitySystem system) 
         {
             Type systemType = system.GetType();
             if (systemByType.ContainsKey(systemType))
             {
-                Debug.LogError($"System of type {systemType} already added");
+                Debug.LogError($"Model System of type {systemType} already added");
                 return;
             }
 
-            if (!systemsByComponentType.TryGetValue(system.ComponentType, out List<SystemCache> systemList))
+            if (!systemsByComponentType.TryGetValue(system.EntityType, out List<SystemCache> systemList))
             {
                 systemList = new List<SystemCache>();
-                systemsByComponentType.Add(system.ComponentType, systemList);
+                systemsByComponentType.Add(system.EntityType, systemList);
             }
 
             SystemCache systemCache = new SystemCache(system);
@@ -58,7 +67,7 @@ namespace Core.Model
             systemByType.Add(systemType, systemCache);
         }
         
-        internal void RemoveComponentSystem(BaseComponentSystem system)
+        internal void RemoveComponentSystem(BaseEntitySystem system)
         {
             Type systemType = system.GetType();
             if (!systemByType.TryGetValue(systemType, out SystemCache systemCache))
@@ -67,7 +76,7 @@ namespace Core.Model
                 return;
             }
 
-            if (!systemsByComponentType.TryGetValue(system.ComponentType, out List<SystemCache> systemList))
+            if (!systemsByComponentType.TryGetValue(system.EntityType, out List<SystemCache> systemList))
             {
                 Debug.LogError($"System of type {systemType} not found in systemsByComponentType");
                 return;
@@ -81,22 +90,22 @@ namespace Core.Model
         
         public sealed class SystemCache
         {
-            public readonly BaseComponentSystem System;
+            public readonly BaseEntitySystem System;
             public readonly Type CachedType;
             public readonly MethodInfo CachedOnNewEntityMethod;
             public readonly MethodInfo CachedOnEntityDestroyedMethod;
             public readonly MethodInfo CachedUpdateMethod;
 
-            public SystemCache(BaseComponentSystem system)
+            public SystemCache(BaseEntitySystem system)
             {
                 System = system;
                 
-                Type d1 = typeof(ComponentSystem<>);
-                Type generic = d1.MakeGenericType( system.ComponentType );
+                Type d1 = typeof(IModelSystem<>);
+                Type generic = d1.MakeGenericType( system.EntityType );
                 
-                MethodInfo methodInfoOnNewEntityMethod = generic.GetMethod(nameof(ComponentSystem<IComponent>.OnNewComponent));
-                MethodInfo methodInfoOnEntityDestroyedMethod = generic.GetMethod(nameof(ComponentSystem<IComponent>.OnComponentDestroy));
-                MethodInfo methodInfoUpdateMethod = generic.GetMethod(nameof(ComponentSystem<IComponent>.UpdateComponent));
+                MethodInfo methodInfoOnNewEntityMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnNew));
+                MethodInfo methodInfoOnEntityDestroyedMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnDestroy));
+                MethodInfo methodInfoUpdateMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.Update));
                         
                 CachedType = generic;
                 CachedOnNewEntityMethod = methodInfoOnNewEntityMethod;

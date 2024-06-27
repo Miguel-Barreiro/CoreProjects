@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Core.Model;
 using UnityEngine;
@@ -27,17 +28,16 @@ namespace Core.Systems
                 }
             }
 
-            IEnumerable<BaseComponentSystem> componentSystems = systemsContainer.GetAllComponentSystems();
-            foreach (BaseComponentSystem componentSystem in componentSystems)
+            IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> systemsByComponentType = systemsContainer.GetAllComponentSystemsByComponentType();
+            foreach ((Type _, List<EntitySystemsContainer.SystemCache> systemCaches) in systemsByComponentType)
             {
-                if (componentSystem.Active)
+                foreach (EntitySystemsContainer.SystemCache systemCache in systemCaches)
                 {
-                    componentSystem.Update(entityLifetimeManager, Time.deltaTime);
+                    if(systemCache.System.Active)
+                        systemCache.System.Update(entityLifetimeManager, Time.deltaTime);
                 }
             }
             
-            
-
         }
 
 
