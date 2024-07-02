@@ -141,7 +141,7 @@ namespace Core.View
             
             
             instantiatedObjects++;
-            GameObject newGameobject = objectBuilder.Instantiate(prefab, parent);
+            GameObject newGameobject = objectBuilder.Instantiate(prefab, parent != null? parent : transform);
             managedGameObjects.Add(newGameobject);
             prefabsFromObjects.Add(newGameobject, prefab);
             AddPropertiesFor(newGameobject);
