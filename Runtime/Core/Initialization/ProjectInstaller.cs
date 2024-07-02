@@ -19,6 +19,16 @@ namespace Core.Initialization
             BuildEntityManager();
             BuildComponentSystemsLogic();
             BuildTypeCache();
+            BuildSystemsManager();
+        }
+        
+        private void BuildSystemsManager()
+        {
+            GameObject systemsManager = new GameObject("SystemsManager");
+            SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
+            DontDestroyOnLoad(systemsManager);
+
+            BindInstance(systemsManagerComponent);
         }
 
         private void BuildTypeCache()
