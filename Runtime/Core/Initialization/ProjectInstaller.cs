@@ -18,6 +18,13 @@ namespace Core.Initialization
 
             BuildEntityManager();
             BuildComponentSystemsLogic();
+            BuildTypeCache();
+        }
+
+        private void BuildTypeCache()
+        {
+            TypeCache typeCache = new TypeCache();
+            BindInstance(typeCache);
         }
 
         private void BuildComponentSystemsLogic()

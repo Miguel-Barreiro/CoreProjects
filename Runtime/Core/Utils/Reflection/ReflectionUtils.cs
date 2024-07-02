@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Core.Utils.CachedDataStructures;
 
 namespace Core.Utils.Reflection
@@ -36,6 +37,21 @@ namespace Core.Utils.Reflection
         {
             return typeof (T).IsAssignableFrom(type);
         }
-        
+
+        public static IEnumerable<Type> GetAllTypesOf<TTargetType>()
+        {
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] types = assembly.GetTypes();
+                foreach (Type type in types)
+                {
+                    if (type.IsTypeOf<TTargetType>() && type != typeof(TTargetType))
+                    {
+                        yield return type;
+                    }
+                }
+            }
+        }
     }
 }

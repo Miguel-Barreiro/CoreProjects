@@ -90,7 +90,7 @@ namespace Core.Systems
             return entitySystemsContainer.GetComponentSystemsFor(componentType);
         }
 
-        internal IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllComponentSystemsByComponentType()
+        internal IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllEntitySystemsByComponentType()
         {
             return entitySystemsContainer.GetAllComponentSystemsByComponentType();
         }

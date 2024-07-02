@@ -33,7 +33,7 @@ namespace Core.Model
         /// <summary>
         /// This is an indicator of an invalid entity which has no entry in the WorldState.
         /// </summary>
-        static public EntId Invalid = new(0);
+        public static EntId Invalid = new(int.MinValue);
 
         public readonly int Id;
 

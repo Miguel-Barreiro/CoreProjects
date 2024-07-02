@@ -1,28 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using Core.Systems;
-using Core.Utils.Reflection;
 using UnityEngine;
 using Zenject;
+
+#nullable enable
 
 namespace Core.Model
 {
     
     public class EntityLifetimeManager : IInitSystem
     {
-        private readonly Dictionary<Type, EntitySystemsContainer.SystemCache> systemByType = new();
-        private readonly Dictionary<Type, List<EntitySystemsContainer.SystemCache>> systemsByComponentType = new ();
+
+        // ENTITY LIFETIME MANAGEMENT
+        private readonly Dictionary<EntId, BaseEntity> entitiesByID = new ();
 
         // COMPONENT CACHING
-        private readonly Dictionary<Type, List<Type>> componentsByEntityType = new ();
         private readonly Dictionary<Type, List<BaseEntity>> entitiesByComponentType = new ();
-        private readonly Dictionary<EntId, BaseEntity> entitiesByID = new ();
+        
+        //EVENT PROCESSING
+        private readonly List<BaseEntity> destroyedEntities = new ();
+        private readonly List<BaseEntity> newEntities = new ();
+        
         
         private int nextEntityID = 0;
 
-        private static EntityLifetimeManager instance;
+        private static EntityLifetimeManager? instance = null!;
 
-        [Inject] private readonly SystemsContainer SystemsContainer = null!;
+        [Inject] private readonly SystemsContainer systemsContainer = null!;
+        [Inject] private readonly TypeCache typeCache = null!;
         
         internal static EntityLifetimeManager CreateInstance()
         {
@@ -35,16 +41,53 @@ namespace Core.Model
         }
         private EntityLifetimeManager(){ }
         
+        
+        public IEnumerable<BaseEntity> GetAllNewEntities()
+        {
+            foreach (BaseEntity newEntity in newEntities)
+            {
+                yield return newEntity;
+            }
+        }
 
+        public IEnumerable<BaseEntity> GetAllDestroyedEntities()
+        {
+            foreach (BaseEntity destroyedEntity in destroyedEntities)
+            {
+                yield return destroyedEntity;
+            }
+        }
+        
+        public void UpgradeCurrentNewEntities()
+        {
+            foreach (BaseEntity newEntity in newEntities)
+            {
+                AddEntityInternal(newEntity);
+            }
+            newEntities.Clear();
+        }
+        
+        public void ClearDestroyedEntities()
+        {
+            foreach (BaseEntity destroyedEntity in destroyedEntities)
+            {
+                RemoveEntityInternal(destroyedEntity);
+            }
+            destroyedEntities.Clear();
+        }
+
+        
         #region Initialization
 
         public void Initialize()
         {
-            componentsByEntityType.Clear();
             entitiesByComponentType.Clear();
-            
-            systemsByComponentType.Clear();
-            systemByType.Clear();
+            IEnumerable<Type> entityTypes = typeCache.GetAllEntityTypes();
+            foreach (Type entityType in entityTypes)
+            {
+                if(!entitiesByComponentType.ContainsKey(entityType))
+                    entitiesByComponentType.Add(entityType, new List<BaseEntity>());
+            }
         }
 
         #endregion
@@ -54,105 +97,17 @@ namespace Core.Model
 
         internal static EntId GenerateNewEntityID()
         {
-            return new EntId(instance.nextEntityID++);
+            return new EntId(instance!.nextEntityID++);
         }
         
         internal static void OnEntityCreated(BaseEntity entity)
         {
-            instance.OnEntityCreatedInternal(entity);
+            instance!.newEntities.Add(entity);
         }
         
         internal static void OnDestroyEntity(BaseEntity entity)
         {
-            instance.OnDestroyEntityInternal(entity);
-        }
-
-        
-        private static readonly object[] ARGUMENT = { null };
-        private void OnEntityCreatedInternal(BaseEntity entity)
-        {
-            Type entityType = entity.GetType();
-
-            entitiesByID.Add(entity.ID, entity);
-            
-            BuildEntityTypeCacheIfNeeded(entityType);
-
-            List<Type> components = componentsByEntityType[entityType];
-            foreach (Type componentType in components)
-            {
-                List<BaseEntity> entities = entitiesByComponentType[componentType];
-                entities.Add(entity);
-
-                IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
-                foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
-                {
-                    BaseEntitySystem system = systemCache.System;
-                    ARGUMENT[0] = entity;
-                    systemCache.CachedOnNewEntityMethod?.Invoke(system, ARGUMENT);
-                }
-            }
-        }
-        
-        private void OnDestroyEntityInternal(BaseEntity entity)
-        {
-            Type entityType = entity.GetType();
-
-            entitiesByID.Add(entity.ID, entity);
-            
-            BuildEntityTypeCacheIfNeeded(entityType);
-
-            List<Type> components = componentsByEntityType[entityType];
-            foreach (Type componentType in components)
-            {
-                IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = SystemsContainer.GetComponentSystemsFor(componentType);
-                foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
-                {
-                    BaseEntitySystem system = systemCache.System;
-                    ARGUMENT[0] = entity;
-                    systemCache.CachedOnEntityDestroyedMethod?.Invoke(system, ARGUMENT);
-                }
-                entitiesByComponentType[componentType].Remove(entity);
-            }
-
-            entitiesByID.Remove(entity.ID);
-        }
-
-        #endregion
-
-
-        #region Internal
-        
-        
-        private void BuildEntityTypeCacheIfNeeded(Type entityType)
-        {
-            if(!componentsByEntityType.ContainsKey(entityType)){
-                List<Type> cachedComponentTypeList = new List<Type>();
-                componentsByEntityType.Add(entityType, cachedComponentTypeList);
-                
-                IEnumerable<Type> componentTypes = GetEntityComponentTypes(entityType);
-                cachedComponentTypeList.AddRange(componentTypes);
-                cachedComponentTypeList.Add(entityType);
-                
-                foreach (Type componentType in cachedComponentTypeList)
-                {
-                    if (!entitiesByComponentType.ContainsKey(componentType))
-                    {
-                        entitiesByComponentType.Add(componentType, new List<BaseEntity>());
-                    }
-                }
-            }
-            
-            static IEnumerable<Type> GetEntityComponentTypes(Type entityType)
-            {
-                IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
-                foreach (Type implementedInterface in implementedInterfaces)
-                {
-                    if (implementedInterface.IsTypeOf<IComponent>())
-                    {
-                        yield return implementedInterface;
-                    }
-                }
-            }
+            instance.destroyedEntities.Add(entity);
         }
         
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
@@ -169,18 +124,38 @@ namespace Core.Model
             }
         }
 
-        public IEnumerable<IComponent> GetAllEntitiesByType(Type componentType)
+        
+        private void AddEntityInternal(BaseEntity entity)
         {
-            entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities);
-            
-            foreach (BaseEntity entity in entities)
+            Type entityType = entity.GetType();
+
+            entitiesByID.Add(entity.ID, entity);
+
+            IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+            foreach (Type componentType in components)
             {
-                yield return entity as IComponent;
+                List<BaseEntity> entities = entitiesByComponentType[componentType];
+                entities.Add(entity);
             }
         }
-
         
+        private void RemoveEntityInternal(BaseEntity entity)
+        {
+            Type entityType = entity.GetType();
+
+            entitiesByID.Add(entity.ID, entity);
+            
+            IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+            foreach (Type componentType in components)
+            {
+                entitiesByComponentType[componentType].Remove(entity);
+            }
+
+            entitiesByID.Remove(entity.ID);
+        }
+
         #endregion
+
 
 
     }
