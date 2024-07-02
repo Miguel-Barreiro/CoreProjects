@@ -45,13 +45,13 @@ namespace Core.Editor
 
             if (systemsContainer != null)
             {
-                IEnumerable<BaseEntitySystem> allComponentSystems = systemsContainer.GetAllComponentSystems();
-                using CachedList<BaseEntitySystem> systems  = ListCache<BaseEntitySystem>.Get();
+                IEnumerable<ISystem> allComponentSystems = systemsContainer.GetAllSystemsByInterface<ISystem>();
+                using CachedList<ISystem> systems  = ListCache<ISystem>.Get();
                 systems.AddRange(allComponentSystems);
 
                 parent.Add(new Label($"Systems Count {systems.Count}"));
                 
-                foreach (BaseEntitySystem system in systems)
+                foreach (ISystem system in systems)
                 {
                     VisualElement systemElement = new VisualElement();
                     systemElement.style.flexDirection = FlexDirection.Row;
@@ -71,22 +71,9 @@ namespace Core.Editor
                     systemElement.Add(button);
                     systemElement.style.alignContent = Align.Center;
                     
-
-                    // EditorGUILayout.LabelField($"  + {system.GetType().Name} ({system.Active})");
                 }
-                // EditorGUILayout.Space(15);
-                // EditorGUILayout.Separator();
 
             }
-            // List<EntitySystem> entitySystems = systemsManager.EntitySystems;
-            // if (entitySystems == null)
-            // {
-            //     return;
-            // }
-            // foreach (EntitySystem entitySystem in entitySystems)
-            // {
-            //     DrawEntitySystem(entitySystem);
-            // }
         }
     }
 }
