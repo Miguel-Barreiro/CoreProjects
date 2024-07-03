@@ -44,6 +44,12 @@ namespace Core.View
 
         public override void OnNew(TEntity newEntity)
         {
+            if (newEntity.Prefab == null)
+            {
+                Debug.LogError($"Prefab not found for entity {typeof(TEntity).Name}({newEntity.ID})");
+                return;
+            }
+
             Spawn(newEntity);
         }
 
