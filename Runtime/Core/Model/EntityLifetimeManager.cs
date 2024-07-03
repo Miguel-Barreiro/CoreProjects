@@ -41,7 +41,11 @@ namespace Core.Model
         }
         private EntityLifetimeManager(){ }
         
-        
+        public T? GetEntity<T>(EntId id) where T:BaseEntity
+        {
+            return entitiesByID.GetValueOrDefault(id) as T;
+        }
+
         public IEnumerable<BaseEntity> GetAllNewEntities()
         {
             foreach (BaseEntity newEntity in newEntities)
