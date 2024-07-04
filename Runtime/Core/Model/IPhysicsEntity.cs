@@ -2,6 +2,7 @@
 
 #nullable enable
 
+
 namespace Core.Model
 {
     public interface I2DPhysicsEntity : IComponent

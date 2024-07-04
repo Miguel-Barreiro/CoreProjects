@@ -2,7 +2,6 @@
 using Core.Model;
 using UnityEngine;
 using Zenject;
-using Vector2 = System.Numerics.Vector2;
 
 
 #nullable enable
@@ -41,7 +40,7 @@ namespace Core.View
                 Debug.LogError($"Prefab not found for entity {typeof(TEntity).Name}({entity.ID})");
                 return null;
             }
-            newGameObject.transform.position = new Vector3(entity.Position.X, entity.Position.Y, 0);
+            newGameObject.transform.position = new Vector3(entity.Position.x, entity.Position.y, 0);
 
             GameobjectsByEntityId.Add(entity.ID, new EntityViewAtributes(newGameObject) );
 
@@ -86,8 +85,8 @@ namespace Core.View
             EntityViewAtributes entityViewAtributes = GameobjectsByEntityId[entity.ID];
             GameObject entityGameobject = entityViewAtributes.GameObject;
             Vector3 position = entityGameobject.transform.position;
-            entityViewAtributes.Position.X = position.x;
-            entityViewAtributes.Position.Y = position.y;
+            entityViewAtributes.Position.x = position.x;
+            entityViewAtributes.Position.y = position.y;
             entity.Position = entityViewAtributes.Position;
             UpdateEntity(entity, entityViewAtributes);
         }
