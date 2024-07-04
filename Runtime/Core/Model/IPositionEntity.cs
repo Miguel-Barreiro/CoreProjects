@@ -1,7 +1,6 @@
-﻿using Core.Model;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Core.Systems
+namespace Core.Model
 {
     public interface IPositionEntity : IComponent
     {
