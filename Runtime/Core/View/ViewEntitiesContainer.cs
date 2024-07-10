@@ -1,0 +1,70 @@
+using System.Collections.Generic;
+using Core.Model;
+using UnityEngine;
+using Zenject;
+
+#nullable enable
+
+namespace Core.View
+{
+	public sealed class ViewEntitiesContainer
+	{
+		[Inject] private readonly GenericGameObjectPool genericGameObjectPool = null!;
+		
+		private readonly Dictionary<EntId, EntityViewAtributes> GameobjectsByEntityId = new();
+		
+		public void Destroy(EntId entityID)
+		{
+			if (!GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes))
+			{
+				return;
+			}
+
+			if (entityViewAtributes.GameObject != null)
+			{
+				genericGameObjectPool.DestroyGameObject(entityViewAtributes.GameObject);
+			}
+
+			GameobjectsByEntityId.Remove(entityID);
+		}
+		
+		internal GameObject? Spawn(GameObject entityPrefab, IEntity entity)
+		{
+			if (entityPrefab == null)
+			{
+				Debug.Log($"No prefab set for entity {entity.GetType().Name}({entity.ID})");
+				return null;
+			}
+
+			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
+
+			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entity);
+			entityAttributes.GameObject = newGameObject;
+			
+			return newGameObject;
+		}
+
+		public EntityViewAtributes? GetEntityViewAtributes(EntId entId)
+		{
+			if (!GameobjectsByEntityId.TryGetValue(entId, out EntityViewAtributes entityViewAtributes))
+			{
+				return null;
+			}
+
+			return entityViewAtributes;
+		}
+		
+
+		private EntityViewAtributes GetOrCreateEntityAttributes(IEntity entity)
+		{
+			if (!GameobjectsByEntityId.TryGetValue(entity.ID, out EntityViewAtributes entityViewAtributes))
+			{
+				entityViewAtributes = new EntityViewAtributes(entity.ID);
+				GameobjectsByEntityId.Add(entity.ID, entityViewAtributes);
+			}
+
+			return entityViewAtributes;
+		}
+
+	}
+}

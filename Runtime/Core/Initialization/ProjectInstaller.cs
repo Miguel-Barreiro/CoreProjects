@@ -12,16 +12,30 @@ namespace Core.Initialization
         
         protected override void InstantiateInternalSystems() 
         {
-            BuildScenesController();
             BuildGameLoopSystem();
-            BuildGenericGameobjePool();
 
             BuildEntityManager();
             BuildComponentSystemsLogic();
             BuildTypeCache();
             BuildSystemsManager();
+
+            BuildViewSystems();
+            BuildGenericGameobjePool();
+            BuildScenesController();
         }
-        
+
+        private void BuildViewSystems()
+        {
+            ViewEntitiesContainer viewEntitiesContainer = new ViewEntitiesContainer();
+            BindInstance(viewEntitiesContainer);
+
+            PositionEntityUpdateViewSystem positionEntityUpdateViewSystem = new();
+            BindInstance(positionEntityUpdateViewSystem);
+
+            PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
+            BindInstance(phisycsEntitiesUpdateViewSystem);
+        }
+
         private void BuildSystemsManager()
         {
             GameObject systemsManager = new GameObject("SystemsManager");

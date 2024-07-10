@@ -27,7 +27,6 @@ namespace Core.Model
 
         private static EntityLifetimeManager? instance = null!;
 
-        [Inject] private readonly SystemsContainer systemsContainer = null!;
         [Inject] private readonly TypeCache typeCache = null!;
         
         internal static EntityLifetimeManager CreateInstance()
@@ -111,20 +110,20 @@ namespace Core.Model
         
         internal static void OnDestroyEntity(BaseEntity entity)
         {
-            instance.destroyedEntities.Add(entity);
+            instance!.destroyedEntities.Add(entity);
         }
         
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
         {
             if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<BaseEntity> entities))
             {
-                Debug.Log($"no entities of type {typeof(TEntity)} found");
+                // Debug.Log($"no entities of type {typeof(TEntity)} found");
                 yield break;
             }
 
             foreach (BaseEntity entity in entities)
             {
-                yield return entity as TEntity;
+                yield return (entity as TEntity)!;
             }
         }
 

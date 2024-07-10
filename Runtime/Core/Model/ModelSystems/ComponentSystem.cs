@@ -1,5 +1,5 @@
 ﻿
-namespace Core.Model
+namespace Core.Model.ModelSystems
 {
     
     public abstract class ComponentSystem<TComponent> : BaseEntitySystem, IModelSystem<TComponent>

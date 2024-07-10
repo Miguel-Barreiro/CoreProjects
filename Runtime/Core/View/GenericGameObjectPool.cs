@@ -51,13 +51,13 @@ namespace Core.View
             public IViewController? viewController;
         }
         
-        public GameObject? GetGameObjectFromPrefab(GameObject prefab, Transform parent = null)
+        public GameObject? GetGameObjectFromPrefab(GameObject prefab, Transform? parent = null)
         {
             GameObject objectFromPrefab = GetOrCreateGameobject(prefab, true,  parent);
             return objectFromPrefab;
         }
 
-        public GameObject? GetGameDeactivatedObjectFromPrefab(GameObject prefab, Transform parent = null)
+        public GameObject? GetGameDeactivatedObjectFromPrefab(GameObject prefab, Transform? parent = null)
         {
             GameObject objectFromPrefab = GetOrCreateGameobject(prefab, false, parent);
             return objectFromPrefab;
@@ -83,7 +83,7 @@ namespace Core.View
                 GameObject.Destroy(targetGameObject);
             }
         }
-        public void Preload(GameObject prefab, int howMany, Transform parent = null)
+        public void Preload(GameObject prefab, int howMany, Transform? parent = null)
         {
             using CachedList<UniTask> loadingTasks = ListCache<UniTask>.Get();
             List<GameObject> poolForPrefab = GetPoolForPrefab(prefab);
@@ -109,7 +109,7 @@ namespace Core.View
             DeactivateGameObject(targetGameObject);
         }
 
-        private GameObject GetOrCreateGameobject(GameObject prefab, bool activate, Transform parent = null)
+        private GameObject GetOrCreateGameobject(GameObject prefab, bool activate, Transform? parent = null)
         {
             List<GameObject> pool = GetPoolForPrefab(prefab);
 

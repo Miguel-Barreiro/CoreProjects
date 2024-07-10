@@ -20,7 +20,7 @@ namespace Core.Initialization
         protected abstract void Instantiate();
         protected virtual void InstantiateInternalSystems() { } 
 
-        public override async void InstallBindings()
+        public override void InstallBindings()
         {
             UpdateSystemsContainer();
             

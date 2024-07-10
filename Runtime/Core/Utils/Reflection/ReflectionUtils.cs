@@ -19,8 +19,6 @@ namespace Core.Utils.Reflection
             
             static void GetInterfacesInternal(Type t, CachedHashset<Type> allInterfaces)
             {
-                HashSet<Type> tt;
-                
                 Type[] currentInterfaces = t.GetInterfaces();
                 foreach (Type current in currentInterfaces)
                 {
