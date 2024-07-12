@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Utils.Reflection;
 using UnityEngine;
+using Zenject;
 
 namespace Core.Model
 {

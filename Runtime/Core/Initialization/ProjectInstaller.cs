@@ -1,4 +1,5 @@
-﻿using Core.Model;
+﻿using Core.Events;
+using Core.Model;
 using Core.Systems;
 using Core.View;
 using UnityEngine;
@@ -12,16 +13,24 @@ namespace Core.Initialization
         
         protected override void InstantiateInternalSystems() 
         {
+            TypeCache typeCache = BuildTypeCache();
+
+            BuildEventManager();
             BuildGameLoopSystem();
 
             BuildEntityManager();
             BuildComponentSystemsLogic();
-            BuildTypeCache();
             BuildSystemsManager();
 
             BuildViewSystems();
             BuildGenericGameobjePool();
             BuildScenesController();
+        }
+
+        private void BuildEventManager()
+        {
+            EventQueue eventQueue = new EventQueue();
+            BindInstance(eventQueue);
         }
 
         private void BuildViewSystems()
@@ -45,10 +54,11 @@ namespace Core.Initialization
             BindInstance(systemsManagerComponent);
         }
 
-        private void BuildTypeCache()
+        private TypeCache BuildTypeCache()
         {
             TypeCache typeCache = new TypeCache();
             BindInstance(typeCache);
+            return typeCache;
         }
 
         private void BuildComponentSystemsLogic()

@@ -35,6 +35,10 @@ namespace Core.Utils.Reflection
         {
             return typeof (T).IsAssignableFrom(type);
         }
+        public static bool IsTypeOf(this Type type, Type targetType)
+        {
+            return targetType.IsAssignableFrom(type);
+        }
 
         public static IEnumerable<Type> GetAllTypesOf<TTargetType>()
         {
@@ -51,5 +55,22 @@ namespace Core.Utils.Reflection
                 }
             }
         }
+        public static IEnumerable<Type> GetAllTypesOf(Type targetType)
+        {
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] types = assembly.GetTypes();
+                foreach (Type type in types)
+                {
+                    if (type.IsTypeOf(targetType) && type != targetType)
+                    {
+                        yield return type;
+                    }
+                }
+            }
+        }
+
+        
     }
 }

@@ -45,6 +45,8 @@ namespace Core.Model
             return entitiesByID.GetValueOrDefault(id) as T;
         }
 
+        public int NewEntitiesCount() => newEntities.Count;
+        
         public IEnumerable<BaseEntity> GetAllNewEntities()
         {
             foreach (BaseEntity newEntity in newEntities)
@@ -53,6 +55,7 @@ namespace Core.Model
             }
         }
 
+        public int DestroyedEntitiesCount => destroyedEntities.Count;
         public IEnumerable<BaseEntity> GetAllDestroyedEntities()
         {
             foreach (BaseEntity destroyedEntity in destroyedEntities)

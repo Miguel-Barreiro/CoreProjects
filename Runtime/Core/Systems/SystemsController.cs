@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Events;
 using Core.Model;
 using Core.Utils.CachedDataStructures;
 using UnityEngine;
@@ -12,7 +13,8 @@ namespace Core.Systems
         [Inject] private readonly SystemsContainer systemsContainer = null!;
         [Inject] private readonly EntityLifetimeManager entityLifetimeManager = null!;
         [Inject] private readonly TypeCache typeCache = null!;
-        
+        [Inject] private readonly EventQueue EventQueue = null!;
+
         private bool initialized = false;
         
         public void Initialize()
@@ -55,12 +57,26 @@ namespace Core.Systems
                 }
             }
 
-            ProcessDestroyedEntities();
-            ProcessNewEntities();
+            while (EventQueue.EventsCount > 0 || 
+                   entityLifetimeManager.NewEntitiesCount() > 0 ||
+                   entityLifetimeManager.DestroyedEntitiesCount > 0)
+            {
+                ProcessEvents();
+                ProcessDestroyedEntities();
+                ProcessNewEntities();
+            }
         }
 
-        
-        
+        private void ProcessEvents()
+        {
+            IEnumerable<BaseEvent> events = EventQueue.PopEvents();
+            foreach (BaseEvent currentEvent in events)
+            {
+                currentEvent.Execute();
+            }
+        }
+
+
         private static readonly object[] ARGUMENT = { null };
         private void ProcessDestroyedEntities()
         {
