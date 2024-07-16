@@ -12,12 +12,6 @@ namespace Core.Model
         private readonly Dictionary<Type, List<SystemCache>> systemsByComponentType = new ();
         
         #region Public
-
-        public void Init()
-        {
-            systemsByComponentType.Clear();
-            systemByType.Clear();
-        }
         
         internal IEnumerable<(Type, List<SystemCache>)> GetAllComponentSystemsByComponentType()
         {
@@ -106,7 +100,7 @@ namespace Core.Model
                 MethodInfo methodInfoOnNewEntityMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnNew));
                 MethodInfo methodInfoOnEntityDestroyedMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnDestroy));
                 MethodInfo methodInfoUpdateMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.Update));
-                        
+                
                 CachedType = generic;
                 CachedOnNewEntityMethod = methodInfoOnNewEntityMethod;
                 CachedOnEntityDestroyedMethod = methodInfoOnEntityDestroyedMethod;

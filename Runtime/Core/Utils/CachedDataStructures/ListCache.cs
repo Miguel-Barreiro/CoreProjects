@@ -57,6 +57,14 @@ namespace Core.Utils.CachedDataStructures
         }
 #endif
         
+
+        public static CachedList<T> Get(IEnumerable<T> values)
+        {
+            CachedList<T> newList = Get();
+            newList.AddRange(values);
+            return newList;
+        }
+        
         
         public static CachedList<T> Get()
         {

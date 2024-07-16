@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Model;
 using Core.Utils.CachedDataStructures;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
 namespace Core.Systems
 {
-    public sealed class SystemsController : MonoBehaviour, IInitSystem
+    public sealed class SystemsController : MonoBehaviour, IInitSystem, IStartSystem
     {
         [Inject] private readonly SystemsContainer systemsContainer = null!;
         [Inject] private readonly EntityLifetimeManager entityLifetimeManager = null!;
-        [Inject] private readonly TypeCache typeCache = null!;
-        [Inject] private readonly EventQueue EventQueue = null!;
+        [Inject] private readonly EventQueue eventQueue = null!;
 
         private bool initialized = false;
         
@@ -22,11 +22,17 @@ namespace Core.Systems
             initialized = false;
         }
 
-        public void Start()
+        public void StartSystem()
         {
+            SetInitialized();
+        }
+
+        private async void SetInitialized()
+        {
+            await UniTask.DelayFrame(1);
             initialized = true;
         }
-        
+
         void Update()
         {
             if (!initialized)
@@ -57,10 +63,14 @@ namespace Core.Systems
                 }
             }
 
-            while (EventQueue.EventsCount > 0 || 
-                   entityLifetimeManager.NewEntitiesCount() > 0 ||
-                   entityLifetimeManager.DestroyedEntitiesCount > 0)
+            int loopGard = 0; 
+            while ( loopGard < 10 && 
+                    (
+                        eventQueue.EventsCount > 0 || 
+                        entityLifetimeManager.NewEntitiesCount() > 0 ||
+                        entityLifetimeManager.DestroyedEntitiesCount > 0))
             {
+                loopGard++;
                 ProcessEvents();
                 ProcessDestroyedEntities();
                 ProcessNewEntities();
@@ -69,9 +79,12 @@ namespace Core.Systems
 
         private void ProcessEvents()
         {
-            IEnumerable<BaseEvent> events = EventQueue.PopEvents();
-            foreach (BaseEvent currentEvent in events)
+            IEnumerable<BaseEvent> events = eventQueue.PopEvents();
+            using CachedList<BaseEvent> eventList = ListCache<BaseEvent>.Get(events);
+            
+            foreach (BaseEvent currentEvent in eventList)
             {
+                currentEvent.CallListenerSystemsInternal();
                 currentEvent.Execute();
             }
         }
@@ -92,7 +105,7 @@ namespace Core.Systems
                 foreach (BaseEntity newEntity in destroyedEntitiesList)
                 {
                     Type entityType = newEntity.GetType();
-                    IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+                    IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
                         IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = systemsContainer.GetComponentSystemsFor(componentType);
@@ -123,7 +136,7 @@ namespace Core.Systems
                 foreach (BaseEntity newEntity in newEntitiesList)
                 {
                     Type entityType = newEntity.GetType();
-                    IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+                    IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
                         IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = systemsContainer.GetComponentSystemsFor(componentType);

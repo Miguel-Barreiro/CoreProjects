@@ -1,18 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using Core.Events;
 using Core.Model;
 using Core.Utils.Reflection;
 
 namespace Core.Systems
 {
-    public sealed class SystemsContainer : IInitSystem
+    public sealed class SystemsContainer
     {
         private readonly Dictionary<Type, HashSet<Object>> systemsByInterface = new Dictionary<Type, HashSet<Object>>();
         private readonly List<Object> systems = new List<Object>();
 
         private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
+        private readonly EventListenerSystemsContainer eventListenerSystemsContainer = new EventListenerSystemsContainer();
+
         
         #region Public
+        
+        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
+        {
+            return entitySystemsContainer.GetComponentSystemsFor(componentType);
+        }
+
+        public IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllEntitySystemsByComponentType()
+        {
+            return entitySystemsContainer.GetAllComponentSystemsByComponentType();
+        }
+
+
+        public IEnumerable<BaseEntitySystem> GetAllComponentSystems()
+        {
+            return entitySystemsContainer.GetAllComponentSystems();
+        }
         
         public IEnumerable<T> GetAllSystemsByInterface<T>() where T : class
         {
@@ -21,10 +40,29 @@ namespace Core.Systems
             {
                 foreach (Object implements in byInterface)
                 {
-                    yield return implements as T;
+                    yield return (T)implements;
                 }
             }
         }
+        
+        public IEnumerable<Object> GetAllSystemsByInterface(Type interfaceType)
+        {
+            if (systemsByInterface.TryGetValue(interfaceType, out var byInterface))
+            {
+                foreach (Object implements in byInterface)
+                {
+                    yield return implements;
+                }
+            }
+        }
+
+
+        public IEnumerable<EventListenerSystemsContainer.EventListenerSystemCache> GetAllEventListenerSystems<TEvent>() 
+            where TEvent : Event<TEvent>, new()
+        {
+            return eventListenerSystemsContainer.GetAllEventListenerSystems<TEvent>();
+        }
+        
         
         public void AddSystem(Object system)
         {
@@ -34,6 +72,11 @@ namespace Core.Systems
             if (objectType.IsTypeOf<BaseEntitySystem>())
             {
                 entitySystemsContainer.AddComponentSystem(system as BaseEntitySystem);
+            }
+
+            if (objectType.IsAssignableToGenericType(typeof(IEventListener<>)))
+            {
+                eventListenerSystemsContainer.AddEventListener(system);
             }
         }
         
@@ -46,6 +89,11 @@ namespace Core.Systems
             {
                 entitySystemsContainer.RemoveComponentSystem(system as BaseEntitySystem);
             }
+            
+            if (objectType.IsAssignableToGenericType(typeof(IEventListener<>)))
+            {
+                eventListenerSystemsContainer.RemoveEventListener(system);
+            }
         }
 
 
@@ -53,13 +101,6 @@ namespace Core.Systems
 
         #region Internal
         
-        
-        public void Initialize()
-        {
-            entitySystemsContainer.Init();
-            
-        }
-
         
         private void AddToInterfaces<T>(T system, Type objectType)
         {
@@ -85,21 +126,7 @@ namespace Core.Systems
 
         #endregion
 
-        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
-        {
-            return entitySystemsContainer.GetComponentSystemsFor(componentType);
-        }
 
-        internal IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllEntitySystemsByComponentType()
-        {
-            return entitySystemsContainer.GetAllComponentSystemsByComponentType();
-        }
-
-
-        internal IEnumerable<BaseEntitySystem> GetAllComponentSystems()
-        {
-            return entitySystemsContainer.GetAllComponentSystems();
-        }
         
     }
 }

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using Core.Systems;
 using Core.Zenject.Source.Factories.Pooling.Static;
+using Zenject;
 
 namespace Core.Events
 {
@@ -8,19 +11,25 @@ namespace Core.Events
 		public abstract void Execute();
 		public abstract void Dispose();
 		
-		public EventOrder Order { get; }
-		protected BaseEvent(EventOrder eventOrder)
-		{
-			this.Order = eventOrder;
-		}
+		// public EventOrder Order { get; }
+		// protected BaseEvent(EventOrder eventOrder)
+		// {
+		// 	this.Order = eventOrder;
+		// }
 
+		protected BaseEvent() { }
+
+		public virtual void CallListenerSystemsInternal() { }
 	}
 
-	public abstract class Event<TEvent> : BaseEvent, IDisposable where TEvent : class, new() 
+	public abstract class Event<TEvent> : BaseEvent, IDisposable 
+		where TEvent : Event<TEvent>, new() 
 	{
+
+		[Inject] private readonly SystemsContainer SystemsContainer = null!; 
+		
 		public static readonly StaticMemoryPool<TEvent> Pool =
 			new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned);
-
 
 		protected virtual void OnSpawned() { }
 		protected virtual void OnDespawned() { }
@@ -39,20 +48,19 @@ namespace Core.Events
 			Pool.Despawn(this as TEvent);
 		}
 
-		protected Event(EventOrder eventOrder = EventOrder.Default) : base(eventOrder) { }
+		public override void CallListenerSystemsInternal()
+		{
+			IEnumerable<EventListenerSystemsContainer.EventListenerSystemCache> listenerSystems;
+			listenerSystems = SystemsContainer.GetAllEventListenerSystems<TEvent>();
+			
+			foreach (EventListenerSystemsContainer.EventListenerSystemCache listenerSystem in listenerSystems)
+			{
+				listenerSystem.CallOnEvent(this);
+			}
+		}
 
-		// public static TEvent New()
-		// {
-		// 	TEvent newEvent = Pool.Spawn();
-		// 	EventManager.Get().Execute(newEvent);
-		// 	return newEvent;
-		// }
+		// protected Event(EventOrder eventOrder = EventOrder.Default) : base(eventOrder) { }
+		
 	}
 
-	public enum EventOrder
-	{
-		PreDefault = -10, 
-		Default = 0,
-		PostDefault = 10,
-	}
 }

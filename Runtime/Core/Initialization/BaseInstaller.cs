@@ -172,7 +172,7 @@ namespace Core.Initialization
             {
                 if(system is IStartSystem startSystem)
                 {
-                    startSystem.Start();
+                    startSystem.StartSystem();
                 }
             }
             

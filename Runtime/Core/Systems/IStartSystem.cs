@@ -2,6 +2,6 @@
 {
     public interface IStartSystem
     {
-        void Start();
+        void StartSystem();
     }
 }

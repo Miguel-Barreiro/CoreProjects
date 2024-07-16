@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Core.Initialization;
+using Core.Model;
+using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
 using Zenject;
@@ -8,29 +11,34 @@ using Zenject;
 
 namespace Core.Events
 {
-	public sealed class EventQueue
+	public sealed class EventQueue: IInitSystem
 	{
 		[Inject] private readonly ObjectBuilder ObjectBuilder = null!;
 		
-		private readonly List<EventOrder> processOrder = new ();
-		private readonly Dictionary<EventOrder, List<BaseEvent>> eventQueue = new();
+		private readonly List<EventOrder> ProcessOrder = new ();
+		private readonly Dictionary<EventOrder, Dictionary<Type, List<BaseEvent>>> EventQueueByType = new();
 		
 		public TEvent Execute<TEvent>() where TEvent : Event<TEvent>, new()
 		{
+			Type eventType = typeof(TEvent);
+			
 			TEvent newEvent = Event<TEvent>.Pool.Spawn();
 			ObjectBuilder.Inject(newEvent);
-			
-			this.eventQueue[newEvent.Order].Add(newEvent);
+
+			TypeCache.EventAttributes attributes = TypeCache.Get().GetEventAttributes(eventType);
+
+			EventOrder newEventOrder = attributes.EventOrder;
+			this.EventQueueByType[newEventOrder][eventType].Add(newEvent);
 			return newEvent;
 		}
-
+		
 		public int EventsCount => GetEventsCount();
-		public int GetEventsCount()
+		private int GetEventsCount()
 		{
 			int eventCount = 0;
-			foreach (EventOrder eventOrder in processOrder)
+			foreach (EventOrder eventOrder in ProcessOrder)
 			{
-				eventCount += eventQueue[eventOrder].Count;
+				eventCount += EventQueueByType[eventOrder].Count;
 			}
 
 			return eventCount;
@@ -40,17 +48,19 @@ namespace Core.Events
 		{
 			using CachedList<BaseEvent> doneEvents = ListCache<BaseEvent>.Get();
 			using CachedList<BaseEvent> currentEventList = ListCache<BaseEvent>.Get();
-			foreach (EventOrder eventOrder in processOrder)
+			foreach (EventOrder eventOrder in ProcessOrder)
 			{
-				List<BaseEvent> currentQueu = eventQueue[eventOrder];
-				currentEventList.Clear();
-				currentEventList.AddRange(currentQueu);
-				currentQueu.Clear();
-
-				foreach (BaseEvent currentEvent in currentEventList)
+				Dictionary<Type,List<BaseEvent>> eventsByOrder = EventQueueByType[eventOrder];
+				foreach ((Type eventType, List<BaseEvent> currentQueu) in eventsByOrder)
 				{
-					yield return currentEvent;
-					doneEvents.Add(currentEvent);
+					currentEventList.Clear();
+					currentEventList.AddRange(currentQueu);
+					currentQueu.Clear();
+					foreach (BaseEvent currentEvent in currentEventList)
+					{
+						yield return currentEvent;
+						doneEvents.Add(currentEvent);
+					}
 				}
 			}
 
@@ -64,23 +74,21 @@ namespace Core.Events
 		{
 			foreach (EventOrder eventOrder in EnumUtils.GetValues<EventOrder>())
 			{
-				eventQueue.Add(eventOrder, new List<BaseEvent>());
-				processOrder.Add(eventOrder);
+				EventQueueByType.Add(eventOrder, new Dictionary<Type, List<BaseEvent>>());
+				ProcessOrder.Add(eventOrder);
 			}
 
-			processOrder.Sort();
+			ProcessOrder.Sort();
 		}
-		
-		// private static EventQueue instance = null;
-		// internal static EventQueue Get()
-		// {
-		// 	if (instance == null)
-		// 	{
-		// 		instance = new EventQueue();
-		// 	}
-		// 	return instance;
-		// }
 
+		public void Initialize()
+		{
+			IEnumerable<TypeCache.EventAttributes> allEventTypes = TypeCache.Get().GetAllEventAttributes();
+			foreach (TypeCache.EventAttributes eventAttributes in allEventTypes)
+			{
+				EventQueueByType[eventAttributes.EventOrder].Add(eventAttributes.EventType, new List<BaseEvent>());
+			}
+		}
 	}
 
 

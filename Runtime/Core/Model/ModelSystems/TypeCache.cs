@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Core.Events;
 using Core.Utils.Reflection;
 using UnityEngine;
-using Zenject;
 
 namespace Core.Model
 {
@@ -10,8 +10,22 @@ namespace Core.Model
     {
         private readonly Dictionary<Type, List<Type>> componentsByEntityType = new ();
         private readonly List<Type> entityTypes = new ();
+        private readonly List<Type> eventTypes = new();
+        // private readonly List<(Type, Type)> eventListenerTypes = new();
+
+        private readonly Dictionary<Type,EventAttributes> EventAttributesByType = new();
+
+        private static TypeCache instance = null;
+        public static TypeCache Get()
+        {
+            if (instance == null)
+            {
+                instance = new TypeCache();
+            }
+            return instance;
+        }
         
-        internal TypeCache()
+        private TypeCache()
         {
             componentsByEntityType.Clear();
             entityTypes.Clear();
@@ -21,8 +35,43 @@ namespace Core.Model
             {
                 BuildEntityTypeCache(entityType);
             }
+
+            BuildEventTypeCache();
         }
+
+
+
+        public IEnumerable<EventAttributes> GetAllEventListenerTypes()
+        {
+            foreach ((Type _, EventAttributes eventAttributes) in EventAttributesByType)
+            {
+                yield return eventAttributes;
+            }
+        }
+
+        public EventAttributes GetEventAttributes(Type eventType)
+        {
+            return EventAttributesByType[eventType];
+        }
+
+        public IEnumerable<EventAttributes> GetAllEventAttributes()
+        {
+            foreach ((Type _, EventAttributes eventAttributes) in EventAttributesByType)
+            {
+                yield return eventAttributes;
+            }
+        }
+
         
+        
+        public IEnumerable<Type> GetAllEventTypes()
+        {
+            foreach (Type eventType in eventTypes)
+            {
+                yield return eventType;
+            }
+        }
+
         public IEnumerable<Type> GetAllEntityTypes()
         {
             foreach (Type entityType in entityTypes)
@@ -48,6 +97,31 @@ namespace Core.Model
         
         #region Internal
         
+
+        
+        private void BuildEventTypeCache()
+        {
+            IEnumerable<Type> allEventTypes = ReflectionUtils.GetAllTypesOf<BaseEvent>();
+            foreach (Type potentialEventType in allEventTypes)
+            {
+                if (potentialEventType.IsGenericType)
+                {
+                    continue;
+                }
+                eventTypes.Add(potentialEventType);
+            }
+            
+            Type genericEventListenerType = typeof(IEventListener<>);
+            Type[] typeArgument = new []{genericEventListenerType};
+            foreach (Type eventType in eventTypes)
+            {
+                // typeArgument[0] = eventType;
+                // Type eventListenerType = genericEventListenerType.MakeGenericType(typeArgument);
+                // eventListenerTypes.Add((eventType, eventListenerType));
+                EventAttributesByType.Add(eventType, new EventAttributes(eventType));
+            }
+        }
+
         
         private void BuildEntityTypeCache(Type entityType)
         {
@@ -81,6 +155,34 @@ namespace Core.Model
             }
         }
         
+        
+        public sealed class EventAttributes
+        {
+            public readonly Type EventType;
+            public readonly EventOrder EventOrder;
+            public readonly Type EventListenerType;
+            
+            public EventAttributes(Type eventType)
+            {
+                EventType = eventType;
+                
+                Type genericEventListenerType = typeof(IEventListener<>);
+                EventListenerType = genericEventListenerType.MakeGenericType(new []{eventType});
+                
+                if (eventType.IsTypeOf<IEarlyEvent>())
+                {
+                    this.EventOrder = EventOrder.PreDefault;
+                    return;
+                }
+                if (eventType.IsTypeOf<ILateEvent>())
+                {
+                    this.EventOrder = EventOrder.PostDefault;
+                    return;
+                }
+
+                this.EventOrder = EventOrder.Default;
+            }
+        }
         
         #endregion
 

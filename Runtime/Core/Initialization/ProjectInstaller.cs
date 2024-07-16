@@ -27,10 +27,20 @@ namespace Core.Initialization
             BuildScenesController();
         }
 
+        private EventQueue eventQueue = null;
+        protected override void OnComplete()
+        {
+            installComplete = true;
+            eventQueue.Execute<OnProjectInstallCompleteEvent>();
+        }
+
         private void BuildEventManager()
         {
-            EventQueue eventQueue = new EventQueue();
-            BindInstance(eventQueue);
+            if (eventQueue == null)
+            {
+                eventQueue = new EventQueue();
+                BindInstance(eventQueue);
+            }
         }
 
         private void BuildViewSystems()
@@ -56,7 +66,7 @@ namespace Core.Initialization
 
         private TypeCache BuildTypeCache()
         {
-            TypeCache typeCache = new TypeCache();
+            TypeCache typeCache = TypeCache.Get();
             BindInstance(typeCache);
             return typeCache;
         }
@@ -66,11 +76,7 @@ namespace Core.Initialization
             EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
             BindInstance(entitySystemsContainer);
         }
-
-        protected override void OnComplete()
-        {
-            installComplete = true;
-        }
+        
 
         private void BuildScenesController()
         {

@@ -29,6 +29,17 @@ namespace Core.Utils.CachedDataStructures
         private readonly static List<CachedHashset<T>> inUseHashsets = new();
         public static int InUseCount => inUseHashsets.Count;
 
+        
+        public static CachedHashset<T> Get(IEnumerable<T> values)
+        {
+            CachedHashset<T> newHashset = Get();
+            foreach (T value in values)
+            {
+                newHashset.Add(value);
+            }
+            return newHashset;
+        }
+        
         public static CachedHashset<T> Get()
         {
             if (freeHashsets.Count > 0)

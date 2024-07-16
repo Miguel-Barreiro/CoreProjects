@@ -26,8 +26,6 @@ namespace Core.Model
         private int nextEntityID = 0;
 
         private static EntityLifetimeManager? instance = null!;
-
-        [Inject] private readonly TypeCache typeCache = null!;
         
         internal static EntityLifetimeManager CreateInstance()
         {
@@ -88,7 +86,7 @@ namespace Core.Model
         public void Initialize()
         {
             entitiesByComponentType.Clear();
-            IEnumerable<Type> entityTypes = typeCache.GetAllEntityTypes();
+            IEnumerable<Type> entityTypes = TypeCache.Get().GetAllEntityTypes();
             foreach (Type entityType in entityTypes)
             {
                 if(!entitiesByComponentType.ContainsKey(entityType))
@@ -137,7 +135,7 @@ namespace Core.Model
 
             entitiesByID.Add(entity.ID, entity);
 
-            IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+            IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
                 List<BaseEntity> entities = entitiesByComponentType[componentType];
@@ -151,7 +149,7 @@ namespace Core.Model
 
             entitiesByID.Add(entity.ID, entity);
             
-            IEnumerable<Type> components = typeCache.GetComponentsOf(entityType);
+            IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
                 entitiesByComponentType[componentType].Remove(entity);
