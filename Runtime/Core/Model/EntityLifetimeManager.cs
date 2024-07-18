@@ -146,8 +146,6 @@ namespace Core.Model
         private void RemoveEntityInternal(BaseEntity entity)
         {
             Type entityType = entity.GetType();
-
-            entitiesByID.Add(entity.ID, entity);
             
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
