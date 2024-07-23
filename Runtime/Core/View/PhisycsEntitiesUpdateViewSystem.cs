@@ -56,10 +56,13 @@ namespace Core.View
 		private void Spawn(I2DPhysicsEntity newEntity)
 		{
 			GameObject? newGameObject = ViewEntitiesContainer.Spawn(newEntity.Prefab.gameObject, newEntity);
-			if (newGameObject != null)
+			if (newGameObject == null)
 			{
-				newGameObject.transform.position = new Vector3(newEntity.Position.x, newEntity.Position.y, 0);
+				Debug.LogError($"no Gameobject was able to be created for physics entity with prefab {newEntity.Prefab.name}");
+				return;
 			}
+
+			newGameObject.transform.position = new Vector3(newEntity.Position.x, newEntity.Position.y, 0);
 
 			Rigidbody2D rigidbody2D = newGameObject.GetComponent<Rigidbody2D>();
 			if(rigidbody2D == null)
