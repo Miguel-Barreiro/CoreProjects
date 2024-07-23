@@ -42,16 +42,35 @@ namespace Core.Systems
 
             float deltaTime = Time.deltaTime;
 
-            IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
-            foreach ((Type _, List<EntitySystemsContainer.SystemCache> systemCaches) in systemsByComponentType)
+            IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
+            foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
             {
-                foreach (EntitySystemsContainer.SystemCache systemCache in systemCaches)
+
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.EarlierPriority)
                 {
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
                     if(systemCacheSystem.Active)
                         systemCacheSystem.Update(entityLifetimeManager, deltaTime);
                 }
+                
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.DefaultPriority)
+                {
+                    BaseEntitySystem systemCacheSystem = systemCache.System;
+                    
+                    if(systemCacheSystem.Active)
+                        systemCacheSystem.Update(entityLifetimeManager, deltaTime);
+                }
+                
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.LatePriority)
+                {
+                    BaseEntitySystem systemCacheSystem = systemCache.System;
+                    
+                    if(systemCacheSystem.Active)
+                        systemCacheSystem.Update(entityLifetimeManager, deltaTime);
+                }
+
+
             }
             
             IEnumerable<IUpdateSystem> allSystemsByInterface = systemsContainer.GetAllSystemsByInterface<IUpdateSystem>();
@@ -102,9 +121,9 @@ namespace Core.Systems
                 destroyedEntitiesList.AddRange(allDestroyedEntities);
                 entityLifetimeManager.ClearDestroyedEntities();
                 
-                foreach (BaseEntity newEntity in destroyedEntitiesList)
+                foreach (BaseEntity destroyedEntity in destroyedEntitiesList)
                 {
-                    Type entityType = newEntity.GetType();
+                    Type entityType = destroyedEntity.GetType();
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
@@ -112,7 +131,7 @@ namespace Core.Systems
                         foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
                         {
                             BaseEntitySystem system = systemCache.System;
-                            ARGUMENT[0] = newEntity;
+                            ARGUMENT[0] = destroyedEntity;
                             systemCache.CachedOnEntityDestroyedMethod?.Invoke(system, ARGUMENT);
                         }
                     }

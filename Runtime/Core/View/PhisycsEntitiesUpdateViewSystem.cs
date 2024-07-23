@@ -1,5 +1,6 @@
 using Core.Model;
 using Core.Model.ModelSystems;
+using Core.Systems;
 using UnityEngine;
 using Zenject;
 
@@ -7,12 +8,15 @@ using Zenject;
 
 namespace Core.View
 {
+	[EntitySystemPropertiesAttribute(SystemPriority = SystemPriority.Early)]
 	public sealed class PhisycsEntitiesUpdateViewSystem: ComponentSystem<I2DPhysicsEntity>
 	{
 		[Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 		
 		public override void OnNew(I2DPhysicsEntity newEntity)
 		{
+			Debug.Log($"on NEW physics entity: EARLY");
+			
 			if (newEntity.Prefab == null)
 			{
 				Debug.LogError($"Prefab not found for entity {newEntity.GetType().Name}({newEntity.ID})");
@@ -36,6 +40,8 @@ namespace Core.View
 
 		public override void Update(I2DPhysicsEntity entity, float deltaTime)
 		{
+			Debug.Log($"on update physics entity: EARLY");
+			
 			EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
 			if (viewAtributes == null || viewAtributes.GameObject== null)
 			{

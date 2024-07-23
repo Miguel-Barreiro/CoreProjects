@@ -22,7 +22,7 @@ namespace Core.Systems
             return entitySystemsContainer.GetComponentSystemsFor(componentType);
         }
 
-        public IEnumerable<(Type, List<EntitySystemsContainer.SystemCache>)> GetAllEntitySystemsByComponentType()
+        public IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> GetAllEntitySystemsByComponentType()
         {
             return entitySystemsContainer.GetAllComponentSystemsByComponentType();
         }

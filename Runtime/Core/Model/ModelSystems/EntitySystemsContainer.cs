@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Core.Systems;
 using UnityEngine;
 
 namespace Core.Model
@@ -9,15 +10,15 @@ namespace Core.Model
     {
         
         private readonly Dictionary<Type, SystemCache> systemByType = new();
-        private readonly Dictionary<Type, List<SystemCache>> systemsByComponentType = new ();
+        private readonly Dictionary<Type, SystemListenerGroup> systemsByComponentType = new ();
         
         #region Public
         
-        internal IEnumerable<(Type, List<SystemCache>)> GetAllComponentSystemsByComponentType()
+        internal IEnumerable<(Type, SystemListenerGroup)> GetAllComponentSystemsByComponentType()
         {
-            foreach ((Type componentType, List<SystemCache> systemCaches)  in systemsByComponentType)
+            foreach ((Type componentType, SystemListenerGroup group)  in systemsByComponentType)
             {
-                yield return (componentType, systemCaches);
+                yield return (componentType, group);
             }
         }
         
@@ -32,9 +33,19 @@ namespace Core.Model
 
         
         internal IEnumerable<SystemCache> GetComponentSystemsFor(Type componentType) {
-            if (systemsByComponentType.TryGetValue(componentType, out List<SystemCache> systems))
+            if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
             {
-                foreach (SystemCache systemCache in systems)
+                foreach (SystemCache systemCache in systems.EarlierPriority)
+                {
+                    yield return systemCache;
+                }
+
+                foreach (SystemCache systemCache in systems.DefaultPriority)
+                {
+                    yield return systemCache;
+                }
+
+                foreach (SystemCache systemCache in systems.LatePriority)
                 {
                     yield return systemCache;
                 }
@@ -50,14 +61,21 @@ namespace Core.Model
                 return;
             }
 
-            if (!systemsByComponentType.TryGetValue(system.EntityType, out List<SystemCache> systemList))
+            if (!systemsByComponentType.TryGetValue(system.EntityType, out SystemListenerGroup systemGroup))
             {
-                systemList = new List<SystemCache>();
-                systemsByComponentType.Add(system.EntityType, systemList);
+                systemGroup = new SystemListenerGroup();
+                systemsByComponentType.Add(system.EntityType, systemGroup);
             }
 
             SystemCache systemCache = new SystemCache(system);
-            systemList.Add(systemCache);
+            List<SystemCache> priorityList = systemCache.SystemPriority switch
+            {
+                SystemPriority.Early => systemGroup.EarlierPriority,
+                SystemPriority.Default => systemGroup.DefaultPriority,
+                SystemPriority.Late => systemGroup.LatePriority,
+            };
+
+            priorityList.Add(systemCache);
             systemByType.Add(systemType, systemCache);
         }
         
@@ -70,17 +88,31 @@ namespace Core.Model
                 return;
             }
 
-            if (!systemsByComponentType.TryGetValue(system.EntityType, out List<SystemCache> systemList))
+            if (!systemsByComponentType.TryGetValue(system.EntityType, out SystemListenerGroup systemGroup))
             {
                 Debug.LogError($"System of type {systemType} not found in systemsByComponentType");
                 return;
             }
 
-            systemList.Remove(systemCache);
+            List<SystemCache> priorityList = systemCache.SystemPriority switch
+            {
+                SystemPriority.Early => systemGroup.EarlierPriority,
+                SystemPriority.Default => systemGroup.DefaultPriority,
+                SystemPriority.Late => systemGroup.LatePriority,
+            };
+            
+            priorityList.Remove(systemCache);
             systemByType.Remove(systemType);
         }
 
         #endregion
+        
+        public sealed class SystemListenerGroup
+        {
+            public readonly List<SystemCache> EarlierPriority = new ();
+            public readonly List<SystemCache> DefaultPriority = new();
+            public readonly List<SystemCache> LatePriority = new();
+        }
         
         public sealed class SystemCache
         {
@@ -90,10 +122,22 @@ namespace Core.Model
             public readonly MethodInfo CachedOnEntityDestroyedMethod;
             public readonly MethodInfo CachedUpdateMethod;
 
+            public readonly SystemPriority SystemPriority = SystemPriority.Default; 
+            
             public SystemCache(BaseEntitySystem system)
             {
                 System = system;
+
+                Type systemType = system.GetType();
+
+                Attribute[] attributes = Attribute.GetCustomAttributes(systemType);
+                EntitySystemPropertiesAttribute systemProperties = GetOfType<EntitySystemPropertiesAttribute>(attributes);
+                if (systemProperties != null)
+                {
+                    SystemPriority = systemProperties.SystemPriority;
+                }
                 
+
                 Type d1 = typeof(IModelSystem<>);
                 Type generic = d1.MakeGenericType( system.EntityType );
                 
@@ -101,10 +145,23 @@ namespace Core.Model
                 MethodInfo methodInfoOnEntityDestroyedMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnDestroy));
                 MethodInfo methodInfoUpdateMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.Update));
                 
-                CachedType = generic;
+                CachedType = systemType;
                 CachedOnNewEntityMethod = methodInfoOnNewEntityMethod;
                 CachedOnEntityDestroyedMethod = methodInfoOnEntityDestroyedMethod;
                 CachedUpdateMethod = methodInfoUpdateMethod;
+            }
+            
+            private static T GetOfType<T>(Attribute[] attributes) where T : Attribute
+            {
+                foreach (Attribute attribute in attributes)
+                {
+                    if (attribute.GetType() == typeof(T))
+                    {
+                        return attribute as T;
+                    }
+                }
+
+                return default;
             }
 
         }

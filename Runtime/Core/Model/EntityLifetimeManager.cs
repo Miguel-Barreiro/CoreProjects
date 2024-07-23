@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Core.Systems;
-using UnityEngine;
-using Zenject;
 
 #nullable enable
 
