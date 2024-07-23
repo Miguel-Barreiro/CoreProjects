@@ -21,6 +21,13 @@ namespace Core.Systems
         {
             return entitySystemsContainer.GetComponentSystemsFor(componentType);
         }
+        
+
+        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsForDestroyed(Type componentType)
+        {
+            return entitySystemsContainer.GetComponentSystemsForDestroyed(componentType);
+        }
+
 
         public IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> GetAllEntitySystemsByComponentType()
         {

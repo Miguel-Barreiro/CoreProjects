@@ -51,6 +51,28 @@ namespace Core.Model
                 }
             }
         }
+        
+        internal IEnumerable<SystemCache> GetComponentSystemsForDestroyed(Type componentType) {
+            if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
+            {
+                foreach (SystemCache systemCache in systems.LatePriority)
+                {
+                    yield return systemCache;
+                }
+                
+                foreach (SystemCache systemCache in systems.DefaultPriority)
+                {
+                    yield return systemCache;
+                }
+
+                foreach (SystemCache systemCache in systems.EarlierPriority)
+                {
+                    yield return systemCache;
+                }
+            }
+        }
+
+        
 
         internal void AddComponentSystem(BaseEntitySystem system) 
         {
@@ -68,14 +90,7 @@ namespace Core.Model
             }
 
             SystemCache systemCache = new SystemCache(system);
-            List<SystemCache> priorityList = systemCache.SystemPriority switch
-            {
-                SystemPriority.Early => systemGroup.EarlierPriority,
-                SystemPriority.Default => systemGroup.DefaultPriority,
-                SystemPriority.Late => systemGroup.LatePriority,
-            };
-
-            priorityList.Add(systemCache);
+            systemGroup.Add(systemCache);
             systemByType.Add(systemType, systemCache);
         }
         
@@ -93,15 +108,8 @@ namespace Core.Model
                 Debug.LogError($"System of type {systemType} not found in systemsByComponentType");
                 return;
             }
-
-            List<SystemCache> priorityList = systemCache.SystemPriority switch
-            {
-                SystemPriority.Early => systemGroup.EarlierPriority,
-                SystemPriority.Default => systemGroup.DefaultPriority,
-                SystemPriority.Late => systemGroup.LatePriority,
-            };
             
-            priorityList.Remove(systemCache);
+            systemGroup.Remove(systemCache);
             systemByType.Remove(systemType);
         }
 
@@ -112,6 +120,50 @@ namespace Core.Model
             public readonly List<SystemCache> EarlierPriority = new ();
             public readonly List<SystemCache> DefaultPriority = new();
             public readonly List<SystemCache> LatePriority = new();
+
+            public readonly List<SystemCache> UpdateEarlierPriority = new ();
+            public readonly List<SystemCache> UpdateDefaultPriority = new();
+            public readonly List<SystemCache> UpdateLatePriority = new();
+
+            public void Add(SystemCache systemCache)
+            {
+                
+                List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
+                {
+                    SystemPriority.Early => EarlierPriority,
+                    SystemPriority.Default => DefaultPriority,
+                    SystemPriority.Late => LatePriority,
+                };
+                List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
+                {
+                    SystemPriority.Early => EarlierPriority,
+                    SystemPriority.Default => DefaultPriority,
+                    SystemPriority.Late => LatePriority,
+                };
+
+                updatePriorityList.Add(systemCache);
+                LifetimePriorityList.Add(systemCache);
+            }
+            
+            public void Remove(SystemCache systemCache)
+            {
+                
+                List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
+                {
+                    SystemPriority.Early => EarlierPriority,
+                    SystemPriority.Default => DefaultPriority,
+                    SystemPriority.Late => LatePriority,
+                };
+                List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
+                {
+                    SystemPriority.Early => EarlierPriority,
+                    SystemPriority.Default => DefaultPriority,
+                    SystemPriority.Late => LatePriority,
+                };
+
+                updatePriorityList.Remove(systemCache);
+                LifetimePriorityList.Remove(systemCache);
+            }
         }
         
         public sealed class SystemCache
@@ -122,7 +174,8 @@ namespace Core.Model
             public readonly MethodInfo CachedOnEntityDestroyedMethod;
             public readonly MethodInfo CachedUpdateMethod;
 
-            public readonly SystemPriority SystemPriority = SystemPriority.Default; 
+            public readonly SystemPriority SystemUpdatePriority = SystemPriority.Default;
+            public readonly SystemPriority SystemLifetimePriority = SystemPriority.Default;
             
             public SystemCache(BaseEntitySystem system)
             {
@@ -134,7 +187,8 @@ namespace Core.Model
                 EntitySystemPropertiesAttribute systemProperties = GetOfType<EntitySystemPropertiesAttribute>(attributes);
                 if (systemProperties != null)
                 {
-                    SystemPriority = systemProperties.SystemPriority;
+                    SystemLifetimePriority = systemProperties.LifetimePriority;
+                    SystemUpdatePriority = systemProperties.LifetimePriority;
                 }
                 
 

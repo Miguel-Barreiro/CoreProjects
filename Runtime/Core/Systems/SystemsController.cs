@@ -46,7 +46,7 @@ namespace Core.Systems
             foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
             {
 
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.EarlierPriority)
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateEarlierPriority)
                 {
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
@@ -54,7 +54,7 @@ namespace Core.Systems
                         systemCacheSystem.Update(entityLifetimeManager, deltaTime);
                 }
                 
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.DefaultPriority)
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateDefaultPriority)
                 {
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
@@ -62,7 +62,7 @@ namespace Core.Systems
                         systemCacheSystem.Update(entityLifetimeManager, deltaTime);
                 }
                 
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.LatePriority)
+                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateLatePriority)
                 {
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
@@ -127,7 +127,7 @@ namespace Core.Systems
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
-                        IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = systemsContainer.GetComponentSystemsFor(componentType);
+                        IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = systemsContainer.GetComponentSystemsForDestroyed(componentType);
                         foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
                         {
                             BaseEntitySystem system = systemCache.System;

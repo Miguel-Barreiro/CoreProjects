@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Core.View
 {
-	[EntitySystemPropertiesAttribute(SystemPriority = SystemPriority.Early)]
+	[EntitySystemPropertiesAttribute(LifetimePriority = SystemPriority.Early, UpdatePriority = SystemPriority.Early)]
 	public sealed class PhisycsEntitiesUpdateViewSystem: ComponentSystem<I2DPhysicsEntity>
 	{
 		[Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
