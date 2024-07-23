@@ -73,6 +73,8 @@ namespace Core.View
 			
 			newEntity.Rigidbody2D = rigidbody2D;
 		}
+
+		public override SystemGroup Group { get; } = CoreSystemGroups.CorePhysicsEntitySystemGroup;
 	}
 	
 }

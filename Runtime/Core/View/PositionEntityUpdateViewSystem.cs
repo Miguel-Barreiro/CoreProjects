@@ -1,5 +1,6 @@
 using Core.Model;
 using Core.Model.ModelSystems;
+using Core.Systems;
 using UnityEngine;
 using Zenject;
 
@@ -54,5 +55,6 @@ namespace Core.View
             entityGameobject.transform.position = new Vector3(entity.Position.x, entity.Position.y, 0);
         }
 
+        public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
     }
 }
