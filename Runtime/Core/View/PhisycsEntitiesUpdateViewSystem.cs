@@ -18,13 +18,7 @@ namespace Core.View
 				Debug.LogError($"Prefab not found for entity {newEntity.GetType().Name}({newEntity.ID})");
 				return;
 			}
-
-			GameObject? newGameObject = ViewEntitiesContainer.Spawn(newEntity.Prefab.gameObject, newEntity);
-			if (newGameObject != null)
-			{
-				newGameObject.transform.position = new Vector3(newEntity.Position.x, newEntity.Position.y, 0);
-			}
-
+			Spawn(newEntity);
 		}
 
 		public override void OnDestroy(I2DPhysicsEntity entity)
@@ -45,12 +39,31 @@ namespace Core.View
 			EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
 			if (viewAtributes == null || viewAtributes.GameObject== null)
 			{
-				GameObject? newGameObject = ViewEntitiesContainer.Spawn(entity.Prefab.gameObject, entity);
+				Spawn(entity);
 				return;
 			}
 
 			GameObject entityGameobject = viewAtributes.GameObject;
 			entity.Position = entityGameobject.transform.position;
 		}
+
+		private void Spawn(I2DPhysicsEntity newEntity)
+		{
+			GameObject? newGameObject = ViewEntitiesContainer.Spawn(newEntity.Prefab.gameObject, newEntity);
+			if (newGameObject != null)
+			{
+				newGameObject.transform.position = new Vector3(newEntity.Position.x, newEntity.Position.y, 0);
+			}
+
+			Rigidbody2D rigidbody2D = newGameObject.GetComponent<Rigidbody2D>();
+			if(rigidbody2D == null)
+			{
+				Debug.LogError($"no rigidBody found for physics entity with prefab {newEntity.Prefab.name}"); 
+				return;
+			}
+			
+			newEntity.Rigidbody2D = rigidbody2D;
+		}
 	}
+	
 }

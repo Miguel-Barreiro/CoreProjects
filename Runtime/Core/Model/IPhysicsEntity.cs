@@ -9,6 +9,8 @@ namespace Core.Model
     {
         Vector2 Position { get; set; }
         Rigidbody2D Prefab { get; }
+
+        Rigidbody2D Rigidbody2D { get; set; }
     }
     
 }
