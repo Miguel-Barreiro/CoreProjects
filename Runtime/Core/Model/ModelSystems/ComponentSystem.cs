@@ -9,9 +9,9 @@ namespace Core.Model.ModelSystems
         public abstract void OnDestroy(TComponent newComponent);
         public abstract void Update(TComponent component, float deltaTime);
         
-        internal override void Update(EntityLifetimeManager entityLifetimeManager, float deltaTime)
+        internal override void Update(EntitiesContainer entitiesContainer, float deltaTime)
         {
-            foreach (TComponent component in entityLifetimeManager.GetAllEntitiesByType<TComponent>())
+            foreach (TComponent component in entitiesContainer.GetAllEntitiesByType<TComponent>())
             {
                 Update(component, deltaTime);
             }

@@ -7,7 +7,7 @@ using Core.Systems;
 namespace Core.Model
 {
     
-    public class EntityLifetimeManager : IInitSystem
+    public class EntitiesContainer : IInitSystem
     {
 
         // ENTITY LIFETIME MANAGEMENT
@@ -23,18 +23,18 @@ namespace Core.Model
         
         private int nextEntityID = 0;
 
-        private static EntityLifetimeManager? instance = null!;
+        private static EntitiesContainer? instance = null!;
         
-        internal static EntityLifetimeManager CreateInstance()
+        internal static EntitiesContainer CreateInstance()
         {
             if (instance == null)
             {
-                instance = new EntityLifetimeManager();
+                instance = new EntitiesContainer();
             }
             
             return instance;
         }
-        private EntityLifetimeManager(){ }
+        private EntitiesContainer(){ }
         
         public T? GetEntity<T>(EntId id) where T:BaseEntity
         {

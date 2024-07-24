@@ -15,7 +15,7 @@ namespace Core.Model
             EntityType = componentType;
         }
 
-        internal abstract void Update(EntityLifetimeManager entityLifetimeManager, float deltaTime);
+        internal abstract void Update(EntitiesContainer entitiesContainer, float deltaTime);
 
         public Type EntityType { get; private set; }
         

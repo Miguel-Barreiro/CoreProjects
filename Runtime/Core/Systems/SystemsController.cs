@@ -12,7 +12,7 @@ namespace Core.Systems
     public sealed class SystemsController : MonoBehaviour, IInitSystem, IStartSystem
     {
         [Inject] private readonly SystemsContainer systemsContainer = null!;
-        [Inject] private readonly EntityLifetimeManager entityLifetimeManager = null!;
+        [Inject] private readonly EntitiesContainer EntitiesContainer = null!;
         [Inject] private readonly EventQueue eventQueue = null!;
 
         private bool initialized = false;
@@ -51,7 +51,7 @@ namespace Core.Systems
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
                     if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(entityLifetimeManager, deltaTime);
+                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
                 }
                 
                 foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateDefaultPriority)
@@ -59,7 +59,7 @@ namespace Core.Systems
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
                     if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(entityLifetimeManager, deltaTime);
+                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
                 }
                 
                 foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateLatePriority)
@@ -67,7 +67,7 @@ namespace Core.Systems
                     BaseEntitySystem systemCacheSystem = systemCache.System;
                     
                     if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(entityLifetimeManager, deltaTime);
+                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
                 }
 
 
@@ -86,8 +86,8 @@ namespace Core.Systems
             while ( loopGard < 10 && 
                     (
                         eventQueue.EventsCount > 0 || 
-                        entityLifetimeManager.NewEntitiesCount() > 0 ||
-                        entityLifetimeManager.DestroyedEntitiesCount > 0))
+                        EntitiesContainer.NewEntitiesCount() > 0 ||
+                        EntitiesContainer.DestroyedEntitiesCount > 0))
             {
                 loopGard++;
                 ProcessEvents();
@@ -116,10 +116,10 @@ namespace Core.Systems
             using CachedList<BaseEntity> destroyedEntitiesList = ListCache<BaseEntity>.Get();
             do
             {
-                IEnumerable<BaseEntity> allDestroyedEntities = entityLifetimeManager.GetAllDestroyedEntities();
+                IEnumerable<BaseEntity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
                 destroyedEntitiesList.Clear();
                 destroyedEntitiesList.AddRange(allDestroyedEntities);
-                entityLifetimeManager.ClearDestroyedEntities();
+                EntitiesContainer.ClearDestroyedEntities();
                 
                 foreach (BaseEntity destroyedEntity in destroyedEntitiesList)
                 {
@@ -147,10 +147,10 @@ namespace Core.Systems
             using CachedList<BaseEntity> newEntitiesList = ListCache<BaseEntity>.Get();
             do
             {
-                IEnumerable<BaseEntity> newEntities = entityLifetimeManager.GetAllNewEntities();
+                IEnumerable<BaseEntity> newEntities = EntitiesContainer.GetAllNewEntities();
                 newEntitiesList.Clear();
                 newEntitiesList.AddRange(newEntities);
-                entityLifetimeManager.UpgradeCurrentNewEntities();
+                EntitiesContainer.UpgradeCurrentNewEntities();
                 
                 foreach (BaseEntity newEntity in newEntitiesList)
                 {

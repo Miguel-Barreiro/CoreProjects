@@ -17,13 +17,13 @@ namespace Core.Model
 
         protected BaseEntity()
         {
-            id = EntityLifetimeManager.GenerateNewEntityID();
-            EntityLifetimeManager.OnEntityCreated(this);
+            id = EntitiesContainer.GenerateNewEntityID();
+            EntitiesContainer.OnEntityCreated(this);
         }
 
         public void Destroy()
         {
-            EntityLifetimeManager.OnDestroyEntity(this);
+            EntitiesContainer.OnDestroyEntity(this);
         }
     }
     

@@ -105,7 +105,7 @@ namespace Core.Initialization
 
         private void BuildEntityManager()
         {
-            EntityLifetimeManager entityManagerComponent = EntityLifetimeManager.CreateInstance();
+            EntitiesContainer entityManagerComponent = EntitiesContainer.CreateInstance();
             BindInstance(entityManagerComponent);
         }        
     }

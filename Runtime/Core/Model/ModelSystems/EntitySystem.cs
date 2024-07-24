@@ -9,9 +9,9 @@ namespace Core.Model
         public abstract void OnDestroy(TEntity newEntity);
         public abstract void Update(TEntity entity, float deltaTime);
 
-        internal override void Update(EntityLifetimeManager entityLifetimeManager, float deltaTime)
+        internal override void Update(EntitiesContainer entitiesContainer, float deltaTime)
         {
-            IEnumerable<TEntity> entities = entityLifetimeManager.GetAllEntitiesByType<TEntity>();
+            IEnumerable<TEntity> entities = entitiesContainer.GetAllEntitiesByType<TEntity>();
             foreach (TEntity entity in entities)
             {
                 Update(entity, deltaTime);
