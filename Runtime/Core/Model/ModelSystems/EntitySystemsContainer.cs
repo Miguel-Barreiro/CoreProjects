@@ -130,10 +130,10 @@ namespace Core.Model
                 
                 List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
                 {
-                    SystemPriority.Early => EarlierPriority,
-                    SystemPriority.Default => DefaultPriority,
-                    SystemPriority.Late => LatePriority,
-                    _ => DefaultPriority
+                    SystemPriority.Early => UpdateEarlierPriority,
+                    SystemPriority.Default => UpdateDefaultPriority,
+                    SystemPriority.Late => UpdateLatePriority,
+                    _ => UpdateDefaultPriority
                 };
                 List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
                 {
@@ -152,10 +152,10 @@ namespace Core.Model
                 
                 List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
                 {
-                    SystemPriority.Early => EarlierPriority,
-                    SystemPriority.Default => DefaultPriority,
-                    SystemPriority.Late => LatePriority,
-                    _ => DefaultPriority
+                    SystemPriority.Early => UpdateEarlierPriority,
+                    SystemPriority.Default =>UpdateDefaultPriority,
+                    SystemPriority.Late => UpdateLatePriority,
+                    _ => UpdateDefaultPriority
                 };
                 List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
                 {

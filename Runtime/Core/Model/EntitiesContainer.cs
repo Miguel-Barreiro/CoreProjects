@@ -41,6 +41,12 @@ namespace Core.Model
             return entitiesByID.GetValueOrDefault(id) as T;
         }
 
+        public BaseEntity? GetEntity(EntId id)
+        {
+            return entitiesByID.GetValueOrDefault(id);
+        }
+
+        
         public int NewEntitiesCount() => newEntities.Count;
         
         public IEnumerable<BaseEntity> GetAllNewEntities()
