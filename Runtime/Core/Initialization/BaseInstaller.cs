@@ -101,20 +101,23 @@ namespace Core.Initialization
                 Debug.LogError($"ERROR: {typeof(T)} not found in {instance.name}");
                 return;
             }
-            Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
+            Container.BindInstance<T>(component);
+            // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
             AddSystem(component);
         }
 
         protected void BindComponentFromSelf<T>(GameObject instance)
         {
             T component = instance.GetComponent<T>();
-            Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
+            Container.BindInstance<T>(component);
+            // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
             AddSystem(component);
         }
 		
         protected void BindComponent<T>(T component) where T : MonoBehaviour
         {
-            Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
+            Container.BindInstance<T>(component);
+            // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
             AddSystem(component);
         }
         
