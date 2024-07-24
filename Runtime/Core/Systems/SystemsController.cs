@@ -105,6 +105,7 @@ namespace Core.Systems
             {
                 currentEvent.CallListenerSystemsInternal();
                 currentEvent.Execute();
+                currentEvent.Dispose();
             }
         }
 

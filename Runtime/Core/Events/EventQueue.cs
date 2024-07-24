@@ -46,12 +46,11 @@ namespace Core.Events
 
 		internal IEnumerable<BaseEvent> PopEvents()
 		{
-			using CachedList<BaseEvent> doneEvents = ListCache<BaseEvent>.Get();
 			using CachedList<BaseEvent> currentEventList = ListCache<BaseEvent>.Get();
 			foreach (EventOrder eventOrder in ProcessOrder)
 			{
 				Dictionary<Type,List<BaseEvent>> eventsByOrder = EventQueueByType[eventOrder];
-				foreach ((Type eventType, List<BaseEvent> currentQueu) in eventsByOrder)
+				foreach ((Type _, List<BaseEvent> currentQueu) in eventsByOrder)
 				{
 					currentEventList.Clear();
 					currentEventList.AddRange(currentQueu);
@@ -59,14 +58,8 @@ namespace Core.Events
 					foreach (BaseEvent currentEvent in currentEventList)
 					{
 						yield return currentEvent;
-						doneEvents.Add(currentEvent);
 					}
 				}
-			}
-
-			foreach (BaseEvent doneEvent in doneEvents)
-			{
-				doneEvent.Dispose();
 			}
 		}
 		

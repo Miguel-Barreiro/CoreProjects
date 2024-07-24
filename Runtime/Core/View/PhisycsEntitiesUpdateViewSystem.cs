@@ -15,8 +15,6 @@ namespace Core.View
 		
 		public override void OnNew(I2DPhysicsEntity newEntity)
 		{
-			Debug.Log($"on NEW physics entity: EARLY");
-			
 			if (newEntity.Prefab == null)
 			{
 				Debug.LogError($"Prefab not found for entity {newEntity.GetType().Name}({newEntity.ID})");
@@ -40,8 +38,6 @@ namespace Core.View
 
 		public override void Update(I2DPhysicsEntity entity, float deltaTime)
 		{
-			Debug.Log($"on update physics entity: EARLY");
-			
 			EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
 			if (viewAtributes == null || viewAtributes.GameObject== null)
 			{
