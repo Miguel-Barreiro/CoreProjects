@@ -33,7 +33,7 @@ namespace Core.View.UI
 		}
 
 		public void RegisterWithViewObject<TMessenger>(UIScreenDefinition uiFDefinition,
-														TMessenger messenger, UIView<TMessenger> view)
+														TMessenger uiMessenger, UIView<TMessenger> view)
 			where TMessenger : UIMessenger
 		{
 			if (!_viewsByDefinition.TryGetValue(uiFDefinition, out ActiveView activeViewResult))
@@ -51,7 +51,9 @@ namespace Core.View.UI
 				GameObject viewObject = view.gameObject;
 				RectTransform rectTransform = viewObject.GetComponent<RectTransform>();
 
-				UIMessenger uiMessenger = _messengersByScreenDefinitions[uiFDefinition];
+				rectTransform.parent = newCanvasObj.transform;
+				_messengersByScreenDefinitions[uiFDefinition] = uiMessenger;
+				
 				activeViewResult = new ActiveView(rectTransform, canvas , uiFDefinition, uiMessenger);
 
 				_viewsByDefinition.Add(uiFDefinition, activeViewResult);
@@ -60,6 +62,8 @@ namespace Core.View.UI
 				BaseUIView baseUIView = activeViewResult.ViewTransform.gameObject.GetComponent<BaseUIView>();
 				activeViewResult.CachedRegisterMethod.Invoke(baseUIView, ARGUMENT);
 			}
+
+			Show(uiFDefinition);
 		}
 
 		
