@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
+using Core.View.UI;
 using Core.Zenject.Source.Install;
 using Core.Zenject.Source.Install.Contexts;
 using Cysharp.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace Core.Initialization
         protected abstract void Instantiate();
         protected virtual void InstantiateInternalSystems() { } 
 
+        
         public override void InstallBindings()
         {
             UpdateSystemsContainer();
@@ -78,9 +80,8 @@ namespace Core.Initialization
             Container.BindInstance<T>(instance);
             AddSystem(instance);
         }
-		
-		
-        protected T InstantiateAndBindType<T>()
+
+        public T Install<T>()
         {
             T newSystem = Container.Instantiate<T>();
             RegisterDisposableIfNeeded(newSystem);
@@ -88,6 +89,28 @@ namespace Core.Initialization
             AddSystem(newSystem);
             return newSystem;
         }
+
+
+        protected void RegisterUIScreenDefinition<TMessenger>( UIScreenDefinition definition, TMessenger messenger)
+            where TMessenger : UIMessenger
+        {
+            UIRootImplementation uiRoot = Container.Resolve<UIRootImplementation>();
+            uiRoot.Register(definition, messenger);
+        }
+
+        
+        protected void RegisterUIScreenDefinition<TMessenger>( UIScreenDefinition definition, UIView<TMessenger> view, TMessenger messenger)
+            where TMessenger : UIMessenger
+        {
+            
+            UIRootImplementation uiRoot = Container.Resolve<UIRootImplementation>();
+            
+            uiRoot.RegisterWithViewObject(definition, messenger, view);
+            
+            
+        }
+
+
 
         protected void BindComponentInHierarchy<T>(GameObject instance)
         {
@@ -304,19 +327,26 @@ namespace Core.Initialization
         {
             AddInjectable(logicInstance);
 
-            SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
-            systemsContainer.AddSystem(logicInstance);
-            ownedSystems.Add(logicInstance);
+            if (!ownedSystems.Contains(logicInstance))
+            {
+                SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
+                systemsContainer.AddSystem(logicInstance);
+                ownedSystems.Add(logicInstance);
+            }
+
         }
         
         private void AddSystemsFromGameobject(GameObject logicInstance)
         {
-            Component[] componentsInChildren = logicInstance.GetComponentsInChildren<Component>();
-            foreach (Component component in componentsInChildren)
+            if (!ownedGameObjectSystems.Contains(logicInstance))
             {
-                AddSystem(component);
+                Component[] componentsInChildren = logicInstance.GetComponentsInChildren<Component>();
+                foreach (Component component in componentsInChildren)
+                {
+                    AddSystem(component);
+                }
+                ownedGameObjectSystems.Add(logicInstance);
             }
-            ownedGameObjectSystems.Add(logicInstance);
         }
         private void RemoveSystem<T>(T logicInstance)
         {

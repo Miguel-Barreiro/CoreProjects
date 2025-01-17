@@ -2,6 +2,7 @@
 using Core.Model;
 using Core.Systems;
 using Core.View;
+using Core.View.UI;
 using UnityEngine;
 
 namespace Core.Initialization
@@ -25,6 +26,21 @@ namespace Core.Initialization
             BuildViewSystems();
             BuildGenericGameobjePool();
             BuildScenesController();
+            
+            BuildUISystems();
+        }
+
+        private void BuildUISystems()
+        {
+            GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
+            Canvas rootCanvas = newCanvasObj.AddComponent<Canvas>();
+            newCanvasObj.SetActive(true);
+            
+            UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas);
+            BindInstance(uiRootImplementation);
+            BindInstance<UIRoot>(uiRootImplementation);
+
+            DontDestroyOnLoad(newCanvasObj);
         }
 
         private EventQueue eventQueue = null;
@@ -53,6 +69,7 @@ namespace Core.Initialization
 
             PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
             BindInstance(phisycsEntitiesUpdateViewSystem);
+            
         }
 
         private void BuildSystemsManager()
