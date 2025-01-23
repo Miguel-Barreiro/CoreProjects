@@ -152,6 +152,7 @@ namespace Core.Model
                         yield return implementedInterface;
                     }
                 }
+                yield return typeof(BaseEntity);
             }
         }
         

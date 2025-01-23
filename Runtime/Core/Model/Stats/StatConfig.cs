@@ -6,15 +6,14 @@ namespace Core.Model
 	[CreateAssetMenu(fileName = "NewStat", menuName = "Core/Stats/Create Stat")]
 	public sealed class StatConfig : ScriptableObject
 	{
-		[SerializeField] private Fix defaultBaseValue = 0;
-		public Fix DefaultBaseValue => defaultBaseValue;
+		[SerializeField] private float defaultBaseValue = 0;
+		public float DefaultBaseValue => defaultBaseValue;
 
+		[SerializeField] private int defaultMaxValue = int.MaxValue;
+		public int DefaultMaxValue => defaultMaxValue;
 
-		[SerializeField] private Fix defaultMaxValue = Fix.MaxValue;
-		public Fix DefaultMaxValue => defaultMaxValue;
-
-		[SerializeField] private Fix defaultMinValue = 0;
-		public Fix DefaultMinValue => defaultMinValue;
+		[SerializeField] private int defaultMinValue = 0;
+		public int DefaultMinValue => defaultMinValue;
 		
 	}
 }

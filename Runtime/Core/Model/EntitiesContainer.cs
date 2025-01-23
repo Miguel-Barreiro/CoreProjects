@@ -25,7 +25,7 @@ namespace Core.Model
 
         private static EntitiesContainer? instance = null!;
         
-        internal static EntitiesContainer CreateInstance()
+        public static EntitiesContainer CreateInstance()
         {
             if (instance == null)
             {
@@ -34,6 +34,12 @@ namespace Core.Model
             
             return instance;
         }
+
+        public static void Reset()
+        {
+            instance = new EntitiesContainer();
+        }
+
         private EntitiesContainer(){ }
         
         public T? GetEntity<T>(EntId id) where T:BaseEntity
