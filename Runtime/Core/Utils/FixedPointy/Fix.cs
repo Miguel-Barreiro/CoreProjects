@@ -105,6 +105,13 @@ namespace FixedPointy
             return new Fix(value << FRACTIONAL_BITS);
         }
 
+        public static implicit operator Fix(float value)
+        {
+            return Ratio(Mathf.RoundToInt(value * 1000.0f),  1000);
+        }
+
+        
+
         public static bool operator ==(Fix lhs, Fix rhs)
         {
             return lhs._raw == rhs._raw;
