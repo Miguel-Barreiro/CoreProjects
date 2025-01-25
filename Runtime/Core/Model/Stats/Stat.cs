@@ -11,14 +11,17 @@ namespace Core.Model
         private readonly List<StatModId>[] Modifiers;
         public Fix BaseValue;
         public Fix DepletedValue;
+
+        public Fix MaxValue;
+        public Fix MinValue;
         
-        
-        
-        public Stat(StatId id, Fix baseValue)
+        public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue)
         {
             Id = id;
             Modifiers = new List<StatModId>[(int) StatModifierType.TOTAL];
             BaseValue = baseValue;
+            MaxValue = maxValue;
+            MinValue = minValue;
             DepletedValue = baseValue;
         }
         

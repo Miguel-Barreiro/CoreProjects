@@ -1,8 +1,7 @@
-using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using FixedPointy;
-using Core.Systems;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Core.Model
 {
@@ -24,16 +23,80 @@ namespace Core.Model
 		private int _statIdGenerator = 0;
 		private int _statModIdGenerator = 0;
 
-		private StatModId NextModId()
+		
+		public void ModifyDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
 		{
-			return new StatModId(_statModIdGenerator++);
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+				Debug.Log($"StatsModel.ModifyDepletedValue: entity({targetEntId}) not found"); 
+				return;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return;
+			}
+
+			Stat statData = StatsById[statId];
+			Fix maxValue = CalculateNonDepletedValue(statData);
+			
+			Fix newDepletedValue = statData.DepletedValue + delta;
+			
+			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, maxValue);
 		}
 
-		private StatId NextStatId()
+		public Fix GetDepletedStatValue(EntId targetEntId, StatConfig stat)
 		{
-			return new StatId(_statIdGenerator++);
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+				return stat.DefaultBaseValue;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return stat.DefaultBaseValue;
+			}
+
+			Stat statData = StatsById[statId];
+			return statData.DepletedValue;
+		}
+		
+		
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix baseValue)
+		{
+			Stat statData = GetOrCreateStat(targetEntId, stat);
+
+			Fix beforeChange = CalculateNonDepletedValue(statData);
+			
+			statData.BaseValue = baseValue;
+			
+			Fix afterChange = CalculateNonDepletedValue(statData);
+
+			Fix depletedDelta = afterChange - beforeChange;
+			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
+			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
 		}
 
+		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
+		{
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig,StatId> statsDict))
+			{
+				return stat.DefaultBaseValue;
+			}
+
+			if (!statsDict.TryGetValue(stat, out StatId statId))
+			{
+				return stat.DefaultBaseValue;
+			}
+
+			Stat statData = StatsById[statId];
+
+			return CalculateNonDepletedValue(statData);
+		}
+
+
+		
+		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, StatModifierType modifierType, Fix modifierValue)
 		{
 			Stat statData = GetOrCreateStat(targetEntId, stat);
@@ -53,8 +116,16 @@ namespace Core.Model
 			ownerModifierList.Add(modifier.Id);
 		    ModifiersById[modifier.Id] = modifier;
 			
+			Fix beforeChange = CalculateNonDepletedValue(statData);
 			
 			statData.AddModifier(modifier);
+			
+			Fix afterChange = CalculateNonDepletedValue(statData);
+
+			Fix depletedDelta = afterChange - beforeChange;
+			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
+			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
+			
 			return newStatModID;
 		}
 		
@@ -68,21 +139,29 @@ namespace Core.Model
 		        return;
 		    }
 		
-		    // Remove from ModifiersById
-		    ModifiersById.Remove(modId);
-		    
-		    // Remove from ModifiersByOwner
+			
+		    // Remove from Stat's modifiers
+			if (StatsById.TryGetValue(modifier.TargetStatId, out Stat targetStat))
+		    {
+				Fix beforeChange = CalculateNonDepletedValue(targetStat);
+
+				targetStat.RemoveModifier(modifier);
+				
+				Fix afterChange = CalculateNonDepletedValue(targetStat);
+
+				Fix depletedDelta = afterChange - beforeChange;
+				Fix newDepletedValue = targetStat.DepletedValue + depletedDelta;
+				targetStat.DepletedValue = FixMath.Clamp(newDepletedValue, targetStat.MinValue, afterChange);
+		    }
+
+			// Remove from ModifiersByOwner
 			if (ModifiersByOwner.TryGetValue(modifier.Owner, out List<StatModId> ownerModifiers))
 		    {
 		        ownerModifiers.Remove(modId);
 		    }
-		
-		    // Remove from Stat's modifiers
-			Stat targetStat;
-			if (StatsById.TryGetValue(modifier.TargetStatId, out targetStat))
-		    {
-				targetStat.RemoveModifier(modifier);
-		    }
+
+			// Remove from ModifiersById
+		    ModifiersById.Remove(modId);
 		}
 		
 		
@@ -145,36 +224,23 @@ namespace Core.Model
 	    }
 		
 		
-		public void SetBaseStat(EntId targetEntId, StatConfig stat, Fix baseValue)
-		{
-			Stat statData = GetOrCreateStat(targetEntId, stat);
-			statData.BaseValue = baseValue;
-		}
-
-		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
-		{
-			
-			Dictionary<StatConfig,StatId> statsDict;
-			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out statsDict))
-			{
-				return stat.DefaultBaseValue;
-			}
-
-			if (!statsDict.TryGetValue(stat, out StatId statId))
-			{
-				return stat.DefaultBaseValue;
-			}
-
-			Stat statData = StatsById[statId];
-
-			return CalculateNonDepletedValue(statData);
-		}
 
 		#region Internal
 
+		private StatModId NextModId()
+		{
+			return new StatModId(_statModIdGenerator++);
+		}
+
+		private StatId NextStatId()
+		{
+			return new StatId(_statIdGenerator++);
+		}
+
+		
+		
 		private Fix CalculateNonDepletedValue(Stat statData)
 		{
-			
 			Fix calculatedResult = statData.BaseValue;
 			
 			// Apply additive modifiers first
@@ -204,8 +270,8 @@ namespace Core.Model
 			{
 				calculatedResult += ModifiersById[modId].Value;
 			}
-			
-			return calculatedResult;
+
+			return FixMath.Clamp(calculatedResult, statData.MinValue, statData.MaxValue);
 		}
 		
 		private Stat GetOrCreateStat(EntId owner, StatConfig stat)
@@ -221,7 +287,7 @@ namespace Core.Model
 			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
 			{
 				statId = NextStatId();
-				statData = new( statId, stat.DefaultBaseValue);
+				statData = new( statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue);
 				StatsById[statData.Id] = statData;
 				ownerStatsDict[stat] = statData.Id;
 			} else
@@ -234,88 +300,10 @@ namespace Core.Model
 		
 
 		#endregion
-		
+
 
 	}
 
 
-	// public sealed class StatsModel : BaseEntity
-    // {
-    //     private readonly Dictionary<EntId, List<StatModifier>> ModifiersByOwner = new();
-    //     private readonly Dictionary<EntId, Dictionary<StatConfig, Stat>> StatsByOwnerAndType = new();
-    //
-    //     
-    //     private readonly Dictionary<int, Stat> StatsById = new();
-    //     
-    //     private readonly Dictionary<StatModId, StatModifier> ModifiersById = new Dictionary<StatModId, StatModifier>();
-    //
-		  //
-    //     private int StatIdGenerator = 0;
-    //     
-    //
-    //     public Fix GetStatValue(EntId targetEntId, StatConfig stat)
-    //     {
-    //         if (!StatsByOwnerAndType.TryGetValue(targetEntId, out var statsDict) || 
-    //             !statsDict.TryGetValue(stat, out var statData))
-    //         {
-    //             return Fix.Zero;
-    //         }
-    //
-    //         return statData.CalculateNonDepletedValue() - statData.DepletedValue;
-    //     }
-    //
-    //     public Fix GetMaxStatValue(EntId targetEntId, StatConfig stat)
-    //     {
-    //         if (!StatsByOwnerAndType.TryGetValue(targetEntId, out var statsDict) || 
-    //             !statsDict.TryGetValue(stat, out var statData))
-    //         {
-    //             return Fix.Zero;
-    //         }
-    //
-    //         return statData.CalculateNonDepletedValue();
-    //     }
-    //
-    //     public Fix GetMinStatValue(EntId targetEntId, StatConfig stat)
-    //     {
-    //         return Fix.Zero;
-    //     }
-    //
- 
-    //
-
-    //
-    //     
-    //
-    //     public void SetBaseStat(EntId targetEntId, StatConfig stat, Fix baseValue)
-    //     {
-    //         if (!StatsByOwnerAndType.TryGetValue(targetEntId, out var statsDict))
-    //         {
-    //             statsDict = new Dictionary<StatConfig, Stat>();
-    //             StatsByOwnerAndType[targetEntId] = statsDict;
-    //         }
-    //
-    //         if (!statsDict.TryGetValue(stat, out var statData))
-    //         {
-    //             statData = new Stat(StatIdGenerator++, baseValue);
-    //             statsDict[stat] = statData;
-    //         }
-    //         else
-    //         {
-    //             statData.BaseValue = baseValue;
-    //         }
-    //     }
-    //
-    //     public void ModifyDepletedValue(EntId targetEntId, StatConfig stat, Fix deltaValue)
-    //     {
-    //         if (!StatsByOwnerAndType.TryGetValue(targetEntId, out var statsDict) || 
-    //             !statsDict.TryGetValue(stat, out var statData))
-    //         {
-    //             return;
-    //         }
-    //
-    //         Fix maxValue = statData.CalculateNonDepletedValue();
-    //         statData.DepletedValue = Fix.Clamp(statData.DepletedValue + deltaValue, Fix.Zero, maxValue);
-    //     }
-    // }
     
 }

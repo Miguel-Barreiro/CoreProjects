@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Core.Systems;
 using FixedPointy;
 
@@ -9,8 +7,12 @@ namespace Core.Model
 	public interface StatsSystem
 	{
 
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue);
+		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta);
+		
+		
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
-		public Fix GetStatCurrentValue(EntId targetEntId, StatConfig stat);
+		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
 		
 		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
@@ -47,14 +49,24 @@ namespace Core.Model
 			// Time-based stat updates if needed
 		}
 
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		{
+			_statsModel.SetBaseValue(targetEntId, stat, newValue);
+		}
+
+		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
+		{
+			_statsModel.ModifyDepletedValue(targetEntId, stat, delta);
+		}
+
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
 		{
 			return _statsModel.GetStatValue(targetEntId, stat);
 		}
 
-		public Fix GetStatCurrentValue(EntId targetEntId, StatConfig stat)
+		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat)
 		{
-			return _statsModel.GetStatValue(targetEntId, stat);
+			return _statsModel.GetDepletedStatValue(targetEntId, stat);
 		}
 
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix modifierValue, StatModifierType type)

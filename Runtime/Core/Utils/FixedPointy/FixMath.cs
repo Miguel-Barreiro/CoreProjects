@@ -333,5 +333,16 @@ namespace FixedPointy {
 
 			return new Fix((int)y);
 		}
+
+		public static Fix Clamp(Fix value, Fix minValue, Fix maxValue)
+		{
+			if (value > maxValue)
+				return maxValue;
+			
+			if (value < minValue)
+				return minValue;
+
+			return value;
+		}
 	}
 }

@@ -7,13 +7,13 @@ namespace Core.Model
 	public sealed class StatConfig : ScriptableObject
 	{
 		[SerializeField] private float defaultBaseValue = 0;
-		public float DefaultBaseValue => defaultBaseValue;
+		public Fix DefaultBaseValue => defaultBaseValue;
 
 		[SerializeField] private int defaultMaxValue = int.MaxValue;
-		public int DefaultMaxValue => defaultMaxValue;
+		public Fix DefaultMaxValue => defaultMaxValue;
 
 		[SerializeField] private int defaultMinValue = 0;
-		public int DefaultMinValue => defaultMinValue;
+		public Fix DefaultMinValue => defaultMinValue;
 		
 	}
 }
