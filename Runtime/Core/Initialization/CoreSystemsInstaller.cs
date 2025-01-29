@@ -1,4 +1,5 @@
-﻿using Core.Events;
+using System.ComponentModel;
+using Core.Events;
 using Core.Model;
 using Core.Systems;
 using Core.View;
@@ -7,30 +8,36 @@ using UnityEngine;
 
 namespace Core.Initialization
 {
-    public abstract class ProjectInstaller : BaseInstaller
+	internal class CoreSystemsInstaller : SystemsInstallerBase
     {
         public override bool InstallComplete => installComplete;
         private bool installComplete = false;
         
-        protected override void InstantiateInternalSystems() 
+
+        protected readonly Transform RootCoreParent;
+        
+        public CoreSystemsInstaller(Transform rootCoreParent) { RootCoreParent = rootCoreParent; }
+        
+
+        protected override void InstallSystems()
         {
-            TypeCache typeCache = BuildTypeCache();
+			TypeCache typeCache = BuildTypeCache();
 
-            BuildEventManager();
-            BuildGameLoopSystem();
+			BuildEventManager();
+			BuildGameLoopSystem();
 
-            BuildEntityManager();
-            BuildComponentSystemsLogic();
-            BuildSystemsManager();
+			BuildEntityManager();
+			BuildComponentSystemsLogic();
+			BuildSystemsManager();
 
-            BuildViewSystems();
-            BuildGenericGameobjePool();
-            BuildScenesController();
+			BuildViewSystems();
+			BuildGenericGameobjePool();
+			BuildScenesController();
             
-            BuildUISystems();
+			BuildUISystems();
         }
 
-        private void BuildUISystems()
+        protected void BuildUISystems()
         {
             GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
             Canvas rootCanvas = newCanvasObj.AddComponent<Canvas>();
@@ -40,17 +47,18 @@ namespace Core.Initialization
             BindInstance(uiRootImplementation);
             BindInstance<UIRoot>(uiRootImplementation);
 
-            DontDestroyOnLoad(newCanvasObj);
+            GameObject.DontDestroyOnLoad(newCanvasObj);
         }
 
         private EventQueue eventQueue = null;
+
         protected override void OnComplete()
         {
             installComplete = true;
             eventQueue.Execute<OnProjectInstallCompleteEvent>();
         }
 
-        private void BuildEventManager()
+        protected void BuildEventManager()
         {
             if (eventQueue == null)
             {
@@ -59,7 +67,7 @@ namespace Core.Initialization
             }
         }
 
-        private void BuildViewSystems()
+        protected void BuildViewSystems()
         {
             ViewEntitiesContainer viewEntitiesContainer = new ViewEntitiesContainer();
             BindInstance(viewEntitiesContainer);
@@ -72,30 +80,30 @@ namespace Core.Initialization
             
         }
 
-        private void BuildSystemsManager()
+        protected void BuildSystemsManager()
         {
             GameObject systemsManager = new GameObject("SystemsManager");
             SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
-            DontDestroyOnLoad(systemsManager);
+            GameObject.DontDestroyOnLoad(systemsManager);
 
             BindInstance(systemsManagerComponent);
         }
 
-        private TypeCache BuildTypeCache()
+        protected TypeCache BuildTypeCache()
         {
             TypeCache typeCache = TypeCache.Get();
             BindInstance(typeCache);
             return typeCache;
         }
 
-        private void BuildComponentSystemsLogic()
+        protected void BuildComponentSystemsLogic()
         {
             EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
             BindInstance(entitySystemsContainer);
         }
-        
 
-        private void BuildScenesController()
+
+        protected void BuildScenesController()
         {
             if (!Container.HasBinding<ScenesController>())
             {
@@ -103,27 +111,28 @@ namespace Core.Initialization
                 BindInstance(scenesController);
             }
         }
-        
-        private void BuildGameLoopSystem()
+
+        protected void BuildGameLoopSystem()
         {
             GameObject gameLoop = new GameObject("GameLoopSystem");
             SystemsController systemsController = gameLoop.AddComponent<SystemsController>();
-            gameLoop.transform.SetParent(transform);
+            gameLoop.transform.SetParent(RootCoreParent);
             BindInstance(systemsController);
         }
-        
-        private void BuildGenericGameobjePool()
+
+        protected void BuildGenericGameobjePool()
         {
             GameObject gameLoop = new GameObject("GameObjectPool");
             GenericGameObjectPool genericGameObjectPool = gameLoop.AddComponent<GenericGameObjectPool>();
-            gameLoop.transform.SetParent(transform);
+            gameLoop.transform.SetParent(RootCoreParent);
             BindInstance(genericGameObjectPool);
         }
 
-        private void BuildEntityManager()
+        protected void BuildEntityManager()
         {
             EntitiesContainer entityManagerComponent = EntitiesContainer.CreateInstance();
             BindInstance(entityManagerComponent);
         }        
-    }
+		
+	}
 }

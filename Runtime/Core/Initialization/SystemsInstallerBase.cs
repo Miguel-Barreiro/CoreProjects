@@ -1,76 +1,66 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
 using Core.View.UI;
-using Core.Zenject.Source.Install;
 using Core.Zenject.Source.Install.Contexts;
+using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Core.Initialization
 {
-    public abstract class BaseInstaller : MonoInstaller, IDisposable
-    {
+    
+    public abstract class SystemsInstallerBase
+	{
         public abstract bool InstallComplete { get; }
         
         public bool LoadedComplete => loadedSystems;
         public bool StartedComplete => startedSystems;
         
-        protected abstract void Instantiate();
-        protected virtual void InstantiateInternalSystems() { } 
+        protected abstract void InstallSystems();
 
-        
-        public override void InstallBindings()
+        protected DiContainer Container;
+
+
+        internal void InstallSystems(DiContainer container)
         {
+            Container = container;
+            
             UpdateSystemsContainer();
             
-            gameObject.SetActive(true);
             Clear();
-
-            InstantiateInternalSystems();
+            
             UpdateObjectBuilder();
-
-            Instantiate();
+        
+            InstallSystems();
             InjectInstances();
             
             InitializeInstances();
-
+        
             OnComplete();
         }
-
-
-        private RunnableContext runnableContext;
-        private void Awake()
-        {
-            runnableContext = GetComponent<RunnableContext>();
-        }
-
+        
         public void Dispose()
         {
             Clear();
         }
-
-        private void OnDestroy()
-        {
-            Clear();
-        }
-
+        
         protected virtual void OnComplete() { }
-
-        #region System Installation
+        
+        
+#region System Installation
 
         protected GameObject InstantiateAndBindPrefab<T>(T prefab, Transform parent = null) where T : MonoBehaviour
         {
-            GameObject logicInstance = Instantiate(prefab.gameObject, parent);
+            GameObject logicInstance = GameObject.Instantiate(prefab.gameObject, parent);
             BindComponentInHierarchy<T>(logicInstance);
             return logicInstance;
         }		
 		
         protected GameObject InstantiatePrefab(GameObject prefab, Transform parent = null) 
         {
-            GameObject logicInstance = Instantiate(prefab, parent);
+            GameObject logicInstance = GameObject.Instantiate(prefab, parent);
             return logicInstance;
         }
 
@@ -81,7 +71,7 @@ namespace Core.Initialization
             AddSystem(instance);
         }
 
-        public T Install<T>()
+        public T InstallSystems<T>()
         {
             T newSystem = Container.Instantiate<T>();
             RegisterDisposableIfNeeded(newSystem);
@@ -104,10 +94,7 @@ namespace Core.Initialization
         {
             
             UIRootImplementation uiRoot = Container.Resolve<UIRootImplementation>();
-            
             uiRoot.RegisterWithViewObject(definition, messenger, view);
-            
-            
         }
 
 
@@ -174,7 +161,7 @@ namespace Core.Initialization
             }
             
             List<UniTask> loadTasks = new (10);
-            foreach (Object system in ownedSystems)
+            foreach (System.Object system in ownedSystems)
             {
                 if(system is ILoadSystem loadSystem)
                 {
@@ -194,7 +181,7 @@ namespace Core.Initialization
                 return;
             }
             
-            foreach (Object system in ownedSystems)
+            foreach (System.Object system in ownedSystems)
             {
                 if(system is IStartSystem startSystem)
                 {
@@ -215,14 +202,12 @@ namespace Core.Initialization
         protected readonly List<GameObject> injectableGameObjects = new ();
         protected readonly List<System.Object> injectableObjects = new ();
 
-        protected readonly List<Object> ownedSystems = new ();
+        protected readonly List<System.Object> ownedSystems = new ();
         protected readonly List<GameObject> ownedGameObjectSystems = new ();
 
         protected bool loadedSystems = false;
         protected bool startedSystems = false;
-        
-        
-        protected RunnableContext RunnableContext => runnableContext;
+
         
         protected void Clear()
         {
@@ -241,9 +226,9 @@ namespace Core.Initialization
             }
             disposableBindedTypes.Clear();
             
-            using CachedList<Object> ownedSystemsTemp = ListCache<Object>.Get();
+            using CachedList<System.Object> ownedSystemsTemp = ListCache<System.Object>.Get();
             ownedSystemsTemp.AddRange(this.ownedSystems);
-            foreach (Object system in ownedSystemsTemp)
+            foreach (System.Object system in ownedSystemsTemp)
             {
                 RemoveSystem(system);
             }
@@ -304,7 +289,7 @@ namespace Core.Initialization
 
         private void InitializeInstances()
         {
-            foreach (Object system in ownedSystems)
+            foreach (System.Object system in ownedSystems)
             {
                 if(system is IInitSystem initSystem)
                 {
@@ -316,7 +301,7 @@ namespace Core.Initialization
         
         private void InjectInstances()
         {
-            foreach (Object injectableObject in injectableObjects)
+            foreach (System.Object injectableObject in injectableObjects)
             {
                 Container.Inject(injectableObject);
             }
@@ -389,6 +374,5 @@ namespace Core.Initialization
         
 #endregion
 
-
-    }
+	}
 }
