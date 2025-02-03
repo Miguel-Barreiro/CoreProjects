@@ -1,11 +1,10 @@
-﻿using System;
-using Core.Zenject.Source.Install;
+﻿using Core.Zenject.Source.Install;
 using Core.Zenject.Source.Install.Contexts;
 
 namespace Core.Initialization
 {
     
-    public abstract class RuntimeBootstrapBase : MonoInstaller, IDisposable
+    public abstract class RuntimeBootstrapBase : MonoInstaller
     {
         public abstract SystemsInstallerBase GetLogicInstaller();
         
@@ -17,11 +16,10 @@ namespace Core.Initialization
         
         protected Bootstrapper GetBootstrapper() { return Container.Resolve<Bootstrapper>(); }
 
-        
-        public void Dispose()
+        private void OnDestroy()
         {
-            // GetBootstrapper().Remove
-            // Clear();
+            GetBootstrapper().RemoveInstaller(GetLogicInstaller());
         }
+
     }
 }

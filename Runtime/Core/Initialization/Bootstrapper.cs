@@ -27,6 +27,12 @@ namespace Core.Initialization
 			}
 		}
 
+		public void RemoveInstaller(SystemsInstallerBase installer)
+		{
+			completedInstallers.Remove(installer);
+		}
+
+
 		public async UniTask<bool> Run()
 		{
 			SetupSystemsContainer();
