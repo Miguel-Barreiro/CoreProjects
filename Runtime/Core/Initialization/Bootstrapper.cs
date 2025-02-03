@@ -7,7 +7,7 @@ namespace Core.Initialization
 {
 	public sealed class Bootstrapper
 	{
-		// private readonly DiContainer Container;
+		private readonly DiContainer Container;
 		
 		private readonly Queue<SystemsInstallerBase> Installers = new Queue<SystemsInstallerBase>();
 		private readonly HashSet<SystemsInstallerBase> completedInstallers = new HashSet<SystemsInstallerBase>();
@@ -16,7 +16,7 @@ namespace Core.Initialization
 #region PUBLIC
 
 
-		// public Bootstrapper(DiContainer container) { Container = container; }
+		public Bootstrapper(DiContainer container) { Container = container; }
 		// private readonly Dictionary<SystemsInstallerBase, bool> InstallersBy = new List<SystemsInstallerBase>();
 		
 		public void AddInstaller(SystemsInstallerBase installer)
@@ -27,8 +27,11 @@ namespace Core.Initialization
 			}
 		}
 
-		internal async UniTask<bool> Run()
+		public async UniTask<bool> Run()
 		{
+			SetupSystemsContainer();
+			SetupObjectBuilder();
+			
 			
 			List<SystemsInstallerBase> systemsInstallerBases = new List<SystemsInstallerBase>(Installers);
 			Installers.Clear();
@@ -77,6 +80,40 @@ namespace Core.Initialization
 #endregion
 
 
+#region Internal
+
+
+		private void SetupObjectBuilder()
+		{
+			ObjectBuilder objectBuilder;
+				            
+			if (!Container.HasBinding<ObjectBuilder>())
+			{
+				objectBuilder = new ObjectBuilder();
+						
+				Container.BindInstance(objectBuilder);
+			}
+			else
+			{
+				objectBuilder = Container.Resolve<ObjectBuilder>();
+			}
+					
+			Container.Inject(objectBuilder);
+		}
+
+		        
+	
+		        
+		private void SetupSystemsContainer()
+		{
+			if (!Container.HasBinding<SystemsContainer>())
+			{
+				SystemsContainer systemsContainer = new SystemsContainer();
+				Container.BindInstance(systemsContainer);
+			}
+		}
+
+#endregion
 
 	}
 }

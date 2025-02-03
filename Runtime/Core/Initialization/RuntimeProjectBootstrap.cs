@@ -9,12 +9,10 @@ namespace Core.Initialization
         public override void InstallBindings()
         {
             SetupBootstrapper();
-            SetupSystemsContainer();
-            SetupObjectBuilder();
             
             Bootstrapper bootstrapper = GetBootstrapper();
 
-            CoreSystemsInstaller coreSystemsInstaller = new CoreSystemsInstaller(transform, Container);
+            CoreSystemsInstallerForRuntime coreSystemsInstaller = new CoreSystemsInstallerForRuntime(transform, Container);
             bootstrapper.AddInstaller(coreSystemsInstaller);
             bootstrapper.AddInstaller(GetLogicInstaller());
 
@@ -24,45 +22,14 @@ namespace Core.Initialization
             // is destroyed
         }
 
-        
-        private void SetupObjectBuilder()
-        {
-            ObjectBuilder objectBuilder;
-		            
-            if (!Container.HasBinding<ObjectBuilder>())
-            {
-                objectBuilder = new ObjectBuilder();
-				
-                Container.BindInstance(objectBuilder);
-            }
-            else
-            {
-                objectBuilder = Container.Resolve<ObjectBuilder>();
-            }
-			
-            Container.Inject(objectBuilder);
-        }
-
-        
         private void SetupBootstrapper()
         {
             if (!Container.HasBinding<Bootstrapper>())
             {
-                Bootstrapper bootstrapper = new Bootstrapper();
+                Bootstrapper bootstrapper = new Bootstrapper(Container);
                 Container.BindInstance(bootstrapper);
             }
         }
-        
-        private void SetupSystemsContainer()
-        {
-            if (!Container.HasBinding<SystemsContainer>())
-            {
-                SystemsContainer systemsContainer = new SystemsContainer();
-                Container.BindInstance(systemsContainer);
-            }
-        }
-
-        
 
         private async UniTask RunFullGameSetup()
         {

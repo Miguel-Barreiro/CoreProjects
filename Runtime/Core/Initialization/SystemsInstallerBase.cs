@@ -251,8 +251,8 @@ namespace Core.Initialization
             }
         }
 
-        
-        protected void AddInjectable(System.Object logicInstance)
+
+        private void AddInjectable(System.Object logicInstance)
         {
             if (!injectableObjects.Contains(logicInstance))
             {
@@ -264,9 +264,7 @@ namespace Core.Initialization
         #endregion
 
         #region Flow
-
         
-
         
         private void AddSystem<T>(T logicInstance)
         {

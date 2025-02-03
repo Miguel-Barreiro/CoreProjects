@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Events;
 using Core.Model;
 using Core.Utils.CachedDataStructures;
@@ -10,13 +11,20 @@ using Zenject;
 
 namespace Core.Systems
 {
-    public sealed class SystemsController : MonoBehaviour, IInitSystem, IStartSystem
+
+    public interface ISystemsController
+    {
+        public void ExecuteFrame(float deltaTime);
+    }
+
+    public sealed class SystemsController : IInitSystem, IStartSystem, ISystemsController
     {
         [Inject] private readonly SystemsContainer systemsContainer = null!;
         [Inject] private readonly EntitiesContainer EntitiesContainer = null!;
         [Inject] private readonly EventQueue eventQueue = null!;
 
         private bool running = false;
+        private SystemsControllerMode mode = SystemsControllerMode.UNIT_TESTS;
         
         public void Initialize()
         {
@@ -32,16 +40,28 @@ namespace Core.Systems
         {
             await UniTask.DelayFrame(1);
             running = true;
+            if (mode == SystemsControllerMode.AUTOMATIC)
+            {
+                GameLoopExecuter().Forget();
+            }
+
+            async UniTask GameLoopExecuter()
+            {
+                while (running)
+                {
+                    await UniTask.DelayFrame(1, PlayerLoopTiming.EarlyUpdate);
+                    float deltaTime = Time.deltaTime;
+                    ExecuteFrame(deltaTime);
+                }
+            }
         }
 
-        void Update()
+        public void ExecuteFrame(float deltaTime)
         {
             if (!running)
             {
                 return;
             }
-
-            float deltaTime = Time.deltaTime;
 
             IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
             foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
@@ -112,6 +132,7 @@ namespace Core.Systems
 
 
         private static readonly object[] ARGUMENT = { null };
+
         private void ProcessDestroyedEntities()
         {
             //TODO: Optimize this by grouping by component type
@@ -173,6 +194,15 @@ namespace Core.Systems
             } while (newEntitiesList.Count > 0);
         }
 
+        public enum SystemsControllerMode
+        {
+            AUTOMATIC, 
+            UNIT_TESTS
+        }
 
+        public void SetMode(SystemsControllerMode mode)
+        {
+            this.mode = mode;
+        }
     }
 }
