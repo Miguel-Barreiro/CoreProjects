@@ -76,6 +76,7 @@ namespace Core.Systems
             Type objectType = system.GetType();
             AddToInterfaces(system, objectType);
             systems.Add(system);
+            
             if (objectType.IsTypeOf<BaseEntitySystem>())
             {
                 entitySystemsContainer.AddComponentSystem(system as BaseEntitySystem);

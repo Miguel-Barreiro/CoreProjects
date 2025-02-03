@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
 using Core.View.UI;
-using Core.Zenject.Source.Install.Contexts;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -13,41 +12,76 @@ namespace Core.Initialization
     
     public abstract class SystemsInstallerBase
 	{
-        public abstract bool InstallComplete { get; }
-        
-        public bool LoadedComplete => loadedSystems;
-        public bool StartedComplete => startedSystems;
-        
         protected abstract void InstallSystems();
 
-        protected DiContainer Container;
+        protected readonly DiContainer Container;
 
+        internal virtual void OnComplete() { }
 
-        internal void InstallSystems(DiContainer container)
+        internal void CreateSystems()
         {
-            Container = container;
-            
-            UpdateSystemsContainer();
-            
-            Clear();
-            
-            UpdateObjectBuilder();
-        
             InstallSystems();
-            InjectInstances();
-            
-            InitializeInstances();
+        }
+
+        internal void InitializeInstances()
+        {
+            foreach (System.Object system in ownedSystems)
+            {
+                if(system is IInitSystem initSystem)
+                {
+                    initSystem.Initialize();
+                }
+            }
+        }
+
+        internal void InjectInstances()
+        {
+            foreach (System.Object injectableObject in injectableObjects)
+            {
+                Container.Inject(injectableObject);
+            }
+        }
+
         
-            OnComplete();
+        internal async UniTask<bool> LoadSystems()
+        {
+            List<UniTask<bool>> loadTasks = new (10);
+            foreach (System.Object system in ownedSystems)
+            {
+                if(system is ILoadSystem loadSystem)
+                {
+                    UniTask<bool> uniTask = loadSystem.Load(out Action retryAction);
+                    loadTasks.Add(uniTask);
+                }
+            }
+            
+            await UniTask.WhenAll(loadTasks);
+
+            bool result = true;
+            foreach (UniTask<bool> loadTask in loadTasks)
+            {
+                result = result && loadTask.AsValueTask().Result;
+            }
+            return result;
+        }
+
+        internal void StartSystems()
+        {
+            foreach (System.Object system in ownedSystems)
+            {
+                if(system is IStartSystem startSystem)
+                {
+                    startSystem.StartSystem();
+                }
+            }
         }
         
         public void Dispose()
         {
+            //TODO: maybe we need to kickstart a shutdown of owned systems  
             Clear();
         }
-        
-        protected virtual void OnComplete() { }
-        
+
         
 #region System Installation
 
@@ -153,44 +187,6 @@ namespace Core.Initialization
         }
         
         
-        public async UniTask LoadSystems()
-        {
-            if (loadedSystems)
-            {
-                return;
-            }
-            
-            List<UniTask> loadTasks = new (10);
-            foreach (System.Object system in ownedSystems)
-            {
-                if(system is ILoadSystem loadSystem)
-                {
-                    UniTask<bool> uniTask = loadSystem.Load(out Action retryAction);
-                    loadTasks.Add(uniTask);
-                }
-            }
-            
-            await UniTask.WhenAll(loadTasks);
-            loadedSystems = true;
-        }
-
-        public void StartSystems()
-        {
-            if (startedSystems)
-            {
-                return;
-            }
-            
-            foreach (System.Object system in ownedSystems)
-            {
-                if(system is IStartSystem startSystem)
-                {
-                    startSystem.StartSystem();
-                }
-            }
-            
-            startedSystems = true;
-        }
 
 
 #endregion
@@ -204,28 +200,10 @@ namespace Core.Initialization
 
         protected readonly List<System.Object> ownedSystems = new ();
         protected readonly List<GameObject> ownedGameObjectSystems = new ();
+        protected SystemsInstallerBase(DiContainer container) { Container = container; }
 
-        protected bool loadedSystems = false;
-        protected bool startedSystems = false;
-
-        
         protected void Clear()
         {
-            injectableGameObjects.Clear();
-            injectableObjects.Clear();
-
-            SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
-            
-            foreach((Type _, List<IDisposable> disposables) in disposableBindedTypes)
-            {
-                foreach (IDisposable disposable in disposables)
-                {
-                    systemsContainer.RemoveSystem(disposable);
-                    disposable.Dispose();
-                }
-            }
-            disposableBindedTypes.Clear();
-            
             using CachedList<System.Object> ownedSystemsTemp = ListCache<System.Object>.Get();
             ownedSystemsTemp.AddRange(this.ownedSystems);
             foreach (System.Object system in ownedSystemsTemp)
@@ -287,25 +265,7 @@ namespace Core.Initialization
 
         #region Flow
 
-        private void InitializeInstances()
-        {
-            foreach (System.Object system in ownedSystems)
-            {
-                if(system is IInitSystem initSystem)
-                {
-                    initSystem.Initialize();
-                }
-            }
-        }
-
         
-        private void InjectInstances()
-        {
-            foreach (System.Object injectableObject in injectableObjects)
-            {
-                Container.Inject(injectableObject);
-            }
-        }
 
         
         private void AddSystem<T>(T logicInstance)
@@ -374,5 +334,5 @@ namespace Core.Initialization
         
 #endregion
 
-	}
+    }
 }

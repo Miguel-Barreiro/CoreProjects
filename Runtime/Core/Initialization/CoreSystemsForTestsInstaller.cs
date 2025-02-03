@@ -1,11 +1,12 @@
 using Core.Model;
+using Core.Zenject.Source.Main;
 using UnityEngine;
 
 namespace Core.Initialization
 {
 	internal class CoreSystemsForTestsInstaller : CoreSystemsInstaller
 	{
-		public CoreSystemsForTestsInstaller(Transform rootCoreParent) : base(rootCoreParent) { }
+		public CoreSystemsForTestsInstaller(Transform rootCoreParent, DiContainer container) : base(rootCoreParent, container) { }
 		
 		protected override void InstallSystems()
 		{

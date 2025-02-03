@@ -6,17 +6,17 @@ namespace Core.Initialization
     [RequireComponent(typeof(SceneContext))]
     public abstract class SceneBootstrap : RuntimeBootstrapBase
     {
-        public abstract SystemsInstallerBase GetLogicInstaller();
         
-        public override bool InstallComplete => RunnableContext != null && RunnableContext.Initialized;
-        
-        public void Install()
+        public override void InstallBindings()
         {
-            if (!InstallComplete)
-            {
-                RunnableContext.Run();
-            }
+            Bootstrapper bootstrapper = GetBootstrapper();
+            
+            bootstrapper.AddInstaller(GetLogicInstaller());
+            
+            //TODO: we can store now the logic installer to understand what systems to destroy when the corresponding scene 
+            // is destroyed
         }
+        
     }
 }
 

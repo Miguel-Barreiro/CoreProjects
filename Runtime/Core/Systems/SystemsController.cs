@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using Core.Events;
@@ -15,27 +16,27 @@ namespace Core.Systems
         [Inject] private readonly EntitiesContainer EntitiesContainer = null!;
         [Inject] private readonly EventQueue eventQueue = null!;
 
-        private bool initialized = false;
+        private bool running = false;
         
         public void Initialize()
         {
-            initialized = false;
+            running = false;
         }
 
         public void StartSystem()
         {
-            SetInitialized();
+            StartLoop();
         }
 
-        private async void SetInitialized()
+        private async void StartLoop()
         {
             await UniTask.DelayFrame(1);
-            initialized = true;
+            running = true;
         }
 
         void Update()
         {
-            if (!initialized)
+            if (!running)
             {
                 return;
             }

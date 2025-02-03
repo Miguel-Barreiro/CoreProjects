@@ -7,16 +7,20 @@ namespace Core.Initialization
     
     public abstract class RuntimeBootstrapBase : MonoInstaller, IDisposable
     {
-        public abstract bool InstallComplete { get; }
-
+        public abstract SystemsInstallerBase GetLogicInstaller();
+        
         protected RunnableContext RunnableContext;
         private void Awake()
         {
             RunnableContext = GetComponent<RunnableContext>();
         }
+        
+        protected Bootstrapper GetBootstrapper() { return Container.Resolve<Bootstrapper>(); }
 
+        
         public void Dispose()
         {
+            // GetBootstrapper().Remove
             // Clear();
         }
     }

@@ -10,6 +10,7 @@ namespace Core.Initialization
     public sealed class ScenesController : IInitSystem
     {
         [Inject] private readonly SystemsController systemsController = null!;
+        [Inject] private readonly Bootstrapper Bootstrapper = null!;
 
         #region Public
 
@@ -40,20 +41,14 @@ namespace Core.Initialization
             {
                 await LoadSceneGameobjectsAsync(sceneName, mode);
 
-                List<SystemsInstallerBase> sceneLogicInstallers = new List<SystemsInstallerBase>();
-                
                 SceneBootstrap[] sceneInstallers = GameObject.FindObjectsByType<SceneBootstrap>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                
                 foreach (SceneBootstrap sceneInstaller in sceneInstallers)
                 {
-                    if (!sceneInstaller.InstallComplete)
-                    {
-                        sceneInstaller.Install();
-                    }
-                    
-                    sceneLogicInstallers.Add(sceneInstaller.GetLogicInstaller());
+                    Bootstrapper.AddInstaller(sceneInstaller.GetLogicInstaller());
                 }
 
-                FinishSetupSystems(sceneLogicInstallers).Forget();
+                bool setupResult = await Bootstrapper.Run();
             }
             
             
@@ -72,52 +67,7 @@ namespace Core.Initialization
         public void Initialize()
         {
             Debug.Log($"SceneController initialized.");
-
-            SceneBootstrap[] sceneInstallers = GameObject.FindObjectsByType<SceneBootstrap>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-
-            List<SystemsInstallerBase> newBaseInstallers = new List<SystemsInstallerBase>(sceneInstallers.Length);
-            foreach (SceneBootstrap runtimeInstaller in sceneInstallers)
-            {
-                newBaseInstallers.Add(runtimeInstaller.GetLogicInstaller());
-            }
-            FinishSetupSystems(newBaseInstallers).Forget();
         }
-
-        private async UniTask FinishSetupSystems(List<SystemsInstallerBase> logicInstallers)
-        {
-            {
-                bool systemsInitialized = false;
-                while (!systemsInitialized)
-                {
-                    await UniTask.DelayFrame(1);
-                    systemsInitialized = GetAllSystemsInitialized(logicInstallers);
-                }
-
-                List<UniTask> loadingTasks = new List<UniTask>();
-                foreach (SystemsInstallerBase baseInstaller in logicInstallers)
-                {
-                    loadingTasks.Add(baseInstaller.LoadSystems());
-                }
-                await UniTask.WhenAll(loadingTasks);
-                
-                foreach (SystemsInstallerBase baseInstaller in logicInstallers)
-                {
-                    baseInstaller.StartSystems();
-                }
-            }
-
-            static bool GetAllSystemsInitialized( List<SystemsInstallerBase> baseInstallers)
-            {
-                foreach (SystemsInstallerBase baseInstaller in baseInstallers)
-                {
-                    if (!baseInstaller.InstallComplete)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        }
+        
     }
 }

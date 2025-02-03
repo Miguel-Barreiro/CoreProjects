@@ -1,31 +1,30 @@
-using System.ComponentModel;
 using Core.Events;
 using Core.Model;
 using Core.Systems;
 using Core.View;
 using Core.View.UI;
+using Core.Zenject.Source.Main;
 using UnityEngine;
 
 namespace Core.Initialization
 {
 	internal class CoreSystemsInstaller : SystemsInstallerBase
     {
-        public override bool InstallComplete => installComplete;
-        private bool installComplete = false;
         
-
         protected readonly Transform RootCoreParent;
-        
-        public CoreSystemsInstaller(Transform rootCoreParent) { RootCoreParent = rootCoreParent; }
+
+        public CoreSystemsInstaller(Transform rootCoreParent, DiContainer container) : base(container)
+        {
+            RootCoreParent = rootCoreParent;
+        }
         
 
         protected override void InstallSystems()
         {
 			TypeCache typeCache = BuildTypeCache();
 
-			BuildEventManager();
+            BuildEventManager();
 			BuildGameLoopSystem();
-
 			BuildEntityManager();
 			BuildComponentSystemsLogic();
 			BuildSystemsManager();
@@ -52,9 +51,9 @@ namespace Core.Initialization
 
         private EventQueue eventQueue = null;
 
-        protected override void OnComplete()
+        internal override void OnComplete()
         {
-            installComplete = true;
+            base.OnComplete();
             eventQueue.Execute<OnProjectInstallCompleteEvent>();
         }
 
