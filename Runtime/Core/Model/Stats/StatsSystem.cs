@@ -17,14 +17,15 @@ namespace Core.Model
 		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
 		public void RemoveModifier(StatModId statModId);
-		
+
+		public void Reset();
 	}
 	
 
 
 	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem
 	{
-		private readonly StatsModel _statsModel;
+		private StatsModel _statsModel;
 	
 		public StatsSystemImplementation()
 		{ 
@@ -36,6 +37,11 @@ namespace Core.Model
 		public override void OnNew(BaseEntity newEntity)
 		{
 			
+		}
+
+		public void Reset()
+		{
+			_statsModel = new StatsModel();
 		}
 
 		public override void OnDestroy(BaseEntity entity)
@@ -78,6 +84,7 @@ namespace Core.Model
 		{
 			_statsModel.RemoveModifier(statModId);
 		}
+
 	}
 	
 	

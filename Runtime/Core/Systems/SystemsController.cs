@@ -33,17 +33,19 @@ namespace Core.Systems
 
         public void StartSystem()
         {
-            StartLoop();
+            running = true;
+            if (mode == SystemsControllerMode.AUTOMATIC)
+            {
+                StartLoop();
+            }
         }
 
         private async void StartLoop()
         {
             await UniTask.DelayFrame(1);
             running = true;
-            if (mode == SystemsControllerMode.AUTOMATIC)
-            {
-                GameLoopExecuter().Forget();
-            }
+            
+            GameLoopExecuter().Forget();
 
             async UniTask GameLoopExecuter()
             {
@@ -60,6 +62,7 @@ namespace Core.Systems
         {
             if (!running)
             {
+                Debug.Log("ExecuteFrame: asked to run while stopped"); 
                 return;
             }
 

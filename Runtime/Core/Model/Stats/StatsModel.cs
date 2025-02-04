@@ -28,7 +28,9 @@ namespace Core.Model
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
 			{
+#if DEBUG
 				Debug.Log($"StatsModel.ModifyDepletedValue: entity({targetEntId}) not found"); 
+#endif				
 				return;
 			}
 
@@ -170,7 +172,9 @@ namespace Core.Model
 		{
 		    if (!ModifiersByOwner.TryGetValue(modifierOwner, out List<StatModId> modifiers))
 		    {
-				Debug.LogError($"StatsModel.RemoveAllModifiersFrom: owner({modifierOwner}) does not have any modifiers");
+#if DEBUG
+				Debug.LogWarning($"StatsModel.RemoveAllModifiersFrom: owner({modifierOwner}) does not have any modifiers");
+#endif				
 		        return;
 		    }
 		

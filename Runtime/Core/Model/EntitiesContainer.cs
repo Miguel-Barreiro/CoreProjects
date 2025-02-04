@@ -37,7 +37,19 @@ namespace Core.Model
 
         public static void Reset()
         {
-            instance = new EntitiesContainer();
+            if (instance == null)
+            {
+                instance = new();
+                return;
+            }
+            
+            instance.entitiesByID.Clear();
+
+            instance.entitiesByComponentType.Clear();
+        
+            instance.destroyedEntities.Clear();
+            instance.newEntities.Clear();
+            
         }
 
         private EntitiesContainer(){ }
@@ -148,8 +160,10 @@ namespace Core.Model
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                List<BaseEntity> entities = entitiesByComponentType[componentType];
-                entities.Add(entity);
+                if (entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities))
+                {
+                    entities.Add(entity);
+                }
             }
         }
         
@@ -160,7 +174,10 @@ namespace Core.Model
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                entitiesByComponentType[componentType].Remove(entity);
+                if (entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities))
+                {
+                    entities.Remove(entity);
+                }
             }
 
             entitiesByID.Remove(entity.ID);

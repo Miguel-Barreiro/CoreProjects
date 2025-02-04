@@ -65,6 +65,9 @@ namespace Core.Model
         {
             foreach (List<StatModId> modifierList in Modifiers)
             {
+                if(modifierList == null)
+                    continue;
+                
                 foreach (StatModId statModId in modifierList)
                 {
                     yield return statModId;

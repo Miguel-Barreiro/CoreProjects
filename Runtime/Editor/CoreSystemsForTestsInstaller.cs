@@ -1,32 +1,39 @@
+using System.Collections.Generic;
+using Core.Editor;
 using Core.Initialization;
+using Core.Systems;
 using Core.Zenject.Source.Main;
 
 namespace Core.Runtime.Editor
 {
-	internal class CoreSystemsForTestsInstaller : CoreSystemsInstaller
+
+	public interface IUnitTestInstaller
 	{
+		public void AddTestSystem<T>(T system);
+	}
+
+	public class CoreSystemsForTestsInstaller : CoreSystemsInstaller, IUnitTestInstaller
+	{
+		private readonly UnitTest Test;
+
+		public CoreSystemsForTestsInstaller(UnitTest test, DiContainer container) : base(container) { Test = test; }
 		
-		public CoreSystemsForTestsInstaller(DiContainer container) : base(container) { }
+		protected override void InstallSystems()
+		{
+			base.InstallSystems();
+			Test.AddUserSystems(this);
+			SetSystemsControllerForTests();
+		}
 		
-// 		protected override void InstallSystems()
-// 		{
-// 			base.InstallSystems();
-// 			
-//
-// 			BuildEventManager();
-// 			BuildGameLoopSystem();
-//
-// 			BuildEntityManager();
-// 			BuildComponentSystemsLogic();
-// 			BuildSystemsManager();
-//
-// 			//for tests we dont use these systems
-// 			
-// //			BuildViewSystems();
-// //			BuildGenericGameobjePool();
-// //			BuildScenesController();
-//             
-// //			BuildUISystems();
-// 		}
+		private void SetSystemsControllerForTests()
+		{
+			SystemsController systemsController = Container.Resolve<SystemsController>();
+			systemsController.SetMode(SystemsController.SystemsControllerMode.UNIT_TESTS);
+		}
+		
+		public void AddTestSystem<T>(T system)
+		{
+			BindInstance(system);
+		}
 	}
 }

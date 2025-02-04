@@ -1,28 +1,49 @@
 using Core.Initialization;
 using Core.Runtime.Editor;
+using Core.Systems;
 using Core.Zenject.Source.Main;
 using NUnit.Framework;
 using UnityEngine;
+using Zenject;
 
 namespace Core.Editor
 {
 	public abstract class UnitTest : ScriptableObject
 	{
-		private DiContainer container;
-		protected DiContainer Container => container;
+		protected abstract void InstallTestSystems(IUnitTestInstaller installer);
 		
+		protected DiContainer Container => container;
+		private DiContainer container;
+
+		
+		[Inject] private readonly SystemsController SystemsController = null!;
+
+		internal void AddUserSystems(CoreSystemsForTestsInstaller installer)
+		{
+			InstallTestSystems(installer);
+		}
+
 		[OneTimeSetUp]
 		public async void OneTimeSetUp()
 		{
 			container = new DiContainer();
-			
-			Bootstrapper bootstrapper = new Bootstrapper(container);
-			bootstrapper.AddInstaller(new CoreSystemsForTestsInstaller(Container));
 
+			CoreSystemsForTestsInstaller installer = new CoreSystemsForTestsInstaller(this, Container);
+
+			Bootstrapper bootstrapper = new Bootstrapper(container);
+			bootstrapper.AddInstaller(installer);
+			
 			bool result = await bootstrapper.Run();
+			
+			Container.Inject(this);
+		}
+		
+		protected void ExecuteFrame(float time)
+		{
+			SystemsController.ExecuteFrame(time);
 		}
 
-		
+
 	}
 
 }

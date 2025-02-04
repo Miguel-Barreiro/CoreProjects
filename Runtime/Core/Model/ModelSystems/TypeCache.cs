@@ -78,6 +78,8 @@ namespace Core.Model
             {
                 yield return entityType;
             }
+
+            yield return typeof(BaseEntity);
         }
 
         
@@ -126,6 +128,7 @@ namespace Core.Model
         private void BuildEntityTypeCache(Type entityType)
         {
             if(!componentsByEntityType.ContainsKey(entityType)){
+                
                 List<Type> cachedComponentTypeList = new List<Type>();
                 componentsByEntityType.Add(entityType, cachedComponentTypeList);
                 
