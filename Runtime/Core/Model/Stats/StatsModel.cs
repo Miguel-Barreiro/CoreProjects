@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using FixedPointy;
@@ -11,7 +10,7 @@ namespace Core.Model
         // Marker interface for entities that can have stats
     }
 
-	public sealed class StatsModel : BaseEntity
+	public sealed class StatsModel 
 	{
 		
 		private readonly Dictionary<StatId, Stat> StatsById = new();
@@ -173,9 +172,9 @@ namespace Core.Model
 		{
 		    if (!ModifiersByOwner.TryGetValue(modifierOwner, out List<StatModId> modifiers))
 		    {
-#if DEBUG
-				Debug.LogWarning($"StatsModel.RemoveAllModifiersFrom: owner({modifierOwner}) does not have any modifiers");
-#endif				
+// #if DEBUG
+// 				Debug.LogWarning($"StatsModel.RemoveAllModifiersFrom: owner({modifierOwner}) does not have any modifiers");
+// #endif				
 		        return;
 		    }
 		
@@ -246,6 +245,12 @@ namespace Core.Model
 		
 		private Fix CalculateNonDepletedValue(Stat statData)
 		{
+			if (!statData.CacheDirty)
+			{
+				return statData.CachedValue;
+			}
+
+
 			Fix calculatedResult = statData.BaseValue;
 			
 			// Apply additive modifiers first
@@ -276,7 +281,12 @@ namespace Core.Model
 				calculatedResult += ModifiersById[modId].Value;
 			}
 
-			return FixMath.Clamp(calculatedResult, statData.MinValue, statData.MaxValue);
+			Fix result = FixMath.Clamp(calculatedResult, statData.MinValue, statData.MaxValue);
+			
+			statData.CacheDirty = false;
+			statData.CachedValue = result;
+			
+			return result;
 		}
 		
 		private Stat GetOrCreateStat(EntId owner, StatConfig stat)
@@ -310,7 +320,7 @@ namespace Core.Model
 		{
 			if (!ModifiersById.TryGetValue(modId, out StatModifier modifier))
 			{
-				Debug.LogWarning($"StatsModel.GetModifierValue: modifier {modId} does not exist");
+				// Debug.LogWarning($"StatsModel.GetModifierValue: modifier {modId} does not exist");
 				return 0;
 			}
 			return modifier.Value;
@@ -320,7 +330,7 @@ namespace Core.Model
 		{
 			if (!ModifiersById.TryGetValue(modId, out StatModifier modifier))
 			{
-				Debug.LogWarning($"StatsModel.ChangeModifierValue: modifier {modId} does not exist");
+				// Debug.LogWarning($"StatsModel.ChangeModifierValue: modifier {modId} does not exist");
 				return;
 			}
 
@@ -328,6 +338,7 @@ namespace Core.Model
 			Fix beforeChange = CalculateNonDepletedValue(statData);
 			
 			modifier.Value = newValue;
+			statData.CacheDirty = true;
 			
 			Fix afterChange = CalculateNonDepletedValue(statData);
 			Fix depletedDelta = afterChange - beforeChange;

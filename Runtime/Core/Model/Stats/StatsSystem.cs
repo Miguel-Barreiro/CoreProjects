@@ -36,7 +36,7 @@ namespace Core.Model
 		private StatsModel _statsModel;
 	
 		public StatsSystemImplementation()
-		{ 
+		{
 			_statsModel = new StatsModel();
 		}
 

@@ -1,21 +1,35 @@
 using System;
 using System.Collections.Generic;
+using Core.Initialization;
 using FixedPointy;
 
 namespace Core.Model
 {
 	internal class Stat
     {
+        public bool CacheDirty = true;
+        public Fix CachedValue = 0;
+        
         public readonly StatId Id;
         public readonly EntId Owner;
         
         private readonly List<StatModId>[] Modifiers;
-        public Fix BaseValue;
+        public Fix BaseValue
+        {
+            get => baseValue;
+            set
+            {
+                baseValue = value;
+                CacheDirty = true;
+            }
+        }
+        private Fix baseValue;
+        
         public Fix DepletedValue;
 
-        public Fix MaxValue;
-        public Fix MinValue;
-        
+        public Fix MaxValue { get; }
+        public Fix MinValue { get; }
+
         public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue, EntId owner)
         {
             Id = id;
@@ -40,6 +54,7 @@ namespace Core.Model
                 return;
             }
             Modifiers[index].Add(modifier.Id);
+            CacheDirty = true;
         }
 
         public void RemoveModifier(StatModifier modifier)
@@ -50,6 +65,7 @@ namespace Core.Model
                 return;
             }
             Modifiers[index].Remove(modifier.Id);
+            CacheDirty = true;
         }
 
         public IEnumerable<StatModId> GetModifiers(StatModifierType type)
