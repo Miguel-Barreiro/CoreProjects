@@ -11,14 +11,13 @@ namespace Core.Model
 		public readonly EntId Owner;
 		public readonly StatModifierType Type;
 		
-		private Fix value;
-		public Fix Value => value;
+		public Fix Value;
 		
 		public StatModifier(StatModId id, StatModifierType type, Fix initialValue, EntId owner, StatId targetStatId)
 		{
 			Id = id;
 			Type = type;
-			value = initialValue;
+			Value = initialValue;
 			Owner = owner;
 			TargetStatId = targetStatId;
 		}

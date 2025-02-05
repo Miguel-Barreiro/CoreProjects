@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using FixedPointy;
 using Debug = UnityEngine.Debug;
 
@@ -291,7 +292,7 @@ namespace Core.Model
 			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
 			{
 				statId = NextStatId();
-				statData = new( statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue);
+				statData = new(statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue, owner);
 				StatsById[statData.Id] = statData;
 				ownerStatsDict[stat] = statData.Id;
 			} else
@@ -305,7 +306,62 @@ namespace Core.Model
 
 		#endregion
 
+		public Fix GetModifierValue(StatModId modId)
+		{
+			if (!ModifiersById.TryGetValue(modId, out StatModifier modifier))
+			{
+				Debug.LogWarning($"StatsModel.GetModifierValue: modifier {modId} does not exist");
+				return 0;
+			}
+			return modifier.Value;
+		}
 
+		public void ChangeModifierValue(StatModId modId, Fix newValue)
+		{
+			if (!ModifiersById.TryGetValue(modId, out StatModifier modifier))
+			{
+				Debug.LogWarning($"StatsModel.ChangeModifierValue: modifier {modId} does not exist");
+				return;
+			}
+
+			Stat statData = StatsById[modifier.TargetStatId];
+			Fix beforeChange = CalculateNonDepletedValue(statData);
+			
+			modifier.Value = newValue;
+			
+			Fix afterChange = CalculateNonDepletedValue(statData);
+			Fix depletedDelta = afterChange - beforeChange;
+			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
+			statData.DepletedValue = FixMath.Clamp(newDepletedValue, statData.MinValue, afterChange);
+		}
+
+		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner)
+		{
+			if (!ModifiersByOwner.TryGetValue(owner, out List<StatModId> modifiers))
+			{
+				return Enumerable.Empty<StatModId>();
+			}
+			return modifiers;
+		}
+
+		public IEnumerable<StatModId> GetModifiersFromOwnerToTarget(EntId owner, EntId targetEntId)
+		{
+			if (!ModifiersByOwner.TryGetValue(owner, out List<StatModId> ownerModifiers))
+			{
+				yield break;
+			}
+
+			foreach (StatModId modId in ownerModifiers){
+				StatModifier modifier = ModifiersById[modId];
+				Stat stat = StatsById[modifier.TargetStatId];
+				if (stat == null){
+					continue;
+				}
+				if (stat.Owner == targetEntId){
+					yield return modId;
+				}
+			}
+		}
 	}
 
 

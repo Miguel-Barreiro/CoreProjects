@@ -7,6 +7,7 @@ namespace Core.Model
 	internal class Stat
     {
         public readonly StatId Id;
+        public readonly EntId Owner;
         
         private readonly List<StatModId>[] Modifiers;
         public Fix BaseValue;
@@ -15,7 +16,7 @@ namespace Core.Model
         public Fix MaxValue;
         public Fix MinValue;
         
-        public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue)
+        public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue, EntId owner)
         {
             Id = id;
             Modifiers = new List<StatModId>[(int) StatModifierType.TOTAL];
@@ -23,6 +24,8 @@ namespace Core.Model
             MaxValue = maxValue;
             MinValue = minValue;
             DepletedValue = baseValue;
+
+            Owner = owner;
         }
         
         

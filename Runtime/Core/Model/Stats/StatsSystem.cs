@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Core.Systems;
 using FixedPointy;
 
@@ -16,6 +17,13 @@ namespace Core.Model
 		
 		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
+		public Fix GetModifierValue(StatModId statModId);
+
+
+		public void ChangeModifier(StatModId statModId, Fix newValue);
+		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner);
+		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId);
+
 		public void RemoveModifier(StatModId statModId);
 
 		public void Reset();
@@ -85,6 +93,25 @@ namespace Core.Model
 			_statsModel.RemoveModifier(statModId);
 		}
 
+		public Fix GetModifierValue(StatModId statModId)
+		{
+			return _statsModel.GetModifierValue(statModId);
+		}
+
+		public void ChangeModifier(StatModId statModId, Fix newValue)
+		{
+			_statsModel.ChangeModifierValue(statModId, newValue);
+		}
+
+		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner)
+		{
+			return _statsModel.GetModifiersOwnedBy(owner);
+		}
+
+		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId)
+		{
+			return _statsModel.GetModifiersFromOwnerToTarget(owner, targetEntId);
+		}
 	}
 	
 	
