@@ -9,6 +9,8 @@ namespace Core.Initialization
 	{
 		private readonly DiContainer Container;
 		
+		private SystemsInstallerBase _currentSceneInstaller;
+		
 		private readonly Queue<SystemsInstallerBase> Installers = new Queue<SystemsInstallerBase>();
 		private readonly HashSet<SystemsInstallerBase> completedInstallers = new HashSet<SystemsInstallerBase>();
 
@@ -26,6 +28,12 @@ namespace Core.Initialization
 				Installers.Enqueue(installer);
 			}
 		}
+
+		internal void SetCurrentSceneInstaller(SystemsInstallerBase sceneInstaller)
+		{
+			_currentSceneInstaller = sceneInstaller;
+		}
+
 
 		public void RemoveInstaller(SystemsInstallerBase installer)
 		{
@@ -45,6 +53,11 @@ namespace Core.Initialization
 			foreach (SystemsInstallerBase installer in systemsInstallerBases)
 			{
 				installer.CreateSystems();
+			}
+			
+			if(_currentSceneInstaller != null)
+			{
+				UpdateObjectBuilder(_currentSceneInstaller);
 			}
 			
 			foreach (SystemsInstallerBase installer in systemsInstallerBases)
@@ -81,9 +94,9 @@ namespace Core.Initialization
 			
 			return true;
 		}
-		
 
-#endregion
+
+		#endregion
 
 
 #region Internal
@@ -107,6 +120,11 @@ namespace Core.Initialization
 			Container.Inject(objectBuilder);
 		}
 
+		private void UpdateObjectBuilder(SystemsInstallerBase currentSceneInstaller)
+		{
+			ObjectBuilder objectBuilder = Container.Resolve<ObjectBuilder>();
+			currentSceneInstaller.ContainerInstance.Inject(objectBuilder);
+		}
 		        
 	
 		        

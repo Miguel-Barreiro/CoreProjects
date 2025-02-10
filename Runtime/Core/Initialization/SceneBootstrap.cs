@@ -10,8 +10,12 @@ namespace Core.Initialization
         public override void InstallBindings()
         {
             Bootstrapper bootstrapper = GetBootstrapper();
+
+            SystemsInstallerBase sceneInstaller = GetLogicInstaller();
+            bootstrapper.AddInstaller(sceneInstaller);
+
+            bootstrapper.SetCurrentSceneInstaller(sceneInstaller);
             
-            bootstrapper.AddInstaller(GetLogicInstaller());
             
             //TODO: we can store now the logic installer to understand what systems to destroy when the corresponding scene 
             // is destroyed

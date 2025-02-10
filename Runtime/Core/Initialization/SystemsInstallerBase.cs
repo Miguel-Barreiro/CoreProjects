@@ -15,7 +15,8 @@ namespace Core.Initialization
         protected abstract void InstallSystems();
 
         protected readonly DiContainer Container;
-
+        internal DiContainer ContainerInstance => Container;
+        
         internal virtual void OnComplete() { }
 
         internal void CreateSystems()
@@ -224,24 +225,6 @@ namespace Core.Initialization
                 Container.BindInstance(systemsContainer);
             }
         }
-
-        private void UpdateObjectBuilder()
-        {
-            ObjectBuilder objectBuilder;
-            
-            if (!Container.HasBinding<ObjectBuilder>())
-            {
-                objectBuilder = new ObjectBuilder();
-                BindInstance(objectBuilder);
-            }
-            else
-            {
-                objectBuilder = Container.Resolve<ObjectBuilder>();
-            }
-
-            AddInjectable(objectBuilder);
-        }
-
         
         protected void AddInjectable(GameObject logicInstance)
         {
