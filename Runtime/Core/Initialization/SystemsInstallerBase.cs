@@ -251,6 +251,12 @@ namespace Core.Initialization
         
         private void AddSystem<T>(T logicInstance)
         {
+            if (logicInstance == null)
+            {
+                Debug.LogError($"Installing System {typeof(T)} but was given null"); 
+                return;
+            }
+            RegisterDisposableIfNeeded(logicInstance);
             AddInjectable(logicInstance);
 
             if (!ownedSystems.Contains(logicInstance))
