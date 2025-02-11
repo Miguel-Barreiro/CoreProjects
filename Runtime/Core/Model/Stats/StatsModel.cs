@@ -64,7 +64,7 @@ namespace Core.Model
 		}
 		
 		
-		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix baseValue)
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix baseValue, bool resetDepletedValue = false)
 		{
 			Stat statData = GetOrCreateStat(targetEntId, stat);
 
@@ -76,7 +76,12 @@ namespace Core.Model
 
 			Fix depletedDelta = afterChange - beforeChange;
 			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
-			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
+
+			if(resetDepletedValue){
+				statData.DepletedValue = afterChange;
+			}else{
+				statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
+			}
 		}
 
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
@@ -108,8 +113,7 @@ namespace Core.Model
 			StatModifier modifier = new StatModifier(newStatModID, modifierType, modifierValue, owner, statId);
 
 
-			List<StatModId> ownerModifierList;
-			if (!ModifiersByOwner.TryGetValue(owner, out ownerModifierList))
+			if (!ModifiersByOwner.TryGetValue(owner, out List<StatModId> ownerModifierList))
 		    {
 				ownerModifierList = new List<StatModId>();
 		        ModifiersByOwner[owner] = ownerModifierList;
@@ -209,7 +213,7 @@ namespace Core.Model
 				{
 					if (!ModifiersById.TryGetValue(modId, out StatModifier modifier))
 					{
-						Debug.LogError($"StatsModel.RemoveAllStatsFrom: modifier {modId} does not exist");
+						// Debug.LogError($"StatsModel.RemoveAllStatsFrom: modifier {modId} does not exist");
 						continue;
 					}
 		
@@ -341,6 +345,7 @@ namespace Core.Model
 			statData.CacheDirty = true;
 			
 			Fix afterChange = CalculateNonDepletedValue(statData);
+			
 			Fix depletedDelta = afterChange - beforeChange;
 			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
 			statData.DepletedValue = FixMath.Clamp(newDepletedValue, statData.MinValue, afterChange);
@@ -373,6 +378,24 @@ namespace Core.Model
 				}
 			}
 		}
+
+		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		{
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+				return;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return;
+			}
+
+			Stat statData = StatsById[statId];
+			Fix maxValue = CalculateNonDepletedValue(statData);
+			statData.DepletedValue = FixMath.Clamp(newValue, stat.DefaultMinValue, maxValue);
+		}
+		
 	}
 
 

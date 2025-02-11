@@ -8,8 +8,10 @@ namespace Core.Model
 	public interface StatsSystem
 	{
 
-		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue);
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false);
 		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta);
+
+		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue);
 		
 		
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
@@ -44,7 +46,7 @@ namespace Core.Model
 
 		public override void OnNew(BaseEntity newEntity)
 		{
-			
+			// Initialize any default stats if needed
 		}
 
 		public void Reset()
@@ -60,12 +62,12 @@ namespace Core.Model
 
 		public override void Update(BaseEntity entity, float deltaTime)
 		{
-			// Time-based stat updates if needed
+			// Handle any time-based stat updates if needed
 		}
 
-		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false)
 		{
-			_statsModel.SetBaseValue(targetEntId, stat, newValue);
+			_statsModel.SetBaseValue(targetEntId, stat, newValue, resetDepletedValue);
 		}
 
 		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
@@ -83,9 +85,9 @@ namespace Core.Model
 			return _statsModel.GetDepletedStatValue(targetEntId, stat);
 		}
 
-		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix modifierValue, StatModifierType type)
+		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type)
 		{
-			return _statsModel.AddModifier(owner, targetEntId, stat, type, modifierValue);
+			return _statsModel.AddModifier(owner, targetEntId, stat, type, value);
 		}
 		
 		public void RemoveModifier(StatModId statModId)
@@ -111,6 +113,11 @@ namespace Core.Model
 		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId)
 		{
 			return _statsModel.GetModifiersFromOwnerToTarget(owner, targetEntId);
+		}
+
+		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		{
+			_statsModel.SetDepletedValue(targetEntId, stat, newValue);
 		}
 	}
 	

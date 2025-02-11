@@ -19,7 +19,7 @@ namespace Core.Events
 
 			if (!systemsByListenerTypes.ContainsKey(typeof(TEvent)))
 			{
-				Debug.Log($"no attributes exist for event {typeof(TEvent)}");
+				// Debug.Log($"no attributes exist for event {typeof(TEvent)}");
 				yield break;
 			}
 

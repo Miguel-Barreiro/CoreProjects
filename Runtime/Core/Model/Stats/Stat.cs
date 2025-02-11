@@ -19,6 +19,9 @@ namespace Core.Model
             get => baseValue;
             set
             {
+                if(baseValue == value)
+                    return;
+                
                 baseValue = value;
                 CacheDirty = true;
             }
