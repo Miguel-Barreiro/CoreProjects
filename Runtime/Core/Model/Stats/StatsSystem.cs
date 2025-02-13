@@ -5,7 +5,18 @@ using FixedPointy;
 namespace Core.Model
 {
 
-	public interface StatsSystem
+	public interface StatsSystemRO
+	{
+		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
+		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
+		public Fix GetModifierValue(StatModId statModId);
+		
+		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner);
+		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId);
+
+	}
+
+	public interface StatsSystem : StatsSystemRO
 	{
 
 		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false);
@@ -33,7 +44,7 @@ namespace Core.Model
 	
 
 
-	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem
+	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRO
 	{
 		private StatsModel _statsModel;
 	

@@ -7,9 +7,7 @@ namespace Core.Initialization
 {
 	public abstract class CoreSystemsInstaller : SystemsInstallerBase
     {
-
-        public CoreSystemsInstaller(DiContainer container) : base(container) { }
-        
+        protected CoreSystemsInstaller(DiContainer container) : base(container) { }
         
         private EventQueue eventQueue = null;
 
