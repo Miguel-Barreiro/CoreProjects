@@ -396,6 +396,48 @@ namespace Core.Model
 			statData.DepletedValue = FixMath.Clamp(newValue, stat.DefaultMinValue, maxValue);
 		}
 		
+		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat)
+		{
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+// #if DEBUG
+// 				Debug.Log($"StatsModel.ResetDepletedValueToMax: entity({targetEntId}) not found");
+// #endif
+				return;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return;
+			}
+
+			Stat statData = StatsById[statId];
+			Fix maxValue = CalculateNonDepletedValue(statData);
+			
+			// Set depleted value to max (full)
+			statData.DepletedValue = maxValue;
+		}
+
+		public void ResetDepletedValueToMin(EntId targetEntId, StatConfig stat)
+		{
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+// #if DEBUG
+// 				Debug.Log($"StatsModel.ResetDepletedValueToMin: entity({targetEntId}) not found");
+// #endif
+				return;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return;
+			}
+
+			Stat statData = StatsById[statId];
+			
+			// Set depleted value to minimum
+			statData.DepletedValue = stat.DefaultMinValue;
+		}
 	}
 
 

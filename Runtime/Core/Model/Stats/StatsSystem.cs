@@ -5,7 +5,7 @@ using FixedPointy;
 namespace Core.Model
 {
 
-	public interface StatsSystemRO
+	public interface StatsSystemRo
 	{
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
 		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
@@ -16,13 +16,15 @@ namespace Core.Model
 
 	}
 
-	public interface StatsSystem : StatsSystemRO
+	public interface StatsSystem : StatsSystemRo
 	{
 
 		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false);
 		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta);
 
 		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue);
+		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat);
+		public void ResetDepletedValueToMin(EntId targetEntId, StatConfig stat);
 		
 		
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
@@ -44,7 +46,7 @@ namespace Core.Model
 	
 
 
-	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRO
+	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRo
 	{
 		private StatsModel _statsModel;
 	
@@ -129,6 +131,16 @@ namespace Core.Model
 		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
 		{
 			_statsModel.SetDepletedValue(targetEntId, stat, newValue);
+		}
+
+		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat)
+		{
+			_statsModel.ResetDepletedValueToMax(targetEntId, stat);
+		}
+
+		public void ResetDepletedValueToMin(EntId targetEntId, StatConfig stat)
+		{
+			_statsModel.ResetDepletedValueToMin(targetEntId, stat);
 		}
 	}
 	
