@@ -37,15 +37,15 @@ namespace Core.Initialization
 			systemsController.SetMode(SystemsController.SystemsControllerMode.AUTOMATIC);
 		}
 		
-		private void BuildGameLoopRunner()
-		{
-			
-			GameObject systemsManager = new GameObject("SystemsLoop");
-			SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
-			GameObject.DontDestroyOnLoad(systemsManager);
-
-			BindInstance(systemsManagerComponent);
-		}
+		// private void BuildGameLoopRunner()
+		// {
+		// 	
+		// 	GameObject systemsManager = new GameObject("SystemsLoop");
+		// 	SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
+		// 	GameObject.DontDestroyOnLoad(systemsManager);
+		//
+		// 	BindInstance(systemsManagerComponent);
+		// }
 
 		protected void BuildUISystems()
 		{
@@ -95,8 +95,8 @@ namespace Core.Initialization
 		{
 			if (!Container.HasBinding<ScenesController>())
 			{
-				ScenesController scenesController = new ScenesController();
-				BindInstance(scenesController);
+				ScenesControllerImplemention scenesController = new ScenesControllerImplemention();
+				BindInstance<ScenesController>(scenesController);
 			}
 		}
 

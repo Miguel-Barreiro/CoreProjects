@@ -249,7 +249,11 @@ namespace Core.Zenject.Source.Install.Contexts
             // InitialComponentsInjecter will also guarantee that any component that is injected into
             // another component has itself been injected
             var injectableMonoBehaviours = new List<MonoBehaviour>();
-            GetInjectableMonoBehaviours(injectableMonoBehaviours);
+            
+            //MIGUEL: we dont want to inject the components in the scene automatically
+            // so I commented this line
+            
+            // GetInjectableMonoBehaviours(injectableMonoBehaviours);
             foreach (var instance in injectableMonoBehaviours)
             {
                 _container.QueueForInject(instance);

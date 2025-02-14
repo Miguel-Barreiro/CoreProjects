@@ -6,28 +6,38 @@ using Zenject;
 
 namespace Core.Initialization
 {
-    public sealed class ScenesController : IInitSystem
+    public interface ScenesController
+    {
+        // public UniTask AddScene(string sceneName);
+        public UniTask SwitchScene(string sceneName);
+        // public UniTask RemoveScene(string sceneName);
+    }
+
+
+    public sealed class ScenesControllerImplemention : IInitSystem, ScenesController
     {
         [Inject] private readonly SystemsController systemsController = null!;
         [Inject] private readonly Bootstrapper Bootstrapper = null!;
 
         #region Public
 
-        
-        public UniTask AddScene(string sceneName)
-        {
-            return UniTask.CompletedTask;
-        }
+        //
+        // public UniTask AddScene(string sceneName)
+        // {
+        //     return UniTask.CompletedTask;
+        // }
 
         public UniTask SwitchScene(string sceneName)
         {
+            LoadScene(sceneName);
+            
             return UniTask.CompletedTask;
         }
         
-        public UniTask RemoveScene(string sceneName)
-        {
-            return UniTask.CompletedTask;
-        }
+        // public UniTask RemoveScene(string sceneName)
+        // {
+        //     return UniTask.CompletedTask;
+        // }
         
 
         #endregion

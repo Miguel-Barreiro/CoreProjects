@@ -65,58 +65,100 @@ namespace Core.Systems
                 Debug.Log("ExecuteFrame: asked to run while stopped"); 
                 return;
             }
-
-            IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
-            foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
+#if !UNITY_EDITOR
+            try
             {
-
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateEarlierPriority)
-                {
-                    BaseEntitySystem systemCacheSystem = systemCache.System;
-                    
-                    if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
-                }
-                
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateDefaultPriority)
-                {
-                    BaseEntitySystem systemCacheSystem = systemCache.System;
-                    
-                    if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
-                }
-                
-                foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateLatePriority)
-                {
-                    BaseEntitySystem systemCacheSystem = systemCache.System;
-                    
-                    if(systemCacheSystem.Active)
-                        systemCacheSystem.Update(EntitiesContainer, deltaTime);
-                }
-
-
+#endif   
+                ExecuteComponentUpdateSystems();
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError("Error in a component system: " + e);
             }
+#endif                
             
-            IEnumerable<IUpdateSystem> allSystemsByInterface = systemsContainer.GetAllSystemsByInterface<IUpdateSystem>();
-            foreach (IUpdateSystem system in allSystemsByInterface)
+#if !UNITY_EDITOR
+            try
             {
-                if (system.Active)
+#endif  
+                ExecuteUpdateSystems();
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError("Error in a system: " + e);
+            }
+#endif                
+            
+#if !UNITY_EDITOR
+            try
+            {
+#endif  
+                ExecuteEvents();
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError("Error in an event: " + e);
+            }
+#endif                
+
+            void ExecuteComponentUpdateSystems()
+            {
+                IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
+                foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
                 {
-                    system.UpdateSystem(deltaTime);
+
+                    foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateEarlierPriority)
+                    {
+                        BaseEntitySystem systemCacheSystem = systemCache.System;
+                    
+                        if(systemCacheSystem.Active)
+                            systemCacheSystem.Update(EntitiesContainer, deltaTime);
+                    }
+                
+                    foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateDefaultPriority)
+                    {
+                        BaseEntitySystem systemCacheSystem = systemCache.System;
+                    
+                        if(systemCacheSystem.Active)
+                            systemCacheSystem.Update(EntitiesContainer, deltaTime);
+                    }
+                
+                    foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateLatePriority)
+                    {
+                        BaseEntitySystem systemCacheSystem = systemCache.System;
+                    
+                        if(systemCacheSystem.Active)
+                            systemCacheSystem.Update(EntitiesContainer, deltaTime);
+                    }
                 }
             }
 
-            int loopGard = 0; 
-            while ( loopGard < 10 && 
-                    (
-                        eventQueue.EventsCount > 0 || 
-                        EntitiesContainer.NewEntitiesCount() > 0 ||
-                        EntitiesContainer.DestroyedEntitiesCount > 0))
+            void ExecuteUpdateSystems()
             {
-                loopGard++;
-                ProcessEvents();
-                ProcessDestroyedEntities();
-                ProcessNewEntities();
+                IEnumerable<IUpdateSystem> allSystemsByInterface = systemsContainer.GetAllSystemsByInterface<IUpdateSystem>();
+                foreach (IUpdateSystem system in allSystemsByInterface)
+                {
+                    if (system.Active)
+                    {
+                        system.UpdateSystem(deltaTime);
+                    }
+                }
+            }
+
+            void ExecuteEvents()
+            {
+                int loopGard = 0;
+                while ( loopGard < 10 && 
+                        (
+                            eventQueue.EventsCount > 0 || 
+                            EntitiesContainer.NewEntitiesCount() > 0 ||
+                            EntitiesContainer.DestroyedEntitiesCount > 0))
+                {
+                    loopGard++;
+                    ProcessEvents();
+                    ProcessDestroyedEntities();
+                    ProcessNewEntities();
+                }
             }
         }
 
