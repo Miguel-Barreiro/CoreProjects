@@ -46,7 +46,18 @@ namespace Core.View
 			}
 
 			GameObject entityGameobject = viewAtributes.GameObject;
-			entity.Position = entityGameobject.transform.position;
+			
+			switch (entity.Rigidbody2D.bodyType)
+			{
+				case RigidbodyType2D.Dynamic:
+					entity.Position = entityGameobject.transform.position;
+					break;
+				case RigidbodyType2D.Kinematic:
+					entityGameobject.transform.position = new Vector3(entity.Position.x, entity.Position.y, 0);
+					break;
+				case RigidbodyType2D.Static:
+					break;
+			}
 		}
 
 		private void Spawn(I2DPhysicsEntity newEntity)
