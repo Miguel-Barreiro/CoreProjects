@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core.View.UI
 {
-	[CreateAssetMenu(fileName = "UIScreenDefinition", menuName = "Core/UI/ScreenDefinition", order = 100)]
+	[CreateAssetMenu(fileName = "UIScreenDefinition", menuName = "!Game/UI/ScreenDefinition", order = 100)]
 	public class UIScreenDefinition : ScriptableObject
 	{
 		[SerializeField] private UILifetimeType lifetimeType;
