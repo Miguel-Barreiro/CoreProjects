@@ -1,9 +1,9 @@
 using FixedPointy;
 using UnityEngine;
 
-namespace Core.Model
+namespace Core.Model.Stats
 {
-	[CreateAssetMenu(fileName = "NewStat", menuName = "Core/Stats/Create Stat")]
+	[CreateAssetMenu(fileName = "NewStat", menuName = "!Game/Stats/Create Stat")]
 	public sealed class StatConfig : ScriptableObject
 	{
 		[SerializeField] private string name = "NO_NAME";
