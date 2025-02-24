@@ -25,5 +25,15 @@ namespace Core.Utils
             return new OperationResult<T>(false, e, default(T));
         }
         
+        public static OperationResult<T> Failure(string message)
+        {
+            return new OperationResult<T>(false, new OperationException(message), default(T));
+        }
+        
+    }
+    
+    public class OperationException : Exception
+    {
+        public OperationException(string message) : base(message) { }
     }
 }
