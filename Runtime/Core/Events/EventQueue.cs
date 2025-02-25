@@ -38,7 +38,11 @@ namespace Core.Events
 			int eventCount = 0;
 			foreach (EventOrder eventOrder in ProcessOrder)
 			{
-				eventCount += EventQueueByType[eventOrder].Count;
+				Dictionary<Type,List<BaseEvent>> eventsByOrder = EventQueueByType[eventOrder];
+				foreach ((Type _, List<BaseEvent> currentQueu) in eventsByOrder)
+				{
+					eventCount += currentQueu.Count;
+				}
 			}
 
 			return eventCount;
