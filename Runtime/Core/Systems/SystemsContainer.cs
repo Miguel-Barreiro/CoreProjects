@@ -17,6 +17,11 @@ namespace Core.Systems
         
         #region Public
         
+        public IEnumerable<Object> GetAllSystems()
+        {
+            return systems;
+        }
+        
         public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
         {
             return entitySystemsContainer.GetComponentSystemsFor(componentType);

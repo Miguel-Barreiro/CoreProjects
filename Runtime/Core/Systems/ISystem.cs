@@ -4,6 +4,8 @@
     {
         public bool Active { get; set; }
         public SystemGroup Group { get; }
+
+        static SystemGroup DefaultGroup { get; } = new SystemGroup("Default");
     }
 
     public struct SystemGroup

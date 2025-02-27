@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-using Core.Editor;
 using Core.Initialization;
 using Core.Systems;
 using Core.Zenject.Source.Main;
 
-namespace Core.Runtime.Editor
+namespace Core.Editor
 {
 
 	public interface IUnitTestInstaller
