@@ -14,7 +14,11 @@ namespace Core.Editor.Systems
     {
         private bool _showAllSystems = false;
         private bool _showSystemGroups = true;
-        private Dictionary<SystemGroup, bool> _groupFoldouts = new Dictionary<SystemGroup, bool>();
+        
+        private Dictionary<string, bool> _installerFoldouts = new Dictionary<string, bool>();
+        private Dictionary<(string, SystemGroup), bool> _groupFoldouts = new ();
+        private Dictionary<object, bool> _systemFoldouts = new Dictionary<object, bool>();
+        
         private string _searchFilter = "";
         private Vector2 _scrollPosition;
 
@@ -37,8 +41,8 @@ namespace Core.Editor.Systems
 
             // Display options
             EditorGUILayout.BeginHorizontal();
-            _showAllSystems = EditorGUILayout.ToggleLeft("Show All Systems", _showAllSystems, GUILayout.Width(150));
-            _showSystemGroups = EditorGUILayout.ToggleLeft("Group by Type", _showSystemGroups, GUILayout.Width(150));
+            // _showAllSystems = EditorGUILayout.ToggleLeft("Show All Systems", _showAllSystems, GUILayout.Width(150));
+            // _showSystemGroups = EditorGUILayout.ToggleLeft("Group by Type", _showSystemGroups, GUILayout.Width(150));
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
@@ -56,14 +60,14 @@ namespace Core.Editor.Systems
             // Begin scrollable area
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(400));
 
-            if (_showSystemGroups)
-            {
-                DrawSystemsByGroup(allSystems);
-            }
-            else
-            {
-                DrawAllSystems(allSystems);
-            }
+            // if (_showSystemGroups)
+            // {
+                DrawSystemsByGroup(allSystems, manager.SystemsContainer);
+            // }
+            // else
+            // {
+            //     DrawAllSystems(allSystems, manager.SystemsContainer);
+            // }
 
             EditorGUILayout.EndScrollView();
 
@@ -103,69 +107,160 @@ namespace Core.Editor.Systems
             // {
             //     systems.Add(system);
             // }
-            
         }
 
-        private void DrawSystemsByGroup(List<object> allSystems)
+        private readonly Dictionary<string, Dictionary<SystemGroup, List<object>>> GroupedSystemsCache = new();
+        
+        
+        private void DrawSystemsByGroup(List<object> allSystems, SystemsContainer managerSystemsContainer)
         {
-            // Group systems by their SystemGroup
-            IEnumerable<IGrouping<SystemGroup,object>> groupedSystems = 
-                allSystems.GroupBy(s => GetSystemGroup(s));
-            // .OrderBy(g => g.Key);
+            ResetGroupedSystemsCache();
 
-            foreach (IGrouping<SystemGroup,object> group in groupedSystems)
+            foreach ((string installer, Dictionary<SystemGroup,List<object>> systemsbyGroup) in GroupedSystemsCache)
             {
-                if (!_groupFoldouts.ContainsKey(group.Key))
+                if (!_installerFoldouts.ContainsKey(installer))
                 {
-                    _groupFoldouts[group.Key] = true;
+                    _installerFoldouts[installer] = true;
                 }
-
+                
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 
                 // Group header with count
                 EditorGUILayout.BeginHorizontal();
-                _groupFoldouts[group.Key] = EditorGUILayout.Foldout(_groupFoldouts[group.Key], 
-                    $"{group.Key.Name} ({group.Count()} systems)", true, EditorStyles.foldoutHeader);
+                _installerFoldouts[installer] = EditorGUILayout.Foldout(_installerFoldouts[installer], 
+                                                                        $"{installer}", 
+                                                                        true, 
+                                                                        EditorStyles.foldoutHeader);
                 EditorGUILayout.EndHorizontal();
 
-                if (_groupFoldouts[group.Key])
+                if (_installerFoldouts[installer])
                 {
-                    EditorGUI.indentLevel++;
-                    foreach (object system in group)
-                    {
-                        DrawSystemInfo(system);
-                    }
-                    EditorGUI.indentLevel--;
+                   DrawInstallerGroups(installer, systemsbyGroup);
                 }
                 
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(2);
             }
-        }
 
-        private void DrawAllSystems(List<object> allSystems)
-        {
-            foreach (Object system in allSystems)
+            void DrawInstallerGroups(string installer, Dictionary<SystemGroup,List<object>> installerGroups)
             {
-                DrawSystemInfo(system);
+
+                foreach ((SystemGroup systemGroup, List<object> systems)  in installerGroups)
+                {
+                    (string installer, SystemGroup systemGroup) groupKey = (installer, systemGroup);
+                   
+                    if (!_groupFoldouts.ContainsKey(groupKey))
+                        _groupFoldouts[groupKey] = false;
+                    
+                    
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    
+                    // Group header with count
+                    EditorGUILayout.BeginHorizontal();
+                    _groupFoldouts[groupKey] = EditorGUILayout.Foldout(_groupFoldouts[groupKey], 
+                                                                       $"{systemGroup.Name} ({systems.Count()} systems)",
+                                                                       true,
+                                                                       EditorStyles.foldoutHeader);
+                    EditorGUILayout.EndHorizontal();
+
+                    if (_groupFoldouts[groupKey])
+                    {
+                        EditorGUI.indentLevel++;
+                        foreach (object system in systems)
+                        {
+                            DrawSystemInfo(system, managerSystemsContainer);
+                        }
+                        EditorGUI.indentLevel--;
+                    }
+    
+                    
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space(2);
+                }
+            }
+
+            void ResetGroupedSystemsCache()
+            {
+                GroupedSystemsCache.Clear();
+                // Group systems by their SystemGroup
+                foreach (object system in allSystems)
+                {
+                    string installerName = managerSystemsContainer.GetInstallerName(system);
+                    if (!GroupedSystemsCache.ContainsKey(installerName))
+                    {
+                        GroupedSystemsCache[installerName] = new Dictionary<SystemGroup, List<object>>();
+                    }
+                
+                    SystemGroup group = GetSystemGroup(system);
+
+                    if (!GroupedSystemsCache[installerName].ContainsKey(group))
+                    {
+                        GroupedSystemsCache[installerName][group] = new();
+                    }
+                    GroupedSystemsCache[installerName][group].Add(system);
+                }
             }
         }
 
-        private void DrawSystemInfo(object system)
+
+        private void DrawAllSystems(List<object> allSystems, SystemsContainer managerSystemsContainer)
+        {
+            foreach (Object system in allSystems)
+            {
+                DrawSystemInfo(system, managerSystemsContainer);
+            }
+        }
+
+        private void DrawSystemInfo(object system, SystemsContainer managerSystemsContainer)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             
-            // System name and type
-            EditorGUILayout.LabelField(system.GetType().Name, EditorStyles.boldLabel);
+            // System name and type with toggle button
+            EditorGUILayout.BeginHorizontal();
+            
+            // Check if system implements ISystem interface to access Active property
+            bool isActiveSystem = system is ISystem;
+            bool systemActive = isActiveSystem ? ((ISystem)system).Active : false;
+
+            if (!_systemFoldouts.ContainsKey(system))
+            {
+                _systemFoldouts.Add(system, false);
+            }
+            
+            
+            // Create toggle for system active state
+            if (isActiveSystem)
+            {
+                EditorGUI.BeginChangeCheck();
+                bool newActiveState = EditorGUILayout.Toggle(systemActive, GUILayout.Width(20));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    ((ISystem)system).Active = newActiveState;
+                }
+            }
+            
+            _systemFoldouts[system] = EditorGUILayout.Foldout(_systemFoldouts[system], 
+                                                              system.GetType().Name,
+                                                              true,
+                                                              EditorStyles.foldoutHeader);
+            EditorGUILayout.EndHorizontal();
             
             // Show additional system info if expanded
-            if (_showAllSystems)
+            if (_systemFoldouts[system])
             {
                 EditorGUI.indentLevel++;
                 
                 // Display system properties
                 EditorGUILayout.LabelField("Type: " + system.GetType().FullName);
-                EditorGUILayout.LabelField("Group: " + GetSystemGroup(system));
+                EditorGUILayout.LabelField("Installer: " + managerSystemsContainer.GetInstallerName(system));
+                
+                
+                if (isActiveSystem)
+                {
+                    EditorGUILayout.LabelField("Status: " + (systemActive ? "Active" : "Inactive"), 
+                        systemActive ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label) { normal = { textColor = Color.gray } });
+                    EditorGUILayout.LabelField("Group: " + ((ISystem)system).Group.Name);
+                }
                 
                 // Display interfaces implemented
                 var interfaces = system.GetType().GetInterfaces();

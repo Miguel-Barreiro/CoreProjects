@@ -14,6 +14,7 @@ namespace Core.Systems
         private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
         private readonly EventListenerSystemsContainer eventListenerSystemsContainer = new EventListenerSystemsContainer();
 
+        private readonly Dictionary<Object, string > SystemByInstallerName = new Dictionary<Object, string>();
         
         #region Public
         
@@ -76,11 +77,13 @@ namespace Core.Systems
         }
         
         
-        public void AddSystem(Object system)
+        public void AddSystem(object system, string name)
         {
             Type objectType = system.GetType();
             AddToInterfaces(system, objectType);
             systems.Add(system);
+            
+            SystemByInstallerName[system] = name;
             
             if (objectType.IsTypeOf<BaseEntitySystem>())
             {
@@ -98,6 +101,9 @@ namespace Core.Systems
             Type objectType = system.GetType();
             RemoveFromInterfaces(system, objectType);
             systems.Remove(system);
+            
+            SystemByInstallerName.Remove(system);
+            
             if (objectType.IsTypeOf<BaseEntitySystem>())
             {
                 entitySystemsContainer.RemoveComponentSystem(system as BaseEntitySystem);
@@ -109,6 +115,15 @@ namespace Core.Systems
             }
         }
 
+        
+        public string GetInstallerName(Object system)
+        {
+            if (SystemByInstallerName.TryGetValue(system, out string name))
+            {
+                return name;
+            }
+            return "NONE";
+        }
 
         #endregion
 

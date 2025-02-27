@@ -262,7 +262,7 @@ namespace Core.Initialization
             if (!ownedSystems.Contains(logicInstance))
             {
                 SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
-                systemsContainer.AddSystem(logicInstance);
+                systemsContainer.AddSystem(logicInstance, this.GetType().Name);
                 ownedSystems.Add(logicInstance);
             }
 
