@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Model;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
 using UnityEditor;
@@ -12,15 +12,56 @@ namespace Core.Editor.Systems
     [CustomEditor(typeof(SystemsManager))]
     public class SystemsManagerInspector : UnityEditor.Editor
     {
-        private bool _showAllSystems = false;
-        private bool _showSystemGroups = true;
         
         private Dictionary<string, bool> _installerFoldouts = new Dictionary<string, bool>();
         private Dictionary<(string, SystemGroup), bool> _groupFoldouts = new ();
         private Dictionary<object, bool> _systemFoldouts = new Dictionary<object, bool>();
         
-        private string _searchFilter = "";
         private Vector2 _scrollPosition;
+
+        
+        private readonly Dictionary<string, Dictionary<SystemGroup, List<object>>> GroupedSystemsCache = new();
+
+        private static readonly Color INSTALLER_FOLDOUT_COLOR = new Color(0.1f, 0.9f, 0.1f);
+        private GUIStyle INSTALLER_BUTTON_STYLE = null;
+        private GUIStyle GROUP_BUTTON_STYLE = null;
+        private GUIStyle SYSTEM_BUTTON_STYLE = null;
+        
+        
+        private GUIStyle ACTIVE_BUTTON_STYLE = null;
+        private GUIStyle INACTIVE_BUTTON_STYLE = null;
+
+        private void OnEnable()
+        {
+            INSTALLER_BUTTON_STYLE = new GUIStyle(EditorStyles.toolbarButton);
+            INSTALLER_BUTTON_STYLE.fontSize = 16;
+            INSTALLER_BUTTON_STYLE.fontStyle = FontStyle.Bold;
+            INSTALLER_BUTTON_STYLE.alignment = TextAnchor.MiddleLeft;
+            INSTALLER_BUTTON_STYLE.margin = new RectOffset(4, 4, 3, 3);
+            INSTALLER_BUTTON_STYLE.padding = new RectOffset(4, 4, 3, 3);
+            
+            GROUP_BUTTON_STYLE = new GUIStyle(EditorStyles.toolbarButton);
+            GROUP_BUTTON_STYLE.fontSize = 12;
+            GROUP_BUTTON_STYLE.fontStyle = FontStyle.Bold;
+            GROUP_BUTTON_STYLE.alignment = TextAnchor.MiddleLeft;
+            GROUP_BUTTON_STYLE.margin = new RectOffset(10, 4, 3, 3);
+            GROUP_BUTTON_STYLE.padding = new RectOffset(10, 4, 3, 3);
+            
+            SYSTEM_BUTTON_STYLE = new GUIStyle(EditorStyles.toolbarButton);
+            SYSTEM_BUTTON_STYLE.fontSize = 11;
+            SYSTEM_BUTTON_STYLE.alignment = TextAnchor.MiddleLeft;
+            SYSTEM_BUTTON_STYLE.margin = new RectOffset(20, 4, 2, 2);
+            SYSTEM_BUTTON_STYLE.padding = new RectOffset(20, 4, 2, 2);
+            
+            ACTIVE_BUTTON_STYLE = new GUIStyle(EditorStyles.miniButton);
+            ACTIVE_BUTTON_STYLE.normal.textColor = Color.green;
+            ACTIVE_BUTTON_STYLE.fontStyle = FontStyle.Bold;
+            
+            INACTIVE_BUTTON_STYLE = new GUIStyle(EditorStyles.miniButton);
+            INACTIVE_BUTTON_STYLE.normal.textColor = Color.red;
+            INACTIVE_BUTTON_STYLE.fontStyle = FontStyle.Bold;
+
+        }
 
         public override void OnInspectorGUI()
         {
@@ -36,17 +77,6 @@ namespace Core.Editor.Systems
                 return;
             }
 
-            // Search filter
-            _searchFilter = EditorGUILayout.TextField("Search", _searchFilter);
-
-            // Display options
-            EditorGUILayout.BeginHorizontal();
-            // _showAllSystems = EditorGUILayout.ToggleLeft("Show All Systems", _showAllSystems, GUILayout.Width(150));
-            // _showSystemGroups = EditorGUILayout.ToggleLeft("Group by Type", _showSystemGroups, GUILayout.Width(150));
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
-
             // Get all systems
             using CachedList<Object> allSystems = ListCache<Object>.Get();
             GetAllSystems(manager.SystemsContainer, allSystems);
@@ -59,59 +89,19 @@ namespace Core.Editor.Systems
 
             // Begin scrollable area
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(400));
-
-            // if (_showSystemGroups)
-            // {
-                DrawSystemsByGroup(allSystems, manager.SystemsContainer);
-            // }
-            // else
-            // {
-            //     DrawAllSystems(allSystems, manager.SystemsContainer);
-            // }
+            
+            DrawSystemsByGroup(allSystems, manager.SystemsContainer);
 
             EditorGUILayout.EndScrollView();
-
-            // Add buttons for common actions
-            // EditorGUILayout.Space();
-            // EditorGUILayout.BeginHorizontal();
-            //
-            // if (GUILayout.Button("Expand All"))
-            // {
-            //     foreach (var group in System.Enum.GetValues(typeof(SystemGroup)))
-            //     {
-            //         _groupFoldouts[(SystemGroup)group] = true;
-            //     }
-            //     _showAllSystems = true;
-            // }
-            //
-            // if (GUILayout.Button("Collapse All"))
-            // {
-            //     foreach (var group in System.Enum.GetValues(typeof(SystemGroup)))
-            //     {
-            //         _groupFoldouts[(SystemGroup)group] = false;
-            //     }
-            //     _showAllSystems = false;
-            // }
-            //
-            // EditorGUILayout.EndHorizontal();
         }
 
         private void GetAllSystems(SystemsContainer container, List<Object> result)
         {
-            // This is a placeholder - you'll need to implement a way to get all systems from the container
-            // The actual implementation depends on how SystemsContainer stores its systems
             result.AddRange(container.GetAllSystems());
-            
-            // Example (modify based on your actual SystemsContainer implementation):
-            // foreach (var system in container.GetAllSystems())
-            // {
-            //     systems.Add(system);
-            // }
         }
 
-        private readonly Dictionary<string, Dictionary<SystemGroup, List<object>>> GroupedSystemsCache = new();
-        
-        
+
+
         private void DrawSystemsByGroup(List<object> allSystems, SystemsContainer managerSystemsContainer)
         {
             ResetGroupedSystemsCache();
@@ -125,13 +115,26 @@ namespace Core.Editor.Systems
                 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 
+
+                Color previousBackgroundColor = GUI.backgroundColor;
+                GUI.backgroundColor = INSTALLER_FOLDOUT_COLOR;
+
                 // Group header with count
                 EditorGUILayout.BeginHorizontal();
-                _installerFoldouts[installer] = EditorGUILayout.Foldout(_installerFoldouts[installer], 
-                                                                        $"{installer}", 
-                                                                        true, 
-                                                                        EditorStyles.foldoutHeader);
+                
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                
+                string buttonText = _installerFoldouts[installer] ? $"▼ {installer}" : $"► {installer}";
+                if (GUILayout.Button(buttonText, INSTALLER_BUTTON_STYLE, GUILayout.ExpandWidth(true)))
+                {
+                    _installerFoldouts[installer] = !_installerFoldouts[installer];
+                }
+                
+                EditorGUILayout.EndVertical();
+                
+
                 EditorGUILayout.EndHorizontal();
+                GUI.backgroundColor = previousBackgroundColor;
 
                 if (_installerFoldouts[installer])
                 {
@@ -139,11 +142,12 @@ namespace Core.Editor.Systems
                 }
                 
                 EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(2);
+                EditorGUILayout.Space(4);
             }
 
             void DrawInstallerGroups(string installer, Dictionary<SystemGroup,List<object>> installerGroups)
             {
+                EditorGUI.indentLevel++;
 
                 foreach ((SystemGroup systemGroup, List<object> systems)  in installerGroups)
                 {
@@ -157,10 +161,13 @@ namespace Core.Editor.Systems
                     
                     // Group header with count
                     EditorGUILayout.BeginHorizontal();
-                    _groupFoldouts[groupKey] = EditorGUILayout.Foldout(_groupFoldouts[groupKey], 
-                                                                       $"{systemGroup.Name} ({systems.Count()} systems)",
-                                                                       true,
-                                                                       EditorStyles.foldoutHeader);
+                    
+                    string buttonText = _groupFoldouts[groupKey] ? $"▼ {systemGroup.Name} ({systems.Count()} systems)" : $"► {systemGroup.Name} ({systems.Count()} systems)";
+                    if (GUILayout.Button(buttonText, GROUP_BUTTON_STYLE, GUILayout.ExpandWidth(true)))
+                    {
+                        _groupFoldouts[groupKey] = !_groupFoldouts[groupKey];
+                    }
+                    
                     EditorGUILayout.EndHorizontal();
 
                     if (_groupFoldouts[groupKey])
@@ -177,6 +184,8 @@ namespace Core.Editor.Systems
                     EditorGUILayout.EndVertical();
                     EditorGUILayout.Space(2);
                 }
+                EditorGUI.indentLevel--;
+
             }
 
             void ResetGroupedSystemsCache()
@@ -201,15 +210,7 @@ namespace Core.Editor.Systems
                 }
             }
         }
-
-
-        private void DrawAllSystems(List<object> allSystems, SystemsContainer managerSystemsContainer)
-        {
-            foreach (Object system in allSystems)
-            {
-                DrawSystemInfo(system, managerSystemsContainer);
-            }
-        }
+        
 
         private void DrawSystemInfo(object system, SystemsContainer managerSystemsContainer)
         {
@@ -228,21 +229,24 @@ namespace Core.Editor.Systems
             }
             
             
-            // Create toggle for system active state
+            // Create button for system active state instead of toggle
             if (isActiveSystem)
             {
-                EditorGUI.BeginChangeCheck();
-                bool newActiveState = EditorGUILayout.Toggle(systemActive, GUILayout.Width(20));
-                if (EditorGUI.EndChangeCheck())
+                string buttonText = systemActive ? "ACTIVE" : "PAUSED";
+                GUIStyle buttonStyle = systemActive ? ACTIVE_BUTTON_STYLE : INACTIVE_BUTTON_STYLE;
+                
+                if (GUILayout.Button(buttonText, buttonStyle, GUILayout.Width(60)))
                 {
-                    ((ISystem)system).Active = newActiveState;
+                    ((ISystem)system).Active = !systemActive;
                 }
             }
             
-            _systemFoldouts[system] = EditorGUILayout.Foldout(_systemFoldouts[system], 
-                                                              system.GetType().Name,
-                                                              true,
-                                                              EditorStyles.foldoutHeader);
+            string foldoutButtonText = _systemFoldouts[system] ? $"▼ {system.GetType().Name}" : $"► {system.GetType().Name}";
+            if (GUILayout.Button(foldoutButtonText, SYSTEM_BUTTON_STYLE, GUILayout.ExpandWidth(true)))
+            {
+                _systemFoldouts[system] = !_systemFoldouts[system];
+            }
+            
             EditorGUILayout.EndHorizontal();
             
             // Show additional system info if expanded

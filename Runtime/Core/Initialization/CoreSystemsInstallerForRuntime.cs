@@ -63,7 +63,7 @@ namespace Core.Initialization
 		
 		private void BuildSystemsManager()
 		{
-			GameObject systemsManager = new GameObject("SystemsManager");
+			GameObject systemsManager = new GameObject("[Systems Manager]");
 			SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
 			GameObject.DontDestroyOnLoad(systemsManager);
 
