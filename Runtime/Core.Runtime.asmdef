@@ -1,5 +1,5 @@
 {
-    "name": "MiguelCore",
+    "name": "Core.Runtime",
     "rootNamespace": "Core",
     "references": [
         "Zenject",
