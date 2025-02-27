@@ -72,6 +72,7 @@ namespace Core.Events
 		}
 		
 		
+		private const string ON_EVENT_NAME = nameof(IEventListener<OnProjectInstallCompleteEvent>.OnEvent);
 		public sealed class EventListenerSystemCache
 		{
 			public readonly Object System;
@@ -93,7 +94,7 @@ namespace Core.Events
 				// Type genericListeneriType = typeof(IEventListener<>);
 				// Type eventListenerType = genericListeneriType.MakeGenericType( eventType );
 
-				CachedOnEventMethod = systemType.GetMethodExt(nameof(IEventListener<OnProjectInstallCompleteEvent>.OnEvent),
+				CachedOnEventMethod = systemType.GetMethodExt(ON_EVENT_NAME,
 															BindingFlags.Public, eventType);
 			}
 		}

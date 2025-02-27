@@ -18,7 +18,7 @@ namespace Core.Initialization
 
         private void OnDestroy()
         {
-            GetBootstrapper().RemoveInstaller(GetLogicInstaller());
+            // GetBootstrapper().RemoveInstaller(GetLogicInstaller());
         }
 
     }

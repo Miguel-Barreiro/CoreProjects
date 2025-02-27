@@ -23,10 +23,21 @@ namespace Core.Initialization
         {
             InstallSystems();
         }
+        
+        internal void UninstallSystems()
+        {
+            SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
+            foreach ( (System.Object system, List<Type> types) in ownedSystems)
+            {
+                systemsContainer.RemoveSystem(system);
+                foreach (Type type in types)
+                    Container.Unbind(type);
+            }
+        }
 
         internal void InitializeInstances()
         {
-            foreach (System.Object system in ownedSystems)
+            foreach ( (System.Object system, List<Type> types) in ownedSystems)
             {
                 if(system is IInitSystem initSystem)
                 {
@@ -47,7 +58,7 @@ namespace Core.Initialization
         internal async UniTask<bool> LoadSystems()
         {
             List<UniTask<bool>> loadTasks = new (10);
-            foreach (System.Object system in ownedSystems)
+            foreach ( (System.Object system, List<Type> types) in ownedSystems)
             {
                 if(system is ILoadSystem loadSystem)
                 {
@@ -68,19 +79,13 @@ namespace Core.Initialization
 
         internal void StartSystems()
         {
-            foreach (System.Object system in ownedSystems)
+            foreach ( (System.Object system, List<Type> types) in ownedSystems)
             {
                 if(system is IStartSystem startSystem)
                 {
                     startSystem.StartSystem();
                 }
             }
-        }
-        
-        public void Dispose()
-        {
-            //TODO: maybe we need to kickstart a shutdown of owned systems  
-            Clear();
         }
 
         
@@ -199,14 +204,24 @@ namespace Core.Initialization
         protected readonly List<GameObject> injectableGameObjects = new ();
         protected readonly List<System.Object> injectableObjects = new ();
 
-        protected readonly List<System.Object> ownedSystems = new ();
+        protected readonly Dictionary<System.Object, List<Type>> ownedSystems = new ();
         protected readonly List<GameObject> ownedGameObjectSystems = new ();
         protected SystemsInstallerBase(DiContainer container) { Container = container; }
 
         protected void Clear()
         {
             using CachedList<System.Object> ownedSystemsTemp = ListCache<System.Object>.Get();
-            ownedSystemsTemp.AddRange(this.ownedSystems);
+            foreach ( (System.Object system, List<Type> types) in ownedSystems)
+            {
+                ownedSystemsTemp.Add(system);
+                foreach (Type type in types)
+                    Container.Unbind(type);
+            }
+            foreach (GameObject system in ownedGameObjectSystems)
+            {
+                GameObject.Destroy(system);
+            }
+            
             foreach (System.Object system in ownedSystemsTemp)
             {
                 RemoveSystem(system);
@@ -259,13 +274,13 @@ namespace Core.Initialization
             RegisterDisposableIfNeeded(logicInstance);
             AddInjectable(logicInstance);
 
-            if (!ownedSystems.Contains(logicInstance))
+            if (!ownedSystems.ContainsKey(logicInstance))
             {
                 SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
                 systemsContainer.AddSystem(logicInstance, this.GetType().Name);
-                ownedSystems.Add(logicInstance);
+                ownedSystems.Add(logicInstance, new());
             }
-
+            ownedSystems[logicInstance].Add(typeof(T));
         }
         
         private void AddSystemsFromGameobject(GameObject logicInstance)
@@ -279,6 +294,7 @@ namespace Core.Initialization
                 }
                 ownedGameObjectSystems.Add(logicInstance);
             }
+
         }
         private void RemoveSystem<T>(T logicInstance)
         {

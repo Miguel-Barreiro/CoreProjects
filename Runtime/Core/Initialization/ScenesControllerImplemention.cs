@@ -1,4 +1,6 @@
-﻿using Core.Systems;
+﻿using System.Collections.Generic;
+using Core.Systems;
+using Core.Utils;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +21,10 @@ namespace Core.Initialization
         [Inject] private readonly SystemsController systemsController = null!;
         [Inject] private readonly Bootstrapper Bootstrapper = null!;
 
+        
+        private List<SystemsInstallerBase> currentSceneLogicInstallers = new List<SystemsInstallerBase>();
+        private List<string> currentSceneNames = new List<string>();
+        
         #region Public
 
         //
@@ -48,13 +54,24 @@ namespace Core.Initialization
         private async void LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
             {
+                OperationResult uninstallCurrentSceneSystems = await UninstallCurrentSceneSystems();
+                if(!uninstallCurrentSceneSystems.IsSuccess)
+                {
+                    string sceneNames = GetCurrenSceneNamesDebugLabel();
+                    Debug.LogError($"Failed to uninstall current scenes({sceneNames}) systems.\n Error: {uninstallCurrentSceneSystems.Exception}");
+                    return;
+                }
+
                 await LoadSceneGameobjectsAsync(sceneName, mode);
 
                 SceneBootstrap[] sceneInstallers = GameObject.FindObjectsByType<SceneBootstrap>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 
                 foreach (SceneBootstrap sceneInstaller in sceneInstallers)
                 {
-                    Bootstrapper.AddInstaller(sceneInstaller.GetLogicInstaller());
+                    SystemsInstallerBase installer = sceneInstaller.GetLogicInstaller();
+                    
+                    currentSceneLogicInstallers.Add(installer);
+                    Bootstrapper.AddInstaller(installer);
                 }
 
                 bool setupResult = await Bootstrapper.Run();
@@ -68,7 +85,24 @@ namespace Core.Initialization
             }
         }
 
-        
+        private string GetCurrenSceneNamesDebugLabel()
+        {
+            string result = "";
+            currentSceneNames.ForEach(sceneName => result += $"<{sceneName}>");
+            return result;
+        }
+
+        private async UniTask<OperationResult> UninstallCurrentSceneSystems()
+        {
+            foreach (SystemsInstallerBase currentSceneLogicInstaller in currentSceneLogicInstallers)
+            {
+                currentSceneLogicInstaller.UninstallSystems();
+                Bootstrapper.RemoveInstaller(currentSceneLogicInstaller);
+            }
+            currentSceneLogicInstallers.Clear();
+            
+            return OperationResult.Success();
+        }
 
         #endregion
 
