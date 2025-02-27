@@ -14,8 +14,7 @@ namespace Core.Initialization
             SystemsInstallerBase sceneInstaller = GetLogicInstaller();
             bootstrapper.AddInstaller(sceneInstaller);
 
-            bootstrapper.SetCurrentSceneInstaller(sceneInstaller);
-            
+            bootstrapper.AddCurrentSceneInstaller(sceneInstaller);
             
             //TODO: we can store now the logic installer to understand what systems to destroy when the corresponding scene 
             // is destroyed

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils;
+using Core.Utils.CachedDataStructures;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,7 +23,6 @@ namespace Core.Initialization
         [Inject] private readonly Bootstrapper Bootstrapper = null!;
 
         
-        private List<SystemsInstallerBase> currentSceneLogicInstallers = new List<SystemsInstallerBase>();
         private List<string> currentSceneNames = new List<string>();
         
         #region Public
@@ -70,8 +70,8 @@ namespace Core.Initialization
                 {
                     SystemsInstallerBase installer = sceneInstaller.GetLogicInstaller();
                     
-                    currentSceneLogicInstallers.Add(installer);
                     Bootstrapper.AddInstaller(installer);
+                    Bootstrapper.AddCurrentSceneInstaller(installer);
                 }
 
                 bool setupResult = await Bootstrapper.Run();
@@ -94,6 +94,9 @@ namespace Core.Initialization
 
         private async UniTask<OperationResult> UninstallCurrentSceneSystems()
         {
+            using CachedList<SystemsInstallerBase> currentSceneLogicInstallers = ListCache<SystemsInstallerBase>.Get();
+            currentSceneLogicInstallers.AddRange(Bootstrapper.GetCurrentSceneInstallers());
+            
             foreach (SystemsInstallerBase currentSceneLogicInstaller in currentSceneLogicInstallers)
             {
                 currentSceneLogicInstaller.UninstallSystems();

@@ -9,7 +9,7 @@ namespace Core.Initialization
 	{
 		private readonly DiContainer Container;
 		
-		private SystemsInstallerBase _currentSceneInstaller;
+		private readonly List<SystemsInstallerBase> _currentSceneInstallers = new List<SystemsInstallerBase>();
 		
 		private readonly Queue<SystemsInstallerBase> Installers = new Queue<SystemsInstallerBase>();
 		private readonly HashSet<SystemsInstallerBase> completedInstallers = new HashSet<SystemsInstallerBase>();
@@ -29,14 +29,20 @@ namespace Core.Initialization
 			}
 		}
 
-		internal void SetCurrentSceneInstaller(SystemsInstallerBase sceneInstaller)
+		internal void AddCurrentSceneInstaller(SystemsInstallerBase sceneInstaller)
 		{
-			_currentSceneInstaller = sceneInstaller;
+			_currentSceneInstallers.Add(sceneInstaller);
+		}
+		
+		public IEnumerable<SystemsInstallerBase>  GetCurrentSceneInstallers()
+		{
+			return _currentSceneInstallers;
 		}
 
 
 		public void RemoveInstaller(SystemsInstallerBase installer)
 		{
+			_currentSceneInstallers.Remove(installer);
 			completedInstallers.Remove(installer);
 		}
 
@@ -55,9 +61,12 @@ namespace Core.Initialization
 				installer.CreateSystems();
 			}
 			
-			if(_currentSceneInstaller != null)
+			if(_currentSceneInstallers.Count > 0 )
 			{
-				UpdateObjectBuilder(_currentSceneInstaller);
+				foreach (SystemsInstallerBase currentSceneInstaller in _currentSceneInstallers)
+				{
+					UpdateObjectBuilder(currentSceneInstaller);
+				}
 			}
 			
 			foreach (SystemsInstallerBase installer in systemsInstallerBases)
