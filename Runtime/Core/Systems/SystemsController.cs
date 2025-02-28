@@ -182,11 +182,10 @@ namespace Core.Systems
             //TODO: Optimize this by grouping by component type
             using CachedList<BaseEntity> destroyedEntitiesList = ListCache<BaseEntity>.Get();
             IEnumerable<BaseEntity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
+            destroyedEntitiesList.AddRange(allDestroyedEntities);
 
             while (destroyedEntitiesList.Count > 0)
             {
-                destroyedEntitiesList.Clear();
-                destroyedEntitiesList.AddRange(allDestroyedEntities);
                 EntitiesContainer.ClearDestroyedEntities();
                 
                 foreach (BaseEntity destroyedEntity in destroyedEntitiesList)
@@ -206,7 +205,8 @@ namespace Core.Systems
                 }
                 
                 allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
-                
+                destroyedEntitiesList.Clear();
+                destroyedEntitiesList.AddRange(allDestroyedEntities);
             }
         }
 
@@ -216,11 +216,10 @@ namespace Core.Systems
             //TODO: Optimize this by grouping by component type
             using CachedList<BaseEntity> newEntitiesList = ListCache<BaseEntity>.Get();
             IEnumerable<BaseEntity> newEntities = EntitiesContainer.GetAllNewEntities();
+            newEntitiesList.AddRange(newEntities);
 
             while (newEntitiesList.Count > 0)
             {
-                newEntitiesList.Clear();
-                newEntitiesList.AddRange(newEntities);
                 EntitiesContainer.UpgradeCurrentNewEntities();
                 
                 foreach (BaseEntity newEntity in newEntitiesList)
@@ -240,6 +239,8 @@ namespace Core.Systems
                 }
                 
                 newEntities = EntitiesContainer.GetAllNewEntities();
+                newEntitiesList.Clear();
+                newEntitiesList.AddRange(newEntities);
                 
             }
         }
