@@ -181,9 +181,10 @@ namespace Core.Systems
         {
             //TODO: Optimize this by grouping by component type
             using CachedList<BaseEntity> destroyedEntitiesList = ListCache<BaseEntity>.Get();
-            do
+            IEnumerable<BaseEntity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
+
+            while (destroyedEntitiesList.Count > 0)
             {
-                IEnumerable<BaseEntity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
                 destroyedEntitiesList.Clear();
                 destroyedEntitiesList.AddRange(allDestroyedEntities);
                 EntitiesContainer.ClearDestroyedEntities();
@@ -204,7 +205,9 @@ namespace Core.Systems
                     }
                 }
                 
-            } while (destroyedEntitiesList.Count > 0);
+                allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
+                
+            }
         }
 
         private void ProcessNewEntities()
@@ -212,9 +215,10 @@ namespace Core.Systems
             
             //TODO: Optimize this by grouping by component type
             using CachedList<BaseEntity> newEntitiesList = ListCache<BaseEntity>.Get();
-            do
+            IEnumerable<BaseEntity> newEntities = EntitiesContainer.GetAllNewEntities();
+
+            while (newEntitiesList.Count > 0)
             {
-                IEnumerable<BaseEntity> newEntities = EntitiesContainer.GetAllNewEntities();
                 newEntitiesList.Clear();
                 newEntitiesList.AddRange(newEntities);
                 EntitiesContainer.UpgradeCurrentNewEntities();
@@ -235,7 +239,9 @@ namespace Core.Systems
                     }
                 }
                 
-            } while (newEntitiesList.Count > 0);
+                newEntities = EntitiesContainer.GetAllNewEntities();
+                
+            }
         }
 
         public enum SystemsControllerMode
