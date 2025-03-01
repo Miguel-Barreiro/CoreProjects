@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Systems;
+using Core.Utils;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
 
@@ -47,7 +48,7 @@ namespace Core.Initialization
 		}
 
 
-		public async UniTask<bool> Run()
+		public async UniTask<OperationResult> Run()
 		{
 			SetupSystemsContainer();
 			SetupObjectBuilder();
@@ -81,14 +82,10 @@ namespace Core.Initialization
 			
 			foreach (SystemsInstallerBase installer in systemsInstallerBases)
 			{
-				bool result = await installer.LoadSystems();
-				if (result)
-				{
-					completedInstallers.Add(installer);
-				} else
-				{
-					return false;
-				}
+				OperationResult result = await installer.LoadSystems();
+				if (result.IsFailure)
+					return result;
+				completedInstallers.Add(installer);
 			}
 
 			foreach (SystemsInstallerBase installer in systemsInstallerBases)
@@ -101,7 +98,7 @@ namespace Core.Initialization
 				installer.OnComplete();
 			}
 			
-			return true;
+			return OperationResult.Success();
 		}
 
 

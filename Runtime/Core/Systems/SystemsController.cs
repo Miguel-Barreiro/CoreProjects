@@ -22,6 +22,8 @@ namespace Core.Systems
         [Inject] private readonly EntitiesContainer EntitiesContainer = null!;
         [Inject] private readonly EventQueue eventQueue = null!;
 
+        public event Action OnEndFrame;
+        
         private bool running = false;
         private SystemsControllerMode mode = SystemsControllerMode.UNIT_TESTS;
         
@@ -98,7 +100,8 @@ namespace Core.Systems
             {
                 Debug.LogError("Error in an event: " + e);
             }
-#endif                
+#endif
+            OnEndFrame?.Invoke();
 
             void ExecuteComponentUpdateSystems()
             {

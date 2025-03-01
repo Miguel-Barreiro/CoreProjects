@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Systems;
+using Core.Utils;
 using Core.Utils.CachedDataStructures;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
@@ -54,8 +55,8 @@ namespace Core.Initialization
             }
         }
 
-        
-        internal async UniTask<bool> LoadSystems()
+        private const string FAIL_LOAD_MESSAGE = "Failed to load systems";
+        internal async UniTask<OperationResult> LoadSystems()
         {
             List<UniTask<bool>> loadTasks = new (10);
             foreach ( (System.Object system, List<Type> types) in ownedSystems)
@@ -74,7 +75,7 @@ namespace Core.Initialization
             {
                 result = result && loadTask.AsValueTask().Result;
             }
-            return result;
+            return result? OperationResult.Success() : OperationResult.Failure(FAIL_LOAD_MESSAGE);
         }
 
         internal void StartSystems()

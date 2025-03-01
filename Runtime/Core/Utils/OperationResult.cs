@@ -38,6 +38,9 @@ namespace Core.Utils
     {
         public bool IsSuccess { get; private set; }
         public bool IsFailure => !IsSuccess;
+        
+        private static readonly OperationResult SuccessInstance = new OperationResult(true, null);
+        
         public Exception Exception { get; private set; }
 
         private OperationResult(bool isSuccess, Exception e)
@@ -46,10 +49,7 @@ namespace Core.Utils
             Exception = e;
         }
 
-        public static OperationResult Success()
-        {
-            return new OperationResult(true, null);
-        }
+        public static OperationResult Success() => SuccessInstance;
 
         public static OperationResult Failure(Exception e)
         {

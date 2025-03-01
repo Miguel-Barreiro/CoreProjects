@@ -1,5 +1,6 @@
 using Core.Initialization;
 using Core.Systems;
+using Core.Utils;
 using Core.Zenject.Source.Main;
 using NUnit.Framework;
 using UnityEngine;
@@ -31,9 +32,14 @@ namespace Core.Editor
 
 			Bootstrapper bootstrapper = new Bootstrapper(container);
 			bootstrapper.AddInstaller(installer);
-			
-			bool result = await bootstrapper.Run();
-			
+
+			OperationResult result = await bootstrapper.Run();
+			if (result.IsFailure)
+			{
+				Debug.LogError("Failed to run test bootstrapper");
+				return;
+			}
+
 			Container.Inject(this);
 		}
 		
