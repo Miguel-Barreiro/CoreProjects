@@ -110,8 +110,7 @@ namespace Core.Initialization
                 {
                     SystemsInstallerBase installer = sceneInstaller.GetLogicInstaller();
                     
-                    Bootstrapper.AddInstaller(installer);
-                    Bootstrapper.AddCurrentSceneInstaller(installer);
+                    Bootstrapper.AddInstaller(installer, true);
                 }
 
                 return await Bootstrapper.Run();

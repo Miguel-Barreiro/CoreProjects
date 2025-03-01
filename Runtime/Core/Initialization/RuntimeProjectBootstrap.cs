@@ -13,8 +13,8 @@ namespace Core.Initialization
             Bootstrapper bootstrapper = GetBootstrapper();
 
             CoreSystemsInstallerForRuntime coreSystemsInstaller = new CoreSystemsInstallerForRuntime(transform, Container);
-            bootstrapper.AddInstaller(coreSystemsInstaller);
-            bootstrapper.AddInstaller(GetLogicInstaller());
+            bootstrapper.AddInstaller(coreSystemsInstaller,false);
+            bootstrapper.AddInstaller(GetLogicInstaller(), false);
 
             RunFullGameSetup().Forget();
 

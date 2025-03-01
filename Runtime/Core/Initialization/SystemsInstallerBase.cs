@@ -27,13 +27,7 @@ namespace Core.Initialization
         
         internal void UninstallSystems()
         {
-            SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
-            foreach ( (System.Object system, List<Type> types) in ownedSystems)
-            {
-                systemsContainer.RemoveSystem(system);
-                foreach (Type type in types)
-                    Container.Unbind(type);
-            }
+            Clear();
         }
 
         internal void InitializeInstances()

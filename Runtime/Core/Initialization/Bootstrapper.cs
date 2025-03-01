@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils;
+using Core.Utils.CachedDataStructures;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
 
@@ -22,17 +23,16 @@ namespace Core.Initialization
 		public Bootstrapper(DiContainer container) { Container = container; }
 		// private readonly Dictionary<SystemsInstallerBase, bool> InstallersBy = new List<SystemsInstallerBase>();
 		
-		public void AddInstaller(SystemsInstallerBase installer)
+		public void AddInstaller(SystemsInstallerBase installer, bool isSceneInstaller)
 		{
 			if (!completedInstallers.Contains(installer) && !Installers.Contains(installer))
 			{
 				Installers.Enqueue(installer);
+				if (isSceneInstaller)
+				{
+					_currentSceneInstallers.Add(installer);
+				}
 			}
-		}
-
-		internal void AddCurrentSceneInstaller(SystemsInstallerBase sceneInstaller)
-		{
-			_currentSceneInstallers.Add(sceneInstaller);
 		}
 		
 		public IEnumerable<SystemsInstallerBase>  GetCurrentSceneInstallers()
@@ -41,10 +41,25 @@ namespace Core.Initialization
 		}
 
 
-		public void RemoveInstaller(SystemsInstallerBase installer)
+		public void RemoveInstaller(SystemsInstallerBase installerToRemove)
 		{
-			_currentSceneInstallers.Remove(installer);
-			completedInstallers.Remove(installer);
+			_currentSceneInstallers.Remove(installerToRemove);
+			completedInstallers.Remove(installerToRemove);
+			if (Installers.Contains(installerToRemove))
+			{
+				using CachedList<SystemsInstallerBase> temp = ListCache<SystemsInstallerBase>.Get();
+				while (Installers.TryDequeue(out SystemsInstallerBase installer))
+				{
+					if (installer != installerToRemove)
+					{
+						temp.Add(installer);
+					}
+				}
+				foreach (SystemsInstallerBase installerToPuckBack in temp)
+				{
+					Installers.Enqueue(installerToPuckBack);
+				}
+			}
 		}
 
 

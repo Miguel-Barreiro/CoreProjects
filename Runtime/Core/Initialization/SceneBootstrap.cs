@@ -12,9 +12,7 @@ namespace Core.Initialization
             Bootstrapper bootstrapper = GetBootstrapper();
 
             SystemsInstallerBase sceneInstaller = GetLogicInstaller();
-            bootstrapper.AddInstaller(sceneInstaller);
-
-            bootstrapper.AddCurrentSceneInstaller(sceneInstaller);
+            bootstrapper.AddInstaller(sceneInstaller,true);
             
             //TODO: we can store now the logic installer to understand what systems to destroy when the corresponding scene 
             // is destroyed

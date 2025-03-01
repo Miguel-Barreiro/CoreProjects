@@ -31,7 +31,7 @@ namespace Core.Editor
 			CoreSystemsForTestsInstaller installer = new CoreSystemsForTestsInstaller(this, Container);
 
 			Bootstrapper bootstrapper = new Bootstrapper(container);
-			bootstrapper.AddInstaller(installer);
+			bootstrapper.AddInstaller(installer, false);
 
 			OperationResult result = await bootstrapper.Run();
 			if (result.IsFailure)
