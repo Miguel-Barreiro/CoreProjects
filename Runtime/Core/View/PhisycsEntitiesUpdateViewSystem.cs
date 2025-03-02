@@ -28,7 +28,7 @@ namespace Core.View
 			EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
 			if (entityViewAtributes == null)
 			{
-				Debug.LogError($"view for Entity with id {entity.ID} not found");
+				Debug.LogError($"view for Entity with id {entity.ID}({entity.GetType().Name}) not found");
 				return;
 			}
 
