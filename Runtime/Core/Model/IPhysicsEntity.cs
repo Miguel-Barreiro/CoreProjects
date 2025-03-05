@@ -5,11 +5,8 @@
 
 namespace Core.Model
 {
-    public interface I2DPhysicsEntity : IComponent
+    public interface I2DPhysicsEntity : IPositionEntity
     {
-        Vector2 Position { get; set; }
-        Rigidbody2D Prefab { get; }
-
         Rigidbody2D Rigidbody2D { get; set; }
     }
     
