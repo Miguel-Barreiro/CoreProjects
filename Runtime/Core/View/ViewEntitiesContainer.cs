@@ -7,7 +7,15 @@ using Zenject;
 
 namespace Core.View
 {
-	public sealed class ViewEntitiesContainer
+	public interface IViewEntitiesContainer
+	{
+		public void Destroy(EntId entityID);
+		public GameObject? Spawn(GameObject entityPrefab, IEntity entity);
+		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
+		public void SetEntityViewParent(EntId entId, Transform newParent);
+	}
+
+	public sealed class ViewEntitiesContainer : IViewEntitiesContainer
 	{
 		[Inject] private readonly GenericGameObjectPool genericGameObjectPool = null!;
 		
@@ -28,7 +36,7 @@ namespace Core.View
 			GameobjectsByEntityId.Remove(entityID);
 		}
 		
-		internal GameObject? Spawn(GameObject entityPrefab, IEntity entity)
+		public GameObject? Spawn(GameObject entityPrefab, IEntity entity)
 		{
 			if (entityPrefab == null)
 			{
@@ -42,6 +50,17 @@ namespace Core.View
 			entityAttributes.GameObject = newGameObject;
 			
 			return newGameObject;
+		}
+
+		public void SetEntityViewParent(EntId entId, Transform newParent)
+		{
+			if (!GameobjectsByEntityId.TryGetValue(entId, out EntityViewAtributes entityViewAtributes))
+			{
+				return;
+			}
+			
+			if (entityViewAtributes.GameObject != null) 
+				entityViewAtributes.GameObject.transform.SetParent(newParent);
 		}
 
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId)

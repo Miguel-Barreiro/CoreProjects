@@ -118,25 +118,20 @@ namespace Core.View
                 GameObject pooledGameobject = pool[0];
                 pool.RemoveAt(0);
 
-                if (pooledGameobject != null)
-                {
-                    managedGameObjects.Add(pooledGameobject);
-                    prefabsFromObjects.Add(pooledGameobject, prefab);
-                    pooledGameobject.transform.SetParent(parent);
-
-
-                    if (activate)
-                    {
-                        ActivateGameObject(pooledGameobject);
-                    }
-
-                    return pooledGameobject;
-                }
-                else
-                {
+                if (pooledGameobject == null)
                     Debug.LogError($"GenericPool: pooled object was null {prefab.gameObject.name}");
+
+                managedGameObjects.Add(pooledGameobject);
+                prefabsFromObjects.Add(pooledGameobject, prefab);
+                pooledGameobject.transform.SetParent(parent);
+
+
+                if (activate)
+                {
+                    ActivateGameObject(pooledGameobject);
                 }
-                
+
+                return pooledGameobject;
             }
             
             
