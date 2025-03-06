@@ -9,7 +9,7 @@ using Zenject;
 namespace Core.View
 {
     
-    public sealed class PositionEntityUpdateViewSystem : ComponentSystem<IKineticEntity>
+    public sealed class KineticEntityUpdateViewSystem : ComponentSystem<IKineticEntity>
     {
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 

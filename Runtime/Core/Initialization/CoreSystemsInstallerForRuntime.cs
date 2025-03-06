@@ -76,8 +76,8 @@ namespace Core.Initialization
 			ViewEntitiesContainer viewEntitiesContainer = new ViewEntitiesContainer();
 			BindInstance(viewEntitiesContainer);
 
-			PositionEntityUpdateViewSystem positionEntityUpdateViewSystem = new();
-			BindInstance(positionEntityUpdateViewSystem);
+			KineticEntityUpdateViewSystem kineticEntityUpdateViewSystem = new();
+			BindInstance(kineticEntityUpdateViewSystem);
 
 			PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
 			BindInstance(phisycsEntitiesUpdateViewSystem);
