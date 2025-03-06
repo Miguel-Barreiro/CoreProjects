@@ -1,8 +1,8 @@
 ﻿using System;
 using Core.Model.Stats;
 using Game.Simulation.Map.Importing;
-using Unity.Plastic.Newtonsoft.Json;
-using Unity.Plastic.Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Core.Core.Runtime.Core.Model.Stats
 {
