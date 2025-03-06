@@ -9,11 +9,11 @@ using Zenject;
 namespace Core.View
 {
     
-    public sealed class PositionEntityUpdateViewSystem : ComponentSystem<IPositionEntity>
+    public sealed class PositionEntityUpdateViewSystem : ComponentSystem<IKineticEntity>
     {
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 
-        public override void OnNew(IPositionEntity newEntity)
+        public override void OnNew(IKineticEntity newEntity)
         {
             if (newEntity.Prefab == null)
             {
@@ -29,7 +29,7 @@ namespace Core.View
 
         }
 
-        public override void OnDestroy(IPositionEntity entity)
+        public override void OnDestroy(IKineticEntity entity)
         {
             EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
             if (entityViewAtributes == null)
@@ -42,7 +42,7 @@ namespace Core.View
         }
 
 
-        public override void Update(IPositionEntity entity, float deltaTime)
+        public override void Update(IKineticEntity entity, float deltaTime)
         {
             EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
             if (viewAtributes == null || viewAtributes.GameObject== null)
