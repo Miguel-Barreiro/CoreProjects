@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Core.Core.Model.Data;
-using Core.Model.Data;
 using Core.Systems;
 using Core.Utils.Reflection;
+using UnityEngine;
 using Zenject;
 
-namespace Core.Model
+namespace Core.Model.Data
 {
-	public abstract class DataTable : IInitSystem, IDisposable
+	public abstract class DataTable : ScriptableObject, IInitSystem, IDisposable
 	{
 		[Inject] private readonly DataConfigContainer DataConfigContainer = null!;
 		public IEnumerable<DataConfig> GetDataConfigs()
