@@ -1,7 +1,6 @@
 ﻿using System;
 using Core.Core.Model.Data;
 using Core.Model.Data;
-using Core.Model.Stats;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -27,7 +26,7 @@ namespace Core.Core.Runtime.Core.Model.Stats
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			string id = ((StatConfig)value!).Name;
+			string id = ((DataConfig)value!).Name;
 			JToken token = JToken.FromObject(id);
 			token.WriteTo(writer);
 		}
