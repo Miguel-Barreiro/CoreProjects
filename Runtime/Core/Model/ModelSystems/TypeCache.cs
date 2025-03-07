@@ -4,6 +4,8 @@ using Core.Events;
 using Core.Utils.Reflection;
 using UnityEngine;
 
+#nullable enable
+
 namespace Core.Model
 {
     public sealed class TypeCache
@@ -49,9 +51,9 @@ namespace Core.Model
             }
         }
 
-        public EventAttributes GetEventAttributes(Type eventType)
+        public EventAttributes? GetEventAttributes(Type eventType)
         {
-            return EventAttributesByType[eventType];
+            return EventAttributesByType.GetValueOrDefault(eventType);
         }
 
         public IEnumerable<EventAttributes> GetAllEventAttributes()

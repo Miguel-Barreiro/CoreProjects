@@ -25,9 +25,9 @@ namespace Core.Events
 			TEvent newEvent = Event<TEvent>.Pool.Spawn();
 			ObjectBuilder.Inject(newEvent);
 
-			TypeCache.EventAttributes attributes = TypeCache.Get().GetEventAttributes(eventType);
+			TypeCache.EventAttributes? attributes = TypeCache.Get().GetEventAttributes(eventType);
 
-			EventOrder newEventOrder = attributes.EventOrder;
+			EventOrder newEventOrder = attributes?.EventOrder ?? EventOrder.Default;
 			this.EventQueueByType[newEventOrder][eventType].Add(newEvent);
 			return newEvent;
 		}
