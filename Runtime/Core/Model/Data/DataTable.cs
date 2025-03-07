@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Core.Core.Model.Data;
 using Core.Model.Data;
 using Core.Systems;
 using Core.Utils.Reflection;
+using Zenject;
 
 namespace Core.Model
 {
-	public abstract class DataTable : IInitSystem
+	public abstract class DataTable : IInitSystem, IDisposable
 	{
+		[Inject] private readonly DataConfigContainer DataConfigContainer = null!;
 		public IEnumerable<DataConfig> GetDataConfigs()
 		{
 			Type selfType = this.GetType();
@@ -27,7 +30,12 @@ namespace Core.Model
 
 		public void Initialize()
 		{
-			
+			DataConfigContainer.AddDataTable(this);
+		}
+
+		public void Dispose()
+		{
+			DataConfigContainer.RemoveDataTable(this);
 		}
 	}
 }

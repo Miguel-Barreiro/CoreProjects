@@ -268,7 +268,7 @@ namespace Core.Initialization
             }
             RegisterDisposableIfNeeded(logicInstance);
             AddInjectable(logicInstance);
-
+            
             if (!ownedSystems.ContainsKey(logicInstance))
             {
                 SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
