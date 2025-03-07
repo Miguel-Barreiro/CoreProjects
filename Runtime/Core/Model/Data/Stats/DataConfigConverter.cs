@@ -26,7 +26,7 @@ namespace Core.Core.Runtime.Core.Model.Stats
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			string id = ((DataConfig)value!).Name;
+			string id = ((DataConfig)value!).ID;
 			JToken token = JToken.FromObject(id);
 			token.WriteTo(writer);
 		}
