@@ -133,6 +133,9 @@ namespace Core.Model
         
         internal static void OnDestroyEntity(BaseEntity entity)
         {
+            if(instance!.destroyedEntities.Contains(entity))
+                return;
+            
             instance!.destroyedEntities.Add(entity);
         }
         
