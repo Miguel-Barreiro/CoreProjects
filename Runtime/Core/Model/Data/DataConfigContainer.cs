@@ -21,6 +21,9 @@ namespace Core.Core.Model.Data
 			IEnumerable<DataConfig> dataTableConfigs = dataTable.GetDataConfigs();
 			foreach (DataConfig dataConfig in dataTableConfigs)
 			{
+				if (dataConfigs.ContainsKey(dataConfig.ID))
+					continue;
+				
 				dataConfigs.Add(dataConfig.ID, dataConfig);
 			}
 		}
