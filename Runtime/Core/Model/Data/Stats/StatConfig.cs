@@ -1,18 +1,12 @@
-using Core.Utils;
+using Core.Model.Data;
 using FixedPointy;
 using UnityEngine;
 
 namespace Core.Model.Stats
 {
 	[CreateAssetMenu(fileName = "NewStat", menuName = "!Game/Stats/Create Stat")]
-	public sealed class StatConfig : ScriptableObject
+	public sealed class StatConfig : DataConfig
 	{
-		[SerializeField] [Utils.ReadOnly] 
-		private string Id = UUID.Generate();
-		
-		[SerializeField] private string name = "NO_NAME";
-		public string Name => name;
-		
 		[SerializeField] private float defaultBaseValue = 0;
 		public Fix DefaultBaseValue => defaultBaseValue;
 
@@ -21,10 +15,6 @@ namespace Core.Model.Stats
 
 		[SerializeField] private int defaultMinValue = 0;
 		public Fix DefaultMinValue => defaultMinValue;
-
-
-		
-		
 		
 	}
 }

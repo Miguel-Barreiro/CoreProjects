@@ -1,3 +1,4 @@
+using Core.Core.Model.Data;
 using Core.Systems;
 using Core.View;
 using Core.View.UI;
@@ -28,9 +29,17 @@ namespace Core.Initialization
 			BuildUISystems();
 
 			SetSystemsControllerForRuntime();
+
+			BuildDataContainer();
 		}
 
-		
+		private void BuildDataContainer()
+		{
+			DataConfigContainer configContainer = new DataConfigContainer();
+			BindInstance(configContainer);
+		}
+
+
 		private void SetSystemsControllerForRuntime()
 		{
 			SystemsController systemsController = Container.Resolve<SystemsController>();
