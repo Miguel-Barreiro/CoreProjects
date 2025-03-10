@@ -16,5 +16,8 @@ namespace Core.Model.Stats
 		[SerializeField] private int defaultMinValue = 0;
 		public Fix DefaultMinValue => defaultMinValue;
 		
+		[SerializeField][TextArea] private string description = "";
+		public string Description => description;
+
 	}
 }
