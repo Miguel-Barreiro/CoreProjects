@@ -31,6 +31,7 @@ namespace Core.Model
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
 		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
 		
+		public void AddPermanentModifier(EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
 		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
 		public Fix GetModifierValue(StatModId statModId);
@@ -103,7 +104,12 @@ namespace Core.Model
 		{
 			return _statsModel.AddModifier(owner, targetEntId, stat, type, value);
 		}
-		
+
+		public void AddPermanentModifier(EntId targetEntId, StatConfig stat, Fix value, StatModifierType type)
+		{
+			_statsModel.AddPermanentModifier(targetEntId, stat, type, value);
+		}
+
 		public void RemoveModifier(StatModId statModId)
 		{
 			_statsModel.RemoveModifier(statModId);

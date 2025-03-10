@@ -104,6 +104,13 @@ namespace Core.Model
 
 
 		
+		public void AddPermanentModifier(EntId targetEntId, StatConfig stat, StatModifierType type, Fix value)
+		{
+			Stat statData = GetOrCreateStat(targetEntId, stat);
+			statData.AddPermanentModifier(type, value);
+		}
+
+		
 		
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, StatModifierType modifierType, Fix modifierValue)
 		{
@@ -264,6 +271,7 @@ namespace Core.Model
 		    {
 		        calculatedResult += ModifiersById[modId].Value;
 		    }
+			calculatedResult += statData.GetPermanentModifier(StatModifierType.Additive);
 			
 			// Apply percentage modifiers
 			IEnumerable<StatModId> percentageModifiers = statData.GetModifiers(StatModifierType.Percentage);
@@ -271,6 +279,7 @@ namespace Core.Model
 			{
 		        calculatedResult += calculatedResult * ModifiersById[modId].Value;
 		    }
+			calculatedResult += calculatedResult * statData.GetPermanentModifier(StatModifierType.Percentage);
 			
 			// Apply multiplicative modifiers
 			IEnumerable<StatModId> multiplicativeModifiers = statData.GetModifiers(StatModifierType.Multiplicative);
@@ -278,6 +287,7 @@ namespace Core.Model
 			{
 				calculatedResult *= ModifiersById[modId].Value;
 			}
+			calculatedResult *= statData.GetPermanentModifier(StatModifierType.Multiplicative);;
 			
 			// Apply post-multiplicative additive modifiers
 			IEnumerable<StatModId> postMultiplicativeModifiers = statData.GetModifiers(StatModifierType.AdditivePostMultiplicative);
@@ -285,6 +295,7 @@ namespace Core.Model
 			{
 				calculatedResult += ModifiersById[modId].Value;
 			}
+			calculatedResult += statData.GetPermanentModifier(StatModifierType.AdditivePostMultiplicative);
 
 			Fix result = FixMath.Clamp(calculatedResult, statData.MinValue, statData.MaxValue);
 			
@@ -439,6 +450,7 @@ namespace Core.Model
 			// Set depleted value to minimum
 			statData.DepletedValue = stat.DefaultMinValue;
 		}
+
 	}
 
 

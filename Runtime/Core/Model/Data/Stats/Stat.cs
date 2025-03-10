@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Core.Initialization;
 using FixedPointy;
 
 namespace Core.Model
@@ -14,6 +13,9 @@ namespace Core.Model
         public readonly EntId Owner;
         
         private readonly List<StatModId>[] Modifiers;
+        
+        private readonly Fix[] PermanentModifiers = new Fix[(int) StatModifierType.TOTAL];
+        
         public Fix BaseValue
         {
             get => baseValue;
@@ -41,10 +43,25 @@ namespace Core.Model
             MaxValue = maxValue;
             MinValue = minValue;
             DepletedValue = baseValue;
+            
+            PermanentModifiers[(int) StatModifierType.Additive] = Fix.Zero;
+            PermanentModifiers[(int) StatModifierType.AdditivePostMultiplicative] = Fix.Zero;
+            PermanentModifiers[(int) StatModifierType.Multiplicative] = Fix.One;
+            PermanentModifiers[(int) StatModifierType.Percentage] = Fix.Zero;
 
             Owner = owner;
         }
         
+        public void AddPermanentModifier(StatModifierType type, Fix value)
+        {
+            if (type == StatModifierType.Multiplicative)
+                PermanentModifiers[(int) type] *= value;
+            else
+                PermanentModifiers[(int) type] += value;
+
+            CacheDirty = true;
+        }
+
         
         public void AddModifier(StatModifier modifier)
         {
@@ -82,6 +99,11 @@ namespace Core.Model
                 }
             }
         }
+        
+        public Fix GetPermanentModifier(StatModifierType type)
+        {
+            return PermanentModifiers[(int) type];
+        }
 
         public IEnumerable<StatModId> GetModifiers()
         {
@@ -96,7 +118,7 @@ namespace Core.Model
                 }
             }
         }
-        
+
     }
 	
 	[Serializable]
