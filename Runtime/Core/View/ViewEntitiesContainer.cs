@@ -48,7 +48,11 @@ namespace Core.View
 
 			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entity);
 			entityAttributes.GameObject = newGameObject;
-			
+
+			EntityView entityView = newGameObject.GetComponent<EntityView>();
+			if(entityView != null)
+				entityView.EntityID = entity.ID;
+
 			return newGameObject;
 		}
 
