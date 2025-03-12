@@ -13,7 +13,7 @@ using Zenject;
 
 namespace Core.Model.Time
 {
-	public interface ITimerSystem : ITimerSystemRo
+	public interface TimerSystem : TimerSystemRo
     {
         public void AddOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener);
         public void RemoveOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener);
@@ -25,7 +25,7 @@ namespace Core.Model.Time
         public void ResetTimer(ITimerComponent entity, string id);
     }
 
-	public interface ITimerSystemRo
+	public interface TimerSystemRo
     {
         public bool HasTimer(EntId entId, string id);
         public OperationResult<float> GetMillisecondsLeft(EntId entId, string id);
@@ -39,8 +39,8 @@ namespace Core.Model.Time
     public interface ITimerComponent : IComponent { }
 
     public class TimerSystemImplementation : ComponentSystem<ITimerComponent>,
-                                             ITimerSystemRo, 
-                                             ITimerSystem, 
+                                             TimerSystemRo, 
+                                             TimerSystem, 
                                              ITimerSystemImplementationInternal
 	{
 

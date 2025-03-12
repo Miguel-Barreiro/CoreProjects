@@ -40,8 +40,8 @@ namespace Core.Initialization
         private void BuildTimerSystem()
         {
             TimerSystemImplementation timerSystemImplementation = new TimerSystemImplementation();
-            BindInstance<ITimerSystemRo>(timerSystemImplementation);
-            BindInstance<ITimerSystem>(timerSystemImplementation);
+            BindInstance<TimerSystemRo>(timerSystemImplementation);
+            BindInstance<TimerSystem>(timerSystemImplementation);
             BindInstance<ITimerSystemImplementationInternal>(timerSystemImplementation);
             BindInstance(new TimerModel());
         }
