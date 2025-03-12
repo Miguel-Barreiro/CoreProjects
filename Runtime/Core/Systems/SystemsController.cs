@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Core.Events;
 using Core.Model;
+using Core.Model.Time;
 using Core.Utils.CachedDataStructures;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace Core.Systems
         [Inject] private readonly SystemsContainer systemsContainer = null!;
         [Inject] private readonly EntitiesContainer EntitiesContainer = null!;
         [Inject] private readonly EventQueue eventQueue = null!;
+        [Inject] private readonly ITimerSystemImplementationInternal ITimerSystem = null!;
 
         public event Action OnEndFrame;
         
@@ -66,6 +68,9 @@ namespace Core.Systems
                 Debug.Log("ExecuteFrame: asked to run while stopped"); 
                 return;
             }
+            
+            ITimerSystem.Update(deltaTime*1000);
+            
 #if !UNITY_EDITOR
             try
             {

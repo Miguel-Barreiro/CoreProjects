@@ -48,6 +48,10 @@ namespace Core.Editor
 			SystemsController.ExecuteFrame(time);
 		}
 
+		protected void ExecuteFrameMs(float time)
+		{
+			SystemsController.ExecuteFrame(time/1000.0f);
+		}
 
 	}
 

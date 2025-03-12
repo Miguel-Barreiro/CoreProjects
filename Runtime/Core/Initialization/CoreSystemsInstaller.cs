@@ -1,5 +1,6 @@
 using Core.Events;
 using Core.Model;
+using Core.Model.Time;
 using Core.Systems;
 using Core.Zenject.Source.Main;
 
@@ -25,9 +26,27 @@ namespace Core.Initialization
             BuildGameLoopSystem();
             BuildEntityManager();
             BuildComponentSystemsLogic();
+            BuildTimerSystem();
+            BuildStatsSystem();
         }
 
-        
+        private void BuildStatsSystem()
+        {
+            StatsSystemImplementation statsSystem = new StatsSystemImplementation();
+            BindInstance<StatsSystem>(statsSystem);
+            BindInstance<StatsSystemRo>(statsSystem);
+        }
+
+        private void BuildTimerSystem()
+        {
+            TimerSystemImplementation timerSystemImplementation = new TimerSystemImplementation();
+            BindInstance<ITimerSystemRo>(timerSystemImplementation);
+            BindInstance<ITimerSystem>(timerSystemImplementation);
+            BindInstance<ITimerSystemImplementationInternal>(timerSystemImplementation);
+            BindInstance(new TimerModel());
+        }
+
+
         private void BuildGameLoopSystem()
         {
             SystemsController systemsController = new SystemsController();
