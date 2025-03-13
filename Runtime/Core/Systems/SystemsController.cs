@@ -228,6 +228,10 @@ namespace Core.Systems
                     CallOnDestroy(latetList, destroyedEntity);
                     CallOnDestroy(defaultList, destroyedEntity);
                     CallOnDestroy(earlytList, destroyedEntity);
+
+                    earlytList.Clear();
+                    defaultList.Clear();
+                    latetList.Clear();
                 }
                 
                 allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
@@ -279,6 +283,11 @@ namespace Core.Systems
                     CallOnNew(earlytList, newEntity);
                     CallOnNew(defaultList, newEntity);
                     CallOnNew(latetList, newEntity);
+
+                    earlytList.Clear();
+                    defaultList.Clear();
+                    latetList.Clear();
+
                     
                     // foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
                     // {
@@ -294,9 +303,9 @@ namespace Core.Systems
                 
             }
             
-            void CallOnNew(CachedList<EntitySystemsContainer.SystemCache> systemList, BaseEntity destroyedEntity)
+            void CallOnNew(CachedList<EntitySystemsContainer.SystemCache> systemList, BaseEntity newEntity)
             {
-                ARGUMENT[0] = destroyedEntity;
+                ARGUMENT[0] = newEntity;
                 foreach (EntitySystemsContainer.SystemCache systemCache in systemList)
                 {
                     BaseEntitySystem system = systemCache.System;
