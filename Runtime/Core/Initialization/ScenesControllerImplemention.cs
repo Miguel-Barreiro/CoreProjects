@@ -66,6 +66,8 @@ namespace Core.Initialization
 
             currentLoadingSceneName = NO_SCENE_LOADING;
             loadingSceneTask = null;
+            endOfFrameTask = null;
+            
             return result;
             
             void LoadSceneAtEndFrame()

@@ -5,6 +5,7 @@ using Core.Model;
 using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
+using UnityEngine;
 using Zenject;
 
 #nullable enable
@@ -61,6 +62,7 @@ namespace Core.Events
 					currentQueu.Clear();
 					foreach (BaseEvent currentEvent in currentEventList)
 					{
+						Debug.Log($"Event {currentEvent.GetType().Name} popped"); 
 						yield return currentEvent;
 					}
 				}
@@ -80,6 +82,11 @@ namespace Core.Events
 
 		public void Initialize()
 		{
+			Debug.Log($"initialize EventQueue"); 
+
+			foreach (EventOrder eventOrder in EnumUtils.GetValues<EventOrder>())
+				EventQueueByType[eventOrder].Clear();
+			
 			IEnumerable<TypeCache.EventAttributes> allEventTypes = TypeCache.Get().GetAllEventAttributes();
 			foreach (TypeCache.EventAttributes eventAttributes in allEventTypes)
 			{
