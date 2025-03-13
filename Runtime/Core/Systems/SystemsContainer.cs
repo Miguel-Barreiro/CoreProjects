@@ -23,15 +23,15 @@ namespace Core.Systems
             return systems;
         }
         
-        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType)
+        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsFor(Type componentType, SystemPriority priority)
         {
-            return entitySystemsContainer.GetComponentSystemsFor(componentType);
+            return entitySystemsContainer.GetComponentSystemsFor(componentType, priority);
         }
         
 
-        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsForDestroyed(Type componentType)
+        public IEnumerable<EntitySystemsContainer.SystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority)
         {
-            return entitySystemsContainer.GetComponentSystemsForDestroyed(componentType);
+            return entitySystemsContainer.GetComponentSystemsForDestroyed(componentType, priority);
         }
 
 

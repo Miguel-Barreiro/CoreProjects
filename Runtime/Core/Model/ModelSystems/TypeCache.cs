@@ -89,7 +89,7 @@ namespace Core.Model
         {
             if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
             {
-                Debug.LogError($"entityType {entityType} not found in cache");
+                // Debug.LogError($"entityType {entityType} not found in cache");
                 yield break;
             }
             

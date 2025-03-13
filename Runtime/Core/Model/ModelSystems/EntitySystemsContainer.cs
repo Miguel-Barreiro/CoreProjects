@@ -32,43 +32,67 @@ namespace Core.Model
         }
 
         
-        internal IEnumerable<SystemCache> GetComponentSystemsFor(Type componentType) {
+        internal IEnumerable<SystemCache> GetComponentSystemsFor(Type componentType, SystemPriority priority) {
             if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
             {
-                foreach (SystemCache systemCache in systems.EarlierPriority)
+                List<SystemCache> updatePriorityList = priority switch
+                {
+                    SystemPriority.Early => systems.EarlierPriority,
+                    SystemPriority.Default => systems.DefaultPriority,
+                    SystemPriority.Late => systems.LatePriority,
+                    _ => systems.DefaultPriority
+                };
+                foreach (SystemCache systemCache in updatePriorityList)
                 {
                     yield return systemCache;
                 }
-
-                foreach (SystemCache systemCache in systems.DefaultPriority)
-                {
-                    yield return systemCache;
-                }
-
-                foreach (SystemCache systemCache in systems.LatePriority)
-                {
-                    yield return systemCache;
-                }
+                //
+                // foreach (SystemCache systemCache in systems.EarlierPriority)
+                // {
+                //     yield return systemCache;
+                // }
+                //
+                // foreach (SystemCache systemCache in systems.DefaultPriority)
+                // {
+                //     yield return systemCache;
+                // }
+                //
+                // foreach (SystemCache systemCache in systems.LatePriority)
+                // {
+                //     yield return systemCache;
+                // }
             }
         }
         
-        internal IEnumerable<SystemCache> GetComponentSystemsForDestroyed(Type componentType) {
+        internal IEnumerable<SystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority) {
             if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
             {
-                foreach (SystemCache systemCache in systems.LatePriority)
+                List<SystemCache> updatePriorityList = priority switch
+                {
+                    SystemPriority.Early => systems.EarlierPriority,
+                    SystemPriority.Default => systems.DefaultPriority,
+                    SystemPriority.Late => systems.LatePriority,
+                    _ => systems.DefaultPriority
+                };
+                foreach (SystemCache systemCache in updatePriorityList)
                 {
                     yield return systemCache;
                 }
                 
-                foreach (SystemCache systemCache in systems.DefaultPriority)
-                {
-                    yield return systemCache;
-                }
-
-                foreach (SystemCache systemCache in systems.EarlierPriority)
-                {
-                    yield return systemCache;
-                }
+                // foreach (SystemCache systemCache in systems.LatePriority)
+                // {
+                //     yield return systemCache;
+                // }
+                //
+                // foreach (SystemCache systemCache in systems.DefaultPriority)
+                // {
+                //     yield return systemCache;
+                // }
+                //
+                // foreach (SystemCache systemCache in systems.EarlierPriority)
+                // {
+                //     yield return systemCache;
+                // }
             }
         }
 
