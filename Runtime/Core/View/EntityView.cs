@@ -6,6 +6,6 @@ namespace Core.View
 	public abstract class EntityView  : MonoBehaviour
 	{
 		public EntId EntityID { get; set; }
-		
+		public virtual void Reset() { }
 	}
 }
