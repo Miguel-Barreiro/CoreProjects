@@ -135,7 +135,7 @@ namespace Core.Model
                     SystemPriority.Late => UpdateLatePriority,
                     _ => UpdateDefaultPriority
                 };
-                List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
+                List<SystemCache> lifetimePriorityList = systemCache.SystemLifetimePriority switch
                 {
                     SystemPriority.Early => EarlierPriority,
                     SystemPriority.Default => DefaultPriority,
@@ -144,7 +144,7 @@ namespace Core.Model
                 };
 
                 updatePriorityList.Add(systemCache);
-                LifetimePriorityList.Add(systemCache);
+                lifetimePriorityList.Add(systemCache);
             }
             
             public void Remove(SystemCache systemCache)
