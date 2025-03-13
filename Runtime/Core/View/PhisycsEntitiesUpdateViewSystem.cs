@@ -32,7 +32,7 @@ namespace Core.View
 				return;
 			}
 
-			Debug.Log($"destroying entity {entity.ID}({entity.GetType().Name})");
+			// Debug.Log($"destroying entity {entity.ID}({entity.GetType().Name})");
 			ViewEntitiesContainer.Destroy(entity.ID);
 		}
 

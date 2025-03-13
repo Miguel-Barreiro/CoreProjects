@@ -207,22 +207,12 @@ namespace Core.Systems
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
-                        // IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = 
-                        //     systemsContainer.GetComponentSystemsForDestroyed(componentType);
-
                         latetList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
                                                                                             SystemPriority.Late));
                         defaultList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
                                                                                             SystemPriority.Default));
                         earlytList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
                                                                                             SystemPriority.Early));
-                        
-                        // foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
-                        // {
-                        //     BaseEntitySystem system = systemCache.System;
-                        //     ARGUMENT[0] = destroyedEntity;
-                        //     systemCache.CachedOnEntityDestroyedMethod?.Invoke(system, ARGUMENT);
-                        // }
                     }
                     
                     CallOnDestroy(latetList, destroyedEntity);
@@ -273,8 +263,6 @@ namespace Core.Systems
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
-                        // IEnumerable<EntitySystemsContainer.SystemCache> componentSystems = systemsContainer.GetComponentSystemsFor(componentType);
-                        
                         latetList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Late));
                         defaultList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Default));
                         earlytList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Early));
@@ -287,14 +275,6 @@ namespace Core.Systems
                     earlytList.Clear();
                     defaultList.Clear();
                     latetList.Clear();
-
-                    
-                    // foreach (EntitySystemsContainer.SystemCache systemCache in componentSystems)
-                    // {
-                    //     BaseEntitySystem system = systemCache.System;
-                    //     ARGUMENT[0] = newEntity;
-                    //     systemCache.CachedOnNewEntityMethod?.Invoke(system, ARGUMENT);
-                    // }
                 }
                 
                 newEntities = EntitiesContainer.GetAllNewEntities();

@@ -62,7 +62,7 @@ namespace Core.Events
 					currentQueu.Clear();
 					foreach (BaseEvent currentEvent in currentEventList)
 					{
-						Debug.Log($"Event {currentEvent.GetType().Name} popped"); 
+						// Debug.Log($"Event {currentEvent.GetType().Name} popped"); 
 						yield return currentEvent;
 					}
 				}
@@ -82,7 +82,7 @@ namespace Core.Events
 
 		public void Initialize()
 		{
-			Debug.Log($"initialize EventQueue"); 
+			// Debug.Log($"initialize EventQueue"); 
 
 			foreach (EventOrder eventOrder in EnumUtils.GetValues<EventOrder>())
 				EventQueueByType[eventOrder].Clear();

@@ -35,64 +35,34 @@ namespace Core.Model
         internal IEnumerable<SystemCache> GetComponentSystemsFor(Type componentType, SystemPriority priority) {
             if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
             {
-                List<SystemCache> updatePriorityList = priority switch
+                List<SystemCache> priorityList = priority switch
                 {
                     SystemPriority.Early => systems.EarlierPriority,
                     SystemPriority.Default => systems.DefaultPriority,
                     SystemPriority.Late => systems.LatePriority,
                     _ => systems.DefaultPriority
                 };
-                foreach (SystemCache systemCache in updatePriorityList)
+                foreach (SystemCache systemCache in priorityList)
                 {
                     yield return systemCache;
                 }
-                //
-                // foreach (SystemCache systemCache in systems.EarlierPriority)
-                // {
-                //     yield return systemCache;
-                // }
-                //
-                // foreach (SystemCache systemCache in systems.DefaultPriority)
-                // {
-                //     yield return systemCache;
-                // }
-                //
-                // foreach (SystemCache systemCache in systems.LatePriority)
-                // {
-                //     yield return systemCache;
-                // }
             }
         }
         
         internal IEnumerable<SystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority) {
             if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
             {
-                List<SystemCache> updatePriorityList = priority switch
+                List<SystemCache> priorityList = priority switch
                 {
                     SystemPriority.Early => systems.EarlierPriority,
                     SystemPriority.Default => systems.DefaultPriority,
                     SystemPriority.Late => systems.LatePriority,
                     _ => systems.DefaultPriority
                 };
-                foreach (SystemCache systemCache in updatePriorityList)
+                foreach (SystemCache systemCache in priorityList)
                 {
                     yield return systemCache;
                 }
-                
-                // foreach (SystemCache systemCache in systems.LatePriority)
-                // {
-                //     yield return systemCache;
-                // }
-                //
-                // foreach (SystemCache systemCache in systems.DefaultPriority)
-                // {
-                //     yield return systemCache;
-                // }
-                //
-                // foreach (SystemCache systemCache in systems.EarlierPriority)
-                // {
-                //     yield return systemCache;
-                // }
             }
         }
 

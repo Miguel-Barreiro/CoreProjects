@@ -28,7 +28,6 @@ namespace Core.View
 				return;
 			}
 
-
 			if (entityViewAtributes.GameObject != null)
 			{
 				EntityView entityView = entityViewAtributes.GameObject.GetComponent<EntityView>();
