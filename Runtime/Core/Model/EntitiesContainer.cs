@@ -6,8 +6,19 @@ using Core.Systems;
 
 namespace Core.Model
 {
-    
-    public class EntitiesContainer : IInitSystem
+
+
+    public interface IEntitiesContainer
+    {
+        public T? GetEntity<T>(EntId id) where T : BaseEntity;
+        public BaseEntity? GetEntity(EntId id);
+        public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity;
+        public bool IsEntityOfType<TEntity>(EntId id) where TEntity : class, IEntity;
+        public bool IsEntityOfType<TEntity>(EntId id, out TEntity? castEntity) where TEntity : class, IEntity;
+
+    }
+
+    public class EntitiesContainer : IInitSystem, IEntitiesContainer
     {
 
         // ENTITY LIFETIME MANAGEMENT
@@ -65,6 +76,28 @@ namespace Core.Model
         }
 
         
+        public bool IsEntityOfType<TEntity>(EntId id) where TEntity : class, IEntity
+        {
+            BaseEntity? baseEntity = GetEntity(id);
+            if (baseEntity == null)
+                return false;
+
+            return baseEntity is TEntity;
+        }
+
+        public bool IsEntityOfType<TEntity>(EntId id, out TEntity? castEntity) where TEntity : class, IEntity
+        {
+            BaseEntity? baseEntity = GetEntity(id);
+            if (baseEntity == null)
+            {
+                castEntity = null;
+                return false;
+            }
+            castEntity = baseEntity as TEntity;
+            return castEntity != null;
+        }
+
+
         public int NewEntitiesCount() => newEntities.Count;
         
         public IEnumerable<BaseEntity> GetAllNewEntities()
