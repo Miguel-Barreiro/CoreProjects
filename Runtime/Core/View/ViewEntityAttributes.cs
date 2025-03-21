@@ -18,12 +18,12 @@ namespace Core.View
 		public EntId ID { get; }
 		public GameObject? GameObject { get; internal set; }
 
-		private readonly Dictionary<Type, MonoBehaviour> componentCache = new ();
+		private readonly Dictionary<Type, Behaviour> componentCache = new ();
 		public T? Get<T>() 
-			where T : MonoBehaviour
+			where T : Behaviour
 		{
 			Type componentType = typeof(T);
-			if (componentCache.TryGetValue(componentType, out MonoBehaviour? value))
+			if (componentCache.TryGetValue(componentType, out Behaviour? value))
 			{
 				return value as T;
 			}
