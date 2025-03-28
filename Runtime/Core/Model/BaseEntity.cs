@@ -10,7 +10,7 @@ namespace Core.Model
         public void Destroy();
     }
 
-    public abstract class BaseEntity : IEntity
+    public abstract class BaseEntity : IEntity, IComponent
     {
         public EntId ID => id;
         private EntId id;

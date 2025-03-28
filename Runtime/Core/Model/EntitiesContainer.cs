@@ -70,6 +70,13 @@ namespace Core.Model
             return entitiesByID.GetValueOrDefault(id) as T;
         }
 
+        public T? GetComponent<T>(EntId id) where T: class, IComponent
+        {
+            BaseEntity baseEntity = entitiesByID.GetValueOrDefault(id);
+            return baseEntity as T;
+        }
+
+        
         public BaseEntity? GetEntity(EntId id)
         {
             return entitiesByID.GetValueOrDefault(id);
