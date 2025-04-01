@@ -75,6 +75,9 @@ namespace Core.View.UI
 			_activeViews.Remove(activeView);
 			_activeViews.Add(activeView);
 			activeView.Canvas.sortingOrder = _activeViews.Count;
+			
+			
+			_messengersByScreenDefinitions[uiFDefinition]?.SignalShow();
 		}
 
 
@@ -95,6 +98,8 @@ namespace Core.View.UI
 				newTopView.Canvas.gameObject.SetActive(true);
 				newTopView.Canvas.sortingOrder = _activeViews.Count;
 			}
+			
+			_messengersByScreenDefinitions[uiFDefinition]?.SignalHide();
 		}
 
 		public void HideAll()
@@ -105,6 +110,8 @@ namespace Core.View.UI
 				activeView.Canvas.sortingOrder = 0;
 			}
 			_activeViews.Clear();
+			foreach ((UIScreenDefinition _,UIMessenger uiMessenger)  in _messengersByScreenDefinitions)
+				uiMessenger.SignalHide();
 		}
 		
 #endregion
@@ -179,7 +186,6 @@ namespace Core.View.UI
 				
 				CachedRegisterMethod = viewType.GetMethodExt(nameof(UIView<UIMessenger>.Register),
 															BindingFlags.Public, messenger.GetType());
-
 			}
 		}
 
