@@ -48,13 +48,14 @@ namespace Core.Model
 	
 
 
-	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRo
+	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRo, IInitSystem
 	{
-		private StatsModel _statsModel;
-	
-		public StatsSystemImplementation()
+		private StatsModel _statsModel = null;
+		
+		public void Initialize()
 		{
-			_statsModel = new StatsModel();
+			if(_statsModel == null)
+				_statsModel = new StatsModel();
 		}
 
 		public override SystemGroup Group => CoreSystemGroups.CoreSystemGroup;
@@ -149,6 +150,7 @@ namespace Core.Model
 		{
 			_statsModel.ResetDepletedValueToMin(targetEntId, stat);
 		}
+
 	}
 	
 	

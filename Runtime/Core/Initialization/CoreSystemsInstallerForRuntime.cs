@@ -90,6 +90,9 @@ namespace Core.Initialization
 
 			PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
 			BindInstance(phisycsEntitiesUpdateViewSystem);
+			
+			TimeScaleSystemImplementation timeScaleSystemImplementation = new();
+			BindInstance<TimeScaleSystem>(timeScaleSystemImplementation);
 		}
 
 		protected void BuildGenericGameobjePool()
