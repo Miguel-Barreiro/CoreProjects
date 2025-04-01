@@ -10,9 +10,7 @@ namespace Core.Systems
 	{
 		public void AddTimeScale(Fix percentage, TimeScalerEntity owner);
 		public void RemoveTimeScale(TimeScalerEntity owner);
-
 		public Fix GetCurrentTimeScale();
-
 		public void ClearTimeScaleModifiers();
 	}
 
@@ -38,7 +36,11 @@ namespace Core.Systems
 				return;
 			}
 			
-			TimeScaleSystemModel.scalerByOwners[owner.ID] = percentage;
+			if(TimeScaleSystemModel.scalerByOwners.ContainsKey(owner.ID))
+				TimeScaleSystemModel.scalerByOwners[owner.ID] = percentage;
+			else
+				TimeScaleSystemModel.scalerByOwners.Add(owner.ID, percentage);
+			
 			UpdateCurrentScale();
 		}
 
@@ -54,24 +56,6 @@ namespace Core.Systems
 			UpdateCurrentScale(); 
 		}
 
-		private void UpdateCurrentScale()
-		{
-			if(TimeScaleSystemModel.scalerByOwners.Count == 0)
-			{
-				TimeScaleSystemModel.currentScale = Fix.One;
-				return;
-			}
-				
-			Fix minScale = Fix.MaxInteger; 
-			foreach ((_, Fix scale) in TimeScaleSystemModel.scalerByOwners)
-			{
-				if (scale < minScale)
-					minScale = scale;
-			}
-
-			TimeScaleSystemModel.currentScale = minScale;
-			Time.timeScale = (float) TimeScaleSystemModel.currentScale;
-		}
 
 		public Fix GetCurrentTimeScale()
 		{
@@ -98,7 +82,36 @@ namespace Core.Systems
 			// No per-frame update needed for this system
 		}
 
+		
+		
+		
+		
+		
+		
 		public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
+	
+		
+		
+		
+		
+		private void UpdateCurrentScale()
+		{
+			if(TimeScaleSystemModel.scalerByOwners.Count == 0)
+			{
+				TimeScaleSystemModel.currentScale = Fix.One;
+				return;
+			}
+				
+			Fix minScale = Fix.MaxInteger; 
+			foreach ((_, Fix scale) in TimeScaleSystemModel.scalerByOwners)
+			{
+				if (scale < minScale)
+					minScale = scale;
+			}
+
+			TimeScaleSystemModel.currentScale = minScale;
+			Time.timeScale = (float) TimeScaleSystemModel.currentScale;
+		}
 	}
 
 	public sealed class TimeScaleSystemModel : BaseEntity
