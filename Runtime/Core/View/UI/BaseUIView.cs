@@ -14,7 +14,17 @@ namespace Core.View.UI
 	public abstract class UIView<TUIMessenger> : BaseUIView
 		where TUIMessenger : UIMessenger
 	{
-		public abstract void Register(TUIMessenger uiEvent);
+
+		protected TUIMessenger Messenger = null!;
+		
+		public void Register(TUIMessenger uiMessenger)
+		{
+			Messenger = uiMessenger;
+			OnRegister(uiMessenger);
+		}
+
+		protected abstract void OnRegister(TUIMessenger uiMessenger);
+
 	}
 	
 }
