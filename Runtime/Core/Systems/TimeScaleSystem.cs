@@ -83,16 +83,7 @@ namespace Core.Systems
 		}
 
 		
-		
-		
-		
-		
-		
 		public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
-	
-		
-		
-		
 		
 		private void UpdateCurrentScale()
 		{

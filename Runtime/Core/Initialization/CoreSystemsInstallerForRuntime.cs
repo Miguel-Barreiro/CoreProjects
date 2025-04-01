@@ -61,6 +61,7 @@ namespace Core.Initialization
 			GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
 			Canvas rootCanvas = newCanvasObj.AddComponent<Canvas>();
 			newCanvasObj.SetActive(true);
+			rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             
 			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas);
 			BindInstance(uiRootImplementation);
