@@ -11,10 +11,12 @@ namespace Core.Initialization
 	public class CoreSystemsInstallerForRuntime : CoreSystemsInstaller
 	{
 		private readonly Transform RootCoreParent;
+		private readonly Canvas RootUIPrefab;
 
-		internal CoreSystemsInstallerForRuntime(Transform rootCoreParent, DiContainer container) : base(container)
+		internal CoreSystemsInstallerForRuntime(Canvas rootUIPrefab, Transform rootCoreParent, DiContainer container) : base(container)
 		{
 			RootCoreParent = rootCoreParent;
+			RootUIPrefab = rootUIPrefab;
 		}
 		
 		protected override void InstallSystems()
@@ -59,13 +61,19 @@ namespace Core.Initialization
 
 		protected void BuildUISystems()
 		{
-			GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
-			Canvas rootCanvas = newCanvasObj.AddComponent<Canvas>();
-			newCanvasObj.SetActive(true);
-			rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
 			
-			CanvasScaler canvasScaler = newCanvasObj.AddComponent<CanvasScaler>();
-			newCanvasObj.AddComponent<GraphicRaycaster>();
+			GameObject newCanvasObj = GameObject.Instantiate(RootUIPrefab.gameObject, RootCoreParent);
+			newCanvasObj.SetActive(true);
+			Canvas rootCanvas = newCanvasObj.GetComponent<Canvas>();
+			
+			// GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
+			// rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			
+			// CanvasScaler canvasScaler = newCanvasObj.AddComponent<CanvasScaler>();
+			// canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+			// canvasScaler.matchWidthOrHeight = 0;
+			//
+			// newCanvasObj.AddComponent<GraphicRaycaster>();
 			
 			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas);
 			BindInstance(uiRootImplementation);

@@ -1,10 +1,12 @@
 ﻿using Core.Systems;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Core.Initialization
 {
     public abstract class RuntimeProjectBootstrap : RuntimeBootstrapBase
     {
+        [SerializeField] private Canvas rootUIPrefab = null;
         
         public override void InstallBindings()
         {
@@ -12,7 +14,7 @@ namespace Core.Initialization
             
             Bootstrapper bootstrapper = GetBootstrapper();
 
-            CoreSystemsInstallerForRuntime coreSystemsInstaller = new CoreSystemsInstallerForRuntime(transform, Container);
+            CoreSystemsInstallerForRuntime coreSystemsInstaller = new CoreSystemsInstallerForRuntime(rootUIPrefab, transform, Container);
             bootstrapper.AddInstaller(coreSystemsInstaller,false);
             bootstrapper.AddInstaller(GetLogicInstaller(), false);
 
