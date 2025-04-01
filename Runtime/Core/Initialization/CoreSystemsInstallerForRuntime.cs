@@ -75,7 +75,7 @@ namespace Core.Initialization
 			//
 			// newCanvasObj.AddComponent<GraphicRaycaster>();
 			
-			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas);
+			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas, RootUIPrefab);
 			BindInstance(uiRootImplementation);
 			BindInstance<UIRoot>(uiRootImplementation);
 

@@ -16,6 +16,7 @@ namespace Core.View.UI
 		[Inject] private ObjectBuilder objectBuilder = null!;
 
 		private readonly Canvas UICanvasRoot;
+		private readonly Canvas UICanvasRootPrefab;
 		
 		private ListStack<ActiveView> _activeViews = new();
 		private Dictionary<UIScreenDefinition, ActiveView> _viewsByDefinition = new();
@@ -25,7 +26,12 @@ namespace Core.View.UI
 #region Public
 
 
-		public UIRootImplementation(Canvas uiCanvasRoot) { this.UICanvasRoot = uiCanvasRoot; }
+		public UIRootImplementation(Canvas uiCanvasRoot, Canvas rootUIPrefab)
+		{
+			this.UICanvasRoot = uiCanvasRoot; 
+			this.UICanvasRootPrefab = rootUIPrefab;
+		}
+
 
 		public void Register(UIScreenDefinition definition, UIMessenger messenger)
 		{
@@ -40,13 +46,7 @@ namespace Core.View.UI
 			{
 				GameObject uiPrefab = uiFDefinition.UIPrefab;
 				
-				GameObject newCanvasObj = new GameObject(uiPrefab.gameObject.name);
-				newCanvasObj.SetActive(false);
-				newCanvasObj.transform.parent = UICanvasRoot.transform;
-				Canvas canvas = newCanvasObj.AddComponent<Canvas>();
-				canvas.overrideSorting = true;
-				canvas.sortingOrder = 0;
-
+				GameObject newCanvasObj = CreateUIViewRootCanvas(uiPrefab, out Canvas canvas);
 
 				GameObject viewObject = view.gameObject;
 				RectTransform rectTransform = viewObject.GetComponent<RectTransform>();
@@ -66,8 +66,8 @@ namespace Core.View.UI
 			Show(uiFDefinition);
 		}
 
-		
-		
+
+
 		public void Show(UIScreenDefinition uiFDefinition)
 		{
 			ActiveView activeView = MakeActiveView(uiFDefinition);
@@ -121,12 +121,8 @@ namespace Core.View.UI
 			if (!_viewsByDefinition.TryGetValue(uiFDefinition, out activeViewResult))
 			{
 				GameObject uiPrefab = uiFDefinition.UIPrefab;
-				GameObject newCanvasObj = new GameObject(uiPrefab.gameObject.name);
-				newCanvasObj.SetActive(false);
-				newCanvasObj.transform.parent = UICanvasRoot.transform;
-				Canvas canvas = newCanvasObj.AddComponent<Canvas>();
-				canvas.overrideSorting = true;
-				canvas.sortingOrder = 0;
+				
+				GameObject newCanvasObj = CreateUIViewRootCanvas(uiPrefab, out Canvas canvas);
 			
 				GameObject viewObject = objectBuilder.Instantiate(uiPrefab, canvas.transform);
 				RectTransform rectTransform = viewObject.GetComponent<RectTransform>();
@@ -144,6 +140,26 @@ namespace Core.View.UI
 			return activeViewResult;
 		}
 
+		private GameObject CreateUIViewRootCanvas(GameObject uiPrefab, out Canvas canvas)
+		{
+			GameObject newCanvasObj = GameObject.Instantiate(UICanvasRootPrefab.gameObject, UICanvasRoot.transform);
+			newCanvasObj.name = uiPrefab.gameObject.name;
+			newCanvasObj.SetActive(false);
+			// newCanvasObj.transform.parent = UICanvasRoot.transform;
+			canvas = newCanvasObj.GetComponent<Canvas>();
+			canvas.overrideSorting = true;
+			canvas.sortingOrder = 0;
+
+			RectTransform rectTransform = canvas.GetComponent<RectTransform>();
+
+			rectTransform.anchorMax = Vector2.one;
+			rectTransform.anchorMin = Vector2.zero;
+			rectTransform.localScale = Vector3.one;
+			
+			return newCanvasObj;
+		}
+
+		
 
 		private record ActiveView
 		{
