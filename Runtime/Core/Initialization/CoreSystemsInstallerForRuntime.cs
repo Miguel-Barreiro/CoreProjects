@@ -4,6 +4,7 @@ using Core.View;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Core.Initialization
 {
@@ -62,7 +63,10 @@ namespace Core.Initialization
 			Canvas rootCanvas = newCanvasObj.AddComponent<Canvas>();
 			newCanvasObj.SetActive(true);
 			rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            
+			
+			CanvasScaler canvasScaler = newCanvasObj.AddComponent<CanvasScaler>();
+			newCanvasObj.AddComponent<GraphicRaycaster>();
+			
 			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas);
 			BindInstance(uiRootImplementation);
 			BindInstance<UIRoot>(uiRootImplementation);
