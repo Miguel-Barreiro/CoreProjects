@@ -90,6 +90,7 @@ namespace Core.Systems
 			if(TimeScaleSystemModel.scalerByOwners.Count == 0)
 			{
 				TimeScaleSystemModel.currentScale = Fix.One;
+				Time.timeScale = 1;
 				return;
 			}
 				
