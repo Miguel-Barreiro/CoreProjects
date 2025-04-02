@@ -67,8 +67,10 @@ namespace Core.Systems
                 {
                     await UniTask.DelayFrame(1, PlayerLoopTiming.EarlyUpdate);
                     float deltaTime = Time.deltaTime;
-                    if(!paused)
+                    if (!paused)
                         ExecuteFrame(deltaTime);
+  
+                    OnEndFrame?.Invoke();
                 }
             }
         }
@@ -118,7 +120,6 @@ namespace Core.Systems
                 Debug.LogError("Error in an event: " + e);
             }
 #endif
-            OnEndFrame?.Invoke();
 
             void ExecuteComponentUpdateSystems()
             {
