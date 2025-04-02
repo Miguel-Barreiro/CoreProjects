@@ -22,14 +22,14 @@ namespace Core.View.UI
 			Messenger = uiMessenger;
 			OnRegister(uiMessenger);
 		}
-		public void Unregister()
+		public void Unregister(TUIMessenger uiMessenger)
 		{
 			Messenger = null!;
-			OnUnregister();
+			OnUnregister(uiMessenger);
 		}
 
 
-		protected abstract void OnUnregister();
+		protected abstract void OnUnregister(TUIMessenger uiMessenger);
 
 		protected abstract void OnRegister(TUIMessenger uiMessenger);
 
