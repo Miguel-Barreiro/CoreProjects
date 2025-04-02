@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Core.Initialization
 {
@@ -65,52 +67,61 @@ namespace Core.Initialization
 
 		public async UniTask<OperationResult> Run()
 		{
-			SetupSystemsContainer();
-			SetupObjectBuilder();
-			
-			
-			List<SystemsInstallerBase> systemsInstallerBases = new List<SystemsInstallerBase>(Installers);
-			Installers.Clear();
-			
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
+			try
 			{
-				installer.CreateSystems();
-			}
+
+				SetupSystemsContainer();
+				SetupObjectBuilder();
 			
-			if(_currentSceneInstallers.Count > 0 )
-			{
-				foreach (SystemsInstallerBase currentSceneInstaller in _currentSceneInstallers)
+			
+				List<SystemsInstallerBase> systemsInstallerBases = new List<SystemsInstallerBase>(Installers);
+				Installers.Clear();
+			
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
-					UpdateObjectBuilder(currentSceneInstaller);
+					installer.CreateSystems();
 				}
-			}
 			
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
-			{
-				installer.InjectInstances();
-			}
+				if(_currentSceneInstallers.Count > 0 )
+				{
+					foreach (SystemsInstallerBase currentSceneInstaller in _currentSceneInstallers)
+					{
+						UpdateObjectBuilder(currentSceneInstaller);
+					}
+				}
 			
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
-			{
-				installer.InitializeInstances();
-			}
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					installer.InjectInstances();
+				}
 			
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
-			{
-				OperationResult result = await installer.LoadSystems();
-				if (result.IsFailure)
-					return result;
-				completedInstallers.Add(installer);
-			}
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					installer.InitializeInstances();
+				}
+			
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					OperationResult result = await installer.LoadSystems();
+					if (result.IsFailure)
+						return result;
+					completedInstallers.Add(installer);
+				}
 
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
-			{
-				installer.StartSystems();
-			}
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					installer.StartSystems();
+				}
 
-			foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					installer.OnComplete();
+				}
+				
+			} catch (Exception e)
 			{
-				installer.OnComplete();
+				Debug.LogError(e);
+				throw;
 			}
 			
 			return OperationResult.Success();
