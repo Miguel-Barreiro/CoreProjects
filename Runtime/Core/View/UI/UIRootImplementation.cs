@@ -35,7 +35,10 @@ namespace Core.View.UI
 
 		public void Register(UIScreenDefinition definition, UIMessenger messenger)
 		{
-			_messengersByScreenDefinitions.Add(definition, messenger);
+			if(_messengersByScreenDefinitions.ContainsKey(definition))
+				_messengersByScreenDefinitions[definition] = messenger;
+			else
+				_messengersByScreenDefinitions.Add(definition, messenger);
 		}
 
 		public void RegisterWithViewObject<TMessenger>(UIScreenDefinition uiFDefinition,
