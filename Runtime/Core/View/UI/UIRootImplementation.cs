@@ -33,12 +33,32 @@ namespace Core.View.UI
 		}
 
 
-		public void Register(UIScreenDefinition definition, UIMessenger messenger)
+		public void Register(UIScreenDefinition uiFDefinition, UIMessenger uiMessenger)
 		{
-			if(_messengersByScreenDefinitions.ContainsKey(definition))
-				_messengersByScreenDefinitions[definition] = messenger;
+			if (_messengersByScreenDefinitions.ContainsKey(uiFDefinition))
+				UpdateMessenger(uiFDefinition, uiMessenger);
 			else
-				_messengersByScreenDefinitions.Add(definition, messenger);
+				_messengersByScreenDefinitions.Add(uiFDefinition, uiMessenger);
+		}
+
+		private void UpdateMessenger(UIScreenDefinition uiFDefinition, UIMessenger uiMessenger)
+		{
+			bool existsUI = _viewsByDefinition.TryGetValue(uiFDefinition, out ActiveView activeViewResult);
+			if (existsUI)
+			{
+				ARGUMENT[0] = _messengersByScreenDefinitions[uiFDefinition];
+				BaseUIView baseUIView = activeViewResult.ViewTransform.gameObject.GetComponent<BaseUIView>();
+				activeViewResult.CachedUnRegisterMethod.Invoke(baseUIView, ARGUMENT);
+			}
+			
+			_messengersByScreenDefinitions[uiFDefinition] = uiMessenger;
+			if (existsUI)
+			{
+				ARGUMENT[0] = uiMessenger;
+				BaseUIView baseUIView = activeViewResult.ViewTransform.gameObject.GetComponent<BaseUIView>();
+				activeViewResult.CachedRegisterMethod.Invoke(baseUIView, ARGUMENT);
+			}
+
 		}
 
 		public void RegisterWithViewObject<TMessenger>(UIScreenDefinition uiFDefinition,
@@ -177,6 +197,7 @@ namespace Core.View.UI
 			public readonly Canvas Canvas;
 			public readonly UIScreenDefinition Definition;
 			public readonly MethodInfo CachedRegisterMethod;
+			public readonly MethodInfo CachedUnRegisterMethod;
 
 			
 			public ActiveView(RectTransform viewTransform, Canvas canvas, UIScreenDefinition definition, UIMessenger messenger)
@@ -189,6 +210,11 @@ namespace Core.View.UI
 				
 				CachedRegisterMethod = viewType.GetMethodExt(nameof(UIView<UIMessenger>.Register),
 															BindingFlags.Public, messenger.GetType());
+				
+				
+				CachedUnRegisterMethod = viewType.GetMethodExt(nameof(UIView<UIMessenger>.Unregister),
+																BindingFlags.Public, messenger.GetType());
+
 			}
 		}
 
