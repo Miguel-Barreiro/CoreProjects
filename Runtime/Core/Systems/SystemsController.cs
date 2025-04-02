@@ -72,6 +72,7 @@ namespace Core.Systems
   
                     OnEndFrame?.Invoke();
                 }
+                Debug.Log($"SystemsController: Stopped"); 
             }
         }
 
