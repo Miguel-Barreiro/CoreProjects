@@ -63,7 +63,6 @@ namespace Core.Initialization
             }
 
             OperationResult result = await loadingSceneTask.Value;
-            this.SystemsController.ResumeLoop();
             
             currentLoadingSceneName = NO_SCENE_LOADING;
             loadingSceneTask = null;
@@ -77,7 +76,6 @@ namespace Core.Initialization
                 {
                     return;
                 }
-                this.SystemsController.PauseLoop();
                 loadingSceneTask = LoadScene(sceneName);
                 endOfFrameTask.TrySetResult(OperationResult.Success());
             }
@@ -98,6 +96,8 @@ namespace Core.Initialization
         private async UniTask<OperationResult> LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
             {
+                SystemsController.PauseLoop();
+                
                 OperationResult uninstallCurrentSceneSystems = await UninstallCurrentSceneSystems();
                 if(!uninstallCurrentSceneSystems.IsSuccess)
                 {
@@ -116,8 +116,11 @@ namespace Core.Initialization
                     
                     Bootstrapper.AddInstaller(installer, true);
                 }
+
+                OperationResult operationResult = await Bootstrapper.Run();
                 
-                return await Bootstrapper.Run();
+                SystemsController.ResumeLoop();
+                return operationResult;
             }
             
             
