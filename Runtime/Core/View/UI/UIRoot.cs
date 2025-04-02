@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Core.View.UI
 {
 	public interface UIRoot
@@ -8,6 +10,7 @@ namespace Core.View.UI
 
 		public void HideAll();
 
+		public Canvas UICanvasRoot { get; }
 
 	}
 	

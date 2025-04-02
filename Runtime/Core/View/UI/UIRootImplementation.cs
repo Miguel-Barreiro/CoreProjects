@@ -15,8 +15,8 @@ namespace Core.View.UI
 		
 		[Inject] private ObjectBuilder objectBuilder = null!;
 
-		private readonly Canvas UICanvasRoot;
-		private readonly Canvas UICanvasRootPrefab;
+		private readonly Canvas _UICanvasRoot;
+		private readonly Canvas _UICanvasRootPrefab;
 		
 		private ListStack<ActiveView> _activeViews = new();
 		private Dictionary<UIScreenDefinition, ActiveView> _viewsByDefinition = new();
@@ -25,11 +25,12 @@ namespace Core.View.UI
 
 #region Public
 
+		public Canvas UICanvasRoot => _UICanvasRoot;
 
 		public UIRootImplementation(Canvas uiCanvasRoot, Canvas rootUIPrefab)
 		{
-			this.UICanvasRoot = uiCanvasRoot; 
-			this.UICanvasRootPrefab = rootUIPrefab;
+			this._UICanvasRoot = uiCanvasRoot; 
+			this._UICanvasRootPrefab = rootUIPrefab;
 		}
 
 
@@ -136,8 +137,9 @@ namespace Core.View.UI
 			foreach ((UIScreenDefinition _,UIMessenger uiMessenger)  in _messengersByScreenDefinitions)
 				uiMessenger.SignalHide();
 		}
-		
-#endregion
+
+
+		#endregion
 
 #region Internal
 
@@ -172,7 +174,7 @@ namespace Core.View.UI
 
 		private GameObject CreateUIViewRootCanvas(GameObject uiPrefab, out Canvas canvas)
 		{
-			GameObject newCanvasObj = GameObject.Instantiate(UICanvasRootPrefab.gameObject, UICanvasRoot.transform);
+			GameObject newCanvasObj = GameObject.Instantiate(_UICanvasRootPrefab.gameObject, _UICanvasRoot.transform);
 			newCanvasObj.name = uiPrefab.gameObject.name;
 			newCanvasObj.SetActive(false);
 			// newCanvasObj.transform.parent = UICanvasRoot.transform;
