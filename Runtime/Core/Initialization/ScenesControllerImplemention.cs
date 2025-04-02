@@ -63,7 +63,8 @@ namespace Core.Initialization
             }
 
             OperationResult result = await loadingSceneTask.Value;
-
+            this.SystemsController.ResumeLoop();
+            
             currentLoadingSceneName = NO_SCENE_LOADING;
             loadingSceneTask = null;
             endOfFrameTask = null;
@@ -76,6 +77,7 @@ namespace Core.Initialization
                 {
                     return;
                 }
+                this.SystemsController.PauseLoop();
                 loadingSceneTask = LoadScene(sceneName);
                 endOfFrameTask.TrySetResult(OperationResult.Success());
             }
@@ -114,7 +116,7 @@ namespace Core.Initialization
                     
                     Bootstrapper.AddInstaller(installer, true);
                 }
-
+                
                 return await Bootstrapper.Run();
             }
             

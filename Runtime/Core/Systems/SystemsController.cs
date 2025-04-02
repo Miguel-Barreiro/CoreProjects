@@ -27,11 +27,22 @@ namespace Core.Systems
         public event Action OnEndFrame;
         
         private bool running = false;
+        private bool paused = false;
         private SystemsControllerMode mode = SystemsControllerMode.UNIT_TESTS;
         
         public void Initialize()
         {
             running = false;
+        }
+        
+        public void PauseLoop()
+        {
+            paused = true;
+        }
+        
+        public void ResumeLoop()
+        {
+            paused = false;
         }
 
         public void StartSystem()
@@ -56,7 +67,8 @@ namespace Core.Systems
                 {
                     await UniTask.DelayFrame(1, PlayerLoopTiming.EarlyUpdate);
                     float deltaTime = Time.deltaTime;
-                    ExecuteFrame(deltaTime);
+                    if(!paused)
+                        ExecuteFrame(deltaTime);
                 }
             }
         }
