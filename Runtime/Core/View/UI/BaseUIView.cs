@@ -1,6 +1,5 @@
 #nullable enable
 
-using System;
 using UnityEngine;
 
 namespace Core.View.UI
@@ -20,15 +19,22 @@ namespace Core.View.UI
 		public void Register(TUIMessenger uiMessenger)
 		{
 			Messenger = uiMessenger;
+			uiMessenger.OnShow += OnShow;
+			uiMessenger.OnHide += OnHide;
 			OnRegister(uiMessenger);
 		}
 		public void Unregister(TUIMessenger uiMessenger)
 		{
 			Messenger = null!;
+			uiMessenger.OnShow -= OnShow;
+			uiMessenger.OnHide -= OnHide;
 			OnUnregister(uiMessenger);
 		}
 
+		protected virtual void OnShow() { }
+		protected virtual void OnHide() { }
 
+		
 		protected abstract void OnUnregister(TUIMessenger uiMessenger);
 
 		protected abstract void OnRegister(TUIMessenger uiMessenger);

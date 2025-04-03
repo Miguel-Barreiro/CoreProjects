@@ -119,6 +119,19 @@ namespace Core.Initialization
         protected void RegisterUIScreenDefinition<TMessenger>( UIScreenDefinition definition, TMessenger messenger)
             where TMessenger : UIMessenger
         {
+            if (definition == null)
+            {
+                Debug.LogError($"RegisterUIScreenDefinition: UIScreenDefinition is null"); 
+                return;
+            }
+
+            if (messenger == null)
+            {
+                Debug.LogError($"RegisterUIScreenDefinition: messenger is null"); 
+                return;
+            }
+
+            
             UIRootImplementation uiRoot = Container.Resolve<UIRootImplementation>();
             uiRoot.Register(definition, messenger);
         }
