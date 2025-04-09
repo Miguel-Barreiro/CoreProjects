@@ -152,7 +152,7 @@ namespace Core.Initialization
             T component = instance.GetComponent<T>();
             if(component == null)
             {
-                component = instance.GetComponentInChildren<T>();
+                component = instance.GetComponentInChildren<T>(true);
             }
             if(component == null)
             {
