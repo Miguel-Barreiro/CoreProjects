@@ -4,7 +4,6 @@ using Core.View;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Core.Initialization
 {
@@ -49,31 +48,12 @@ namespace Core.Initialization
 			systemsController.SetMode(SystemsController.SystemsControllerMode.AUTOMATIC);
 		}
 		
-		// private void BuildGameLoopRunner()
-		// {
-		// 	
-		// 	GameObject systemsManager = new GameObject("SystemsLoop");
-		// 	SystemsManager systemsManagerComponent = systemsManager.AddComponent<SystemsManager>();
-		// 	GameObject.DontDestroyOnLoad(systemsManager);
-		//
-		// 	BindInstance(systemsManagerComponent);
-		// }
-
 		protected void BuildUISystems()
 		{
 			
 			GameObject newCanvasObj = GameObject.Instantiate(RootUIPrefab.gameObject, RootCoreParent);
 			newCanvasObj.SetActive(true);
 			Canvas rootCanvas = newCanvasObj.GetComponent<Canvas>();
-			
-			// GameObject newCanvasObj = new GameObject(UIRootImplementation.ROOT_CANVAS_NAME);
-			// rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-			
-			// CanvasScaler canvasScaler = newCanvasObj.AddComponent<CanvasScaler>();
-			// canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-			// canvasScaler.matchWidthOrHeight = 0;
-			//
-			// newCanvasObj.AddComponent<GraphicRaycaster>();
 			
 			UIRootImplementation uiRootImplementation = new UIRootImplementation(rootCanvas, RootUIPrefab);
 			BindInstance(uiRootImplementation);

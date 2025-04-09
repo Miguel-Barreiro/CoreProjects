@@ -6,7 +6,7 @@ namespace Core.Model.ModelSystems
         where TComponent : class, IComponent 
     {
         public abstract void OnNew(TComponent newComponent);
-        public abstract void OnDestroy(TComponent newComponent);
+        public abstract void OnDestroy(TComponent destroyedComponent);
         public abstract void Update(TComponent component, float deltaTime);
         
         internal override void Update(EntitiesContainer entitiesContainer, float deltaTime)
