@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Core.Events;
 using Core.Utils.Reflection;
-using UnityEngine;
 
 #nullable enable
 
@@ -115,13 +114,8 @@ namespace Core.Model
                 eventTypes.Add(potentialEventType);
             }
             
-            Type genericEventListenerType = typeof(IEventListener<>);
-            Type[] typeArgument = new []{genericEventListenerType};
             foreach (Type eventType in eventTypes)
             {
-                // typeArgument[0] = eventType;
-                // Type eventListenerType = genericEventListenerType.MakeGenericType(typeArgument);
-                // eventListenerTypes.Add((eventType, eventListenerType));
                 EventAttributesByType.Add(eventType, new EventAttributes(eventType));
             }
         }
@@ -167,6 +161,7 @@ namespace Core.Model
             public readonly Type EventType;
             public readonly EventOrder EventOrder;
             public readonly Type EventListenerType;
+            public readonly Type PostEventListenerType;
             
             public EventAttributes(Type eventType)
             {
@@ -174,6 +169,10 @@ namespace Core.Model
                 
                 Type genericEventListenerType = typeof(IEventListener<>);
                 EventListenerType = genericEventListenerType.MakeGenericType(new []{eventType});
+                
+                Type genericPostEventListenerType = typeof(IPostEventListener<>);
+                PostEventListenerType = genericPostEventListenerType.MakeGenericType(new []{eventType});
+                
                 
                 if (eventType.IsTypeOf<IEarlyEvent>())
                 {

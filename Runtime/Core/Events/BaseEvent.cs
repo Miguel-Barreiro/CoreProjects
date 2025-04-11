@@ -19,7 +19,8 @@ namespace Core.Events
 
 		protected BaseEvent() { }
 
-		public virtual void CallListenerSystemsInternal() { }
+		public abstract void CallPreListenerSystemsInternal();
+		public abstract void CallPostListenerSystemsInternal();
 	}
 
 	public abstract class Event<TEvent> : BaseEvent, IDisposable 
@@ -48,12 +49,23 @@ namespace Core.Events
 			Pool.Despawn(this as TEvent);
 		}
 
-		public override void CallListenerSystemsInternal()
+		public override void CallPreListenerSystemsInternal()
 		{
 			IEnumerable<EventListenerSystemsContainer.EventListenerSystemCache> listenerSystems;
 			listenerSystems = SystemsContainer.GetAllEventListenerSystems<TEvent>();
 			
 			foreach (EventListenerSystemsContainer.EventListenerSystemCache listenerSystem in listenerSystems)
+			{
+				listenerSystem.CallOnEvent(this);
+			}
+		}
+		
+		public override void CallPostListenerSystemsInternal()
+		{
+			IEnumerable<EventListenerSystemsContainer.EventListenerSystemCache> listenerPostEventSystems;
+			listenerPostEventSystems = SystemsContainer.GetAllPostEventListenerSystems<TEvent>();
+			
+			foreach (EventListenerSystemsContainer.EventListenerSystemCache listenerSystem in listenerPostEventSystems)
 			{
 				listenerSystem.CallOnEvent(this);
 			}

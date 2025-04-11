@@ -5,4 +5,12 @@ namespace Core.Events
 	{
 		public void OnEvent(TEvent onEvent);
 	}
+
+	public interface IPostEventListener<TEvent>
+		where TEvent : Event<TEvent>, new()
+	{
+		public void OnPostEvent(TEvent onEvent);
+	}
+
+	
 }

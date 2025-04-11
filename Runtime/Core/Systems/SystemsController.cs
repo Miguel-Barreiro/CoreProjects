@@ -190,8 +190,9 @@ namespace Core.Systems
             
             foreach (BaseEvent currentEvent in eventList)
             {
-                currentEvent.CallListenerSystemsInternal();
+                currentEvent.CallPreListenerSystemsInternal();
                 currentEvent.Execute();
+                currentEvent.CallPostListenerSystemsInternal();
                 currentEvent.Dispose();
             }
         }

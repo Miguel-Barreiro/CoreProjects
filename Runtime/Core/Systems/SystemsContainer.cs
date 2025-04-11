@@ -76,6 +76,13 @@ namespace Core.Systems
             return eventListenerSystemsContainer.GetAllEventListenerSystems<TEvent>();
         }
         
+
+        public IEnumerable<EventListenerSystemsContainer.EventListenerSystemCache> GetAllPostEventListenerSystems<TEvent>() 
+            where TEvent : Event<TEvent>, new()
+        {
+            return eventListenerSystemsContainer.GetAllPostEventListenerSystems<TEvent>();
+        }
+
         
         public void AddSystem(object system, string name)
         {
@@ -94,6 +101,12 @@ namespace Core.Systems
             {
                 eventListenerSystemsContainer.AddEventListener(system);
             }
+
+            if (objectType.IsAssignableToGenericType(typeof(IPostEventListener<>)))
+            {
+                eventListenerSystemsContainer.AddPostEventListener(system);
+            }
+
         }
         
         public void RemoveSystem(Object system)
@@ -113,6 +126,12 @@ namespace Core.Systems
             {
                 eventListenerSystemsContainer.RemoveEventListener(system);
             }
+            
+            if (objectType.IsAssignableToGenericType(typeof(IPostEventListener<>)))
+            {
+                eventListenerSystemsContainer.RemovePostEventListener(system);
+            }
+
         }
 
         
