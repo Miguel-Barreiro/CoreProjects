@@ -12,6 +12,7 @@ namespace Core.Model
     {
         public T? GetEntity<T>(EntId id) where T : BaseEntity;
         public BaseEntity? GetEntity(EntId id);
+        public BaseEntity? GetNewEntity(EntId id);
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity;
         public bool IsEntityOfType<TEntity>(EntId id) where TEntity : class, IEntity;
         public bool IsEntityOfType<TEntity>(EntId id, out TEntity? castEntity) where TEntity : class, IEntity;
@@ -30,7 +31,6 @@ namespace Core.Model
         //EVENT PROCESSING
         private readonly List<BaseEntity> destroyedEntities = new ();
         private readonly List<BaseEntity> newEntities = new ();
-        
         
         private int nextEntityID = 0;
 
@@ -80,6 +80,11 @@ namespace Core.Model
         public BaseEntity? GetEntity(EntId id)
         {
             return entitiesByID.GetValueOrDefault(id);
+        }
+        
+        public BaseEntity? GetNewEntity(EntId id)
+        {
+            return newEntities.Find(newEntity => newEntity.ID == id);
         }
 
         
