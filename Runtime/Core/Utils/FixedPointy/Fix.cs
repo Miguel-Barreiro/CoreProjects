@@ -42,7 +42,10 @@ namespace FixedPointy
 
         public static readonly Fix Zero = new Fix(0);
         public static readonly Fix One = new Fix(FRACTION_RANGE);
+        public static readonly Fix Ten = One * 10;
         public static readonly Fix Hundred = One * 100;
+        public static readonly Fix Thousand = One * 1000;
+        
         public static readonly Fix MinusOne = -new Fix(FRACTION_RANGE);
         public static readonly Fix MinValue = new Fix(int.MinValue);
         public static readonly Fix MaxValue = new Fix(int.MaxValue);
