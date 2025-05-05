@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using Core.Events;
 using Core.Model;
+using Core.Model.ModelSystems;
+using Core.Model.ModelSystems.ComponentSystems;
 using Core.Model.Time;
 using Core.Utils.CachedDataStructures;
 using Cysharp.Threading.Tasks;
@@ -124,14 +126,18 @@ namespace Core.Systems
 
             void ExecuteComponentUpdateSystems()
             {
-                IEnumerable<(Type, EntitySystemsContainer.SystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
-                foreach ((Type _, EntitySystemsContainer.SystemListenerGroup group) in systemsByComponentType)
+                IEnumerable<(Type, ComponentSystemListenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
+                foreach ((Type componentType, ComponentSystemListenerGroup group) in systemsByComponentType)
                 {
-
-                    foreach (EntitySystemsContainer.SystemCache systemCache in group.UpdateEarlierPriority)
-                    {
-                        BaseEntitySystem systemCacheSystem = systemCache.System;
+                  
                     
+                    foreach (UpdateComponentSystemCache systemCache in group.UpdateEarlierPriority)
+                    {
+                        object system = systemCache.System;
+                        ARGUMENT[0] = ;
+                        systemCache.CachedUpdateMethod?.Invoke(system, ARGUMENT);
+                        
+                        
                         if(systemCacheSystem.Active)
                             systemCacheSystem.Update(EntitiesContainer, deltaTime);
                     }
@@ -203,8 +209,8 @@ namespace Core.Systems
         private void ProcessDestroyedEntities()
         {
             //TODO: Optimize this by grouping by component type
-            using CachedList<BaseEntity> destroyedEntitiesList = ListCache<BaseEntity>.Get();
-            IEnumerable<BaseEntity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
+            using CachedList<Entity> destroyedEntitiesList = ListCache<Entity>.Get();
+            IEnumerable<Entity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
             destroyedEntitiesList.AddRange(allDestroyedEntities);
 
             while (destroyedEntitiesList.Count > 0)
@@ -216,7 +222,7 @@ namespace Core.Systems
                 using CachedList<EntitySystemsContainer.SystemCache> earlytList = ListCache<EntitySystemsContainer.SystemCache>.Get();
 
                 
-                foreach (BaseEntity destroyedEntity in destroyedEntitiesList)
+                foreach (Entity destroyedEntity in destroyedEntitiesList)
                 {
                     Type entityType = destroyedEntity.GetType();
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
@@ -244,7 +250,7 @@ namespace Core.Systems
                 destroyedEntitiesList.AddRange(allDestroyedEntities);
             }
 
-            void CallOnDestroy(CachedList<EntitySystemsContainer.SystemCache> systemList, BaseEntity destroyedEntity)
+            void CallOnDestroy(CachedList<EntitySystemsContainer.SystemCache> systemList, Entity destroyedEntity)
             {
                 ARGUMENT[0] = destroyedEntity;
                 foreach (EntitySystemsContainer.SystemCache systemCache in systemList)
@@ -259,8 +265,8 @@ namespace Core.Systems
         {
             
             //TODO: Optimize this by grouping by component type
-            using CachedList<BaseEntity> newEntitiesList = ListCache<BaseEntity>.Get();
-            IEnumerable<BaseEntity> newEntities = EntitiesContainer.GetAllNewEntities();
+            using CachedList<Entity> newEntitiesList = ListCache<Entity>.Get();
+            IEnumerable<Entity> newEntities = EntitiesContainer.GetAllNewEntities();
             newEntitiesList.AddRange(newEntities);
 
             while (newEntitiesList.Count > 0)
@@ -272,15 +278,15 @@ namespace Core.Systems
                 using CachedList<EntitySystemsContainer.SystemCache> earlytList = ListCache<EntitySystemsContainer.SystemCache>.Get();
 
                 
-                foreach (BaseEntity newEntity in newEntitiesList)
+                foreach (Entity newEntity in newEntitiesList)
                 {
                     Type entityType = newEntity.GetType();
                     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
                     foreach (Type componentType in components)
                     {
-                        latetList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Late));
-                        defaultList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Default));
-                        earlytList.AddRange(systemsContainer.GetComponentSystemsFor(componentType, SystemPriority.Early));
+                        latetList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Late));
+                        defaultList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Default));
+                        earlytList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Early));
                     }
                     
                     CallOnNew(earlytList, newEntity);
@@ -298,7 +304,7 @@ namespace Core.Systems
                 
             }
             
-            void CallOnNew(CachedList<EntitySystemsContainer.SystemCache> systemList, BaseEntity newEntity)
+            void CallOnNew(CachedList<EntitySystemsContainer.SystemCache> systemList, Entity newEntity)
             {
                 ARGUMENT[0] = newEntity;
                 foreach (EntitySystemsContainer.SystemCache systemCache in systemList)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Core.Utils.CachedDataStructures;
+using Sirenix.Utilities;
 
 namespace Core.Utils.Reflection
 {
@@ -60,6 +61,62 @@ namespace Core.Utils.Reflection
         }
         
         
+        
+        public static bool ImplementsGenericFullTypeDefinition(this Type givenType, Type genericFullType)
+        {
+            if (givenType.IsGenericType && givenType.IsTypeOf(genericFullType))
+            {
+                return true;
+            }
+            
+            var interfaceTypes = givenType.GetInterfaces();
+            foreach (var it in interfaceTypes)
+            {
+                if (it.IsGenericType && givenType.IsTypeOf(genericFullType))
+                {
+                    return true;
+                }
+            }
+
+            Type parentType = givenType.BaseType;
+            if (parentType == null) return false;
+
+            return ImplementsGenericFullTypeDefinition(parentType, genericFullType);
+        }
+        
+        
+        
+        public static Type GetFirstGenericArgumentTypeDefinition(this Type givenType, Type genericType)
+        {
+            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
+            {
+                Type[] genericArguments = givenType.GetGenericArguments();
+                if (genericArguments.Length > 0)
+                    return genericArguments[0];
+                else
+                    // If the generic type has no arguments, return null
+                    return null;
+            }
+
+
+            var interfaceTypes = givenType.GetInterfaces();
+            foreach (var it in interfaceTypes)
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
+                {
+                    Type[] genericArguments = it.GetGenericArguments();
+                    if (genericArguments.Length > 0)
+                        return genericArguments[0];
+                }
+            }
+
+            Type parentType = givenType.BaseType;
+            if (parentType == null) return null;
+
+            return GetFirstGenericArgumentTypeDefinition(parentType, genericType);
+        }
+        
+
         public static IEnumerable<Type> GetAllTypesOf<TTargetType>()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -68,7 +125,6 @@ namespace Core.Utils.Reflection
                 Type[] types = assembly.GetTypes();
                 foreach (Type type in types)
                 {
-                    
                     if (type.IsTypeOf<TTargetType>() && type != typeof(TTargetType))
                     {
                         yield return type;
@@ -76,7 +132,9 @@ namespace Core.Utils.Reflection
                 }
             }
         }
-        public static IEnumerable<Type> GetAllTypesOf(Type targetType)
+        
+        
+        public static IEnumerable<Type> GetAllTypesImplementingGeneric(Type genericType)
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (Assembly assembly in assemblies)
@@ -84,14 +142,13 @@ namespace Core.Utils.Reflection
                 Type[] types = assembly.GetTypes();
                 foreach (Type type in types)
                 {
-                    if (type.IsTypeOf(targetType) && type != targetType)
+                    if (type.IsAssignableToGenericType(genericType) && type != genericType)
                     {
                         yield return type;
                     }
                 }
             }
         }
-        
         
         
         /// <summary>

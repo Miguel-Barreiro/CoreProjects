@@ -1,5 +1,7 @@
+using System;
 using Core.Events;
 using Core.Model;
+using Core.Model.ModelSystems;
 using Core.Model.Time;
 using Core.Systems;
 using Core.Zenject.Source.Main;
@@ -28,6 +30,16 @@ namespace Core.Initialization
             BuildComponentSystemsLogic();
             BuildTimerSystem();
             BuildStatsSystem();
+
+            BuildDD();
+        }
+
+        private void BuildDD()
+        {
+            foreach ((object container, Type componentType, Type containerType) in ComponentContainersController.GetAllComponentContainers())
+            {
+                BindInstanceByDynamicType(container, containerType);
+            }
         }
 
         private void BuildStatsSystem()
@@ -73,7 +85,7 @@ namespace Core.Initialization
 
         private void BuildComponentSystemsLogic()
         {
-            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
+            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainerImplementation();
             BindInstance(entitySystemsContainer);
         }
 
@@ -81,8 +93,11 @@ namespace Core.Initialization
         
         protected void BuildEntityManager()
         {
-            EntitiesContainer entityManagerComponent = EntitiesContainer.CreateInstance();
-            BindInstance(entityManagerComponent);
+            // EntitiesContainerImplementation entityManager = new EntitiesContainerImplementation();
+            // BindInstance<EntitiesContainer>(entityManager);
+            
+            // EntitiesContainer_old entityManagerComponent = EntitiesContainer_old.CreateInstance();
+            // BindInstance(entityManagerComponent);
         }        
 		
 	}

@@ -35,6 +35,8 @@ namespace Core.Initialization
 			BuildDataContainer();
 		}
 
+		public override void ResetComponentContainers() {  }
+
 		private void BuildDataContainer()
 		{
 			DataConfigContainer configContainer = new DataConfigContainer();

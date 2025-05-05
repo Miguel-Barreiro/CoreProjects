@@ -10,17 +10,17 @@ namespace Core.Model
         public void Destroy();
     }
 
-    public abstract class BaseEntity : IEntity, IComponent
+    public abstract class Entity : IEntity
     {
         public EntId ID => id;
         private EntId id;
-
-        protected BaseEntity()
+    
+        protected Entity()
         {
             id = EntitiesContainer.GenerateNewEntityID();
             EntitiesContainer.OnEntityCreated(this);
         }
-
+    
         public void Destroy()
         {
             EntitiesContainer.OnDestroyEntity(this);

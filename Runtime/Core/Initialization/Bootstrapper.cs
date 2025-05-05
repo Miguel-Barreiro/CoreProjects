@@ -67,16 +67,22 @@ namespace Core.Initialization
 
 		public async UniTask<OperationResult> Run()
 		{
+#if !UNITY_EDITOR
 			try
 			{
-
+#endif
 				SetupSystemsContainer();
 				SetupObjectBuilder();
 			
 			
 				List<SystemsInstallerBase> systemsInstallerBases = new List<SystemsInstallerBase>(Installers);
 				Installers.Clear();
-			
+
+
+				foreach (SystemsInstallerBase installer in systemsInstallerBases) { 
+					installer.ResetComponentContainers();
+				}
+				
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
 					installer.CreateSystems();
@@ -89,6 +95,7 @@ namespace Core.Initialization
 						UpdateObjectBuilder(currentSceneInstaller);
 					}
 				}
+
 			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
@@ -118,11 +125,12 @@ namespace Core.Initialization
 					installer.OnComplete();
 				}
 				
+#if !UNITY_EDITOR
 			} catch (Exception e)
 			{
 				Debug.LogError(e);
-				throw;
 			}
+#endif
 			
 			return OperationResult.Success();
 		}

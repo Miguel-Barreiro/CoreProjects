@@ -36,13 +36,19 @@ namespace Core.Model.Time
         public void Update(float deltaTimeMs);
     }
 
-    public interface ITimerComponent : IComponent { }
+    public struct TimerComponent : IComponentData
+    {
+        public EntId ID { get; set; }
+    }
+    
+    public interface ITimerComponent : Component<TimerComponent> { }
 
-    public class TimerSystemImplementation : ComponentSystem<ITimerComponent>,
-                                             TimerSystemRo, 
+    public class TimerSystemImplementation : TimerSystemRo, 
                                              TimerSystem, 
-                                             ITimerSystemImplementationInternal
-	{
+                                             ITimerSystemImplementationInternal, 
+                                             OnDestroyComponent<TimerComponent>
+                                             
+    {
 
         [Inject] private readonly StatsSystem StatsSystem = null!;
         [Inject] private readonly TimerModel TimerModel = null!;
@@ -232,16 +238,14 @@ namespace Core.Model.Time
             }
         }
         
+        
 
-        public override void OnNew(ITimerComponent newComponent) { }
-
-        public override void OnDestroy(ITimerComponent newComponent)
+        public void OnDestroyComponent(ref TimerComponent destroyedComponent)
         {
-            if (TimerModel.Timers.ContainsKey(newComponent.ID))
-                TimerModel.Timers.Remove(newComponent.ID);
+            if (TimerModel.Timers.ContainsKey(destroyedComponent.ID))
+                TimerModel.Timers.Remove(destroyedComponent.ID);
         }
 
-        public override void Update(ITimerComponent component, float deltaTime) { }
         
         #endregion
 
@@ -263,6 +267,6 @@ namespace Core.Model.Time
         #endregion
         
 
-        public override SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
+        public SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
     }
 }

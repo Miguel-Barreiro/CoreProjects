@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Core.Events;
 using Core.Utils.Reflection;
 
@@ -7,16 +8,32 @@ using Core.Utils.Reflection;
 
 namespace Core.Model
 {
-    public sealed class TypeCache
+    
+    public interface ITypeCache
     {
+        IEnumerable<Type> GetAllEntityTypes();
+        IEnumerable<Type> GetAllEntityComponentTypes();
+        IEnumerable<Type> GetAllComponentDataTypes();
+        IEnumerable<Type> GetAllEventTypes();
+        IEnumerable<TypeCache.EventAttributes> GetAllEventAttributes();
+        TypeCache.EventAttributes? GetEventAttributes(Type eventType);
+        IEnumerable<Type> GetComponentsOf(Type entityType);
+    }
+    
+    public sealed class TypeCache: ITypeCache
+    {
+        private readonly Dictionary<Type, List<Type>> componentsBySystemType = new ();
         private readonly Dictionary<Type, List<Type>> componentsByEntityType = new ();
         private readonly List<Type> entityTypes = new ();
+        private readonly List<Type> componentTypes = new ();
+        private readonly List<Type> componentDataTypes = new ();
         private readonly List<Type> eventTypes = new();
-        // private readonly List<(Type, Type)> eventListenerTypes = new();
 
+        private readonly Dictionary<Type, Type> componentDataTypeByComponentType = new();
+        
         private readonly Dictionary<Type,EventAttributes> EventAttributesByType = new();
 
-        private static TypeCache instance = null;
+        private static TypeCache? instance = null;
         public static TypeCache Get()
         {
             if (instance == null)
@@ -31,15 +48,43 @@ namespace Core.Model
             componentsByEntityType.Clear();
             entityTypes.Clear();
 
-            IEnumerable<Type> types = ReflectionUtils.GetAllTypesOf<BaseEntity>();
+            IEnumerable<Type> types = ReflectionUtils.GetAllTypesOf<Entity>();
             foreach (Type entityType in types)
             {
                 BuildEntityTypeCache(entityType);
             }
 
             BuildEventTypeCache();
+            BuildComponentDataTypeCache();
         }
 
+
+        private void BuildComponentDataTypeCache()
+        {
+            IEnumerable<Type> types = ReflectionUtils.GetAllTypesOf<IComponentData>();
+            foreach (Type currentPotentialComponentDataType in types)
+            {
+                if (currentPotentialComponentDataType.IsValueType)
+                {
+                    componentDataTypes.Add(currentPotentialComponentDataType);
+                }
+            }
+
+            foreach (Type componentType in componentTypes)
+            {
+                Type componentDataType = componentType.GetFirstGenericArgumentTypeDefinition(typeof(Component<>));
+                if (componentDataType == null)
+                {
+                    // Debug.LogError($"componentType {componentType} not found in cache");
+                    continue;
+                }
+                
+                if (!componentDataTypes.Contains(componentDataType))
+                {
+                    componentDataTypeByComponentType.Add(componentType, componentDataType);
+                }
+            }
+        }
 
 
         public IEnumerable<EventAttributes> GetAllEventListenerTypes()
@@ -80,10 +125,14 @@ namespace Core.Model
                 yield return entityType;
             }
 
-            yield return typeof(BaseEntity);
+            yield return typeof(Entity);
         }
 
-        
+        public Type GetComponentDataTypeFromComponentType(Type componentType)
+        {
+            return componentDataTypeByComponentType[componentType];
+        }
+
         public IEnumerable<Type> GetComponentsOf(Type entityType)
         {
             if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
@@ -98,6 +147,22 @@ namespace Core.Model
             }
         }
         
+        public IEnumerable<Type> GetAllEntityComponentTypes()
+        {
+            foreach (Type componentType in componentTypes)
+            {
+                yield return componentType;
+            }
+        }
+
+        public IEnumerable<Type> GetAllComponentDataTypes()
+        {
+            foreach (Type componentType in componentDataTypes)
+            {
+                yield return componentType;
+            }
+        }
+
         #region Internal
         
 
@@ -128,30 +193,35 @@ namespace Core.Model
                 List<Type> cachedComponentTypeList = new List<Type>();
                 componentsByEntityType.Add(entityType, cachedComponentTypeList);
                 
-                IEnumerable<Type> componentTypes = GetEntityComponentTypes(entityType);
-                cachedComponentTypeList.AddRange(componentTypes);
-                cachedComponentTypeList.Add(entityType);
-
+                IEnumerable<Type> entityComponentTypes = GetEntityComponentTypes(entityType);
+                cachedComponentTypeList.AddRange(entityComponentTypes);
+                
                 foreach (Type componentType in cachedComponentTypeList)
                 {
-                    if (!entityTypes.Contains(componentType))
+                    if (!componentTypes.Contains(componentType))
                     {
-                        entityTypes.Add(componentType);
+                        componentTypes.Add(componentType);
                     }
                 }
             }
+
+            if (!entityTypes.Contains(entityType))
+            {
+                entityTypes.Add(entityType);
+            }
             
+
             static IEnumerable<Type> GetEntityComponentTypes(Type entityType)
             {
                 IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
                 foreach (Type implementedInterface in implementedInterfaces)
                 {
-                    if (implementedInterface.IsTypeOf<IComponent>())
+                    if (implementedInterface.IsAssignableToGenericType(typeof(Component<>)))
                     {
                         yield return implementedInterface;
                     }
                 }
-                yield return typeof(BaseEntity);
+                // yield return typeof(Entity);
             }
         }
         
@@ -191,5 +261,6 @@ namespace Core.Model
         
         #endregion
 
+        
     }
 }

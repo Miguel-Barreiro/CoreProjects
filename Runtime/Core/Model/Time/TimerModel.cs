@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Model.Time
 {
-	public class TimerModel : BaseEntity
+	public class TimerModel : Entity
 	{
 		[SerializeField]
 		internal Dictionary<EntId, Dictionary<string, InternalTimer>> Timers = new ();

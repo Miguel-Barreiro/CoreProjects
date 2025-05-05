@@ -6,7 +6,13 @@ using Debug = UnityEngine.Debug;
 
 namespace Core.Model
 {
-    public interface IStatsEntity : IComponent
+
+	public struct StatsEntityData : IComponentData
+	{
+		public EntId ID { get; set; }
+	}
+
+	public interface IStatsEntity : Component<StatsEntityData>
     {
         // Marker interface for entities that can have stats
     }

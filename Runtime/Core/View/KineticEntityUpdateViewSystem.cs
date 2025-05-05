@@ -9,52 +9,62 @@ using Zenject;
 namespace Core.View
 {
     
-    public sealed class KineticEntityUpdateViewSystem : ComponentSystem<IKineticEntity>
+    public sealed class KineticEntityUpdateViewSystem : OnCreateComponent<IKineticEntityData>, 
+                                                        OnDestroyComponent<IKineticEntityData>, 
+                                                        UpdateComponent<IKineticEntityData>
     {
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
+        [Inject] private readonly ComponentContainer<IKineticEntityData> ComponentContainer = null!;
 
-        public override void OnNew(IKineticEntity newEntity)
+        public void OnCreateComponent(ref IKineticEntityData newComponent)  
         {
-            if (newEntity.Prefab == null)
+            if (newComponent.Prefab == null)
             {
-                Debug.LogError($"Prefab not found for entity {newEntity.GetType().Name}({newEntity.ID})");
+                Debug.LogError($"Prefab not found for entity {newComponent.GetType().Name}({newComponent.ID})");
                 return;
             }
 
-            GameObject? newGameObject = ViewEntitiesContainer.Spawn(newEntity.Prefab, newEntity);
+            GameObject? newGameObject = ViewEntitiesContainer.Spawn(newComponent.Prefab, newComponent.ID);
             if (newGameObject != null)
             {
-                newGameObject.transform.position = new Vector3(newEntity.Position.x, newEntity.Position.y, 0);
+                newGameObject.transform.position = new Vector3(newComponent.Position.x, newComponent.Position.y, 0);
             }
 
         }
 
-        public override void OnDestroy(IKineticEntity entity)
+        public void OnDestroyComponent(ref IKineticEntityData destroyedComponent)
         {
-            EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
+            EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(destroyedComponent.ID);
             if (entityViewAtributes == null)
             {
-                Debug.LogError($"view for Entity with id {entity.ID} not found");
+                Debug.LogError($"view for Entity with id {destroyedComponent.ID} not found");
                 return;
             }
 
-            ViewEntitiesContainer.Destroy(entity.ID);
+            ViewEntitiesContainer.Destroy(destroyedComponent.ID);
         }
 
-
-        public override void Update(IKineticEntity entity, float deltaTime)
+        public void UpdateComponents(float deltaTime)
         {
-            EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
-            if (viewAtributes == null || viewAtributes.GameObject== null)
+            
+            ComponentContainer.ResetIterator();
+            while (ComponentContainer.MoveNext())
             {
-                GameObject? newGameObject = ViewEntitiesContainer.Spawn(entity.Prefab, entity);
-                return;
+                ref IKineticEntityData kineticEntityData = ref ComponentContainer.GetCurrent();
+                
+                EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(kineticEntityData.ID);
+                if (viewAtributes == null || viewAtributes.GameObject== null)
+                {
+                    GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticEntityData.Prefab, kineticEntityData.ID);
+                    return;
+                }
+
+                GameObject entityGameobject = viewAtributes.GameObject;
+                entityGameobject.transform.position = new Vector3(kineticEntityData.Position.x, kineticEntityData.Position.y, 0);
             }
 
-            GameObject entityGameobject = viewAtributes.GameObject;
-            entityGameobject.transform.position = new Vector3(entity.Position.x, entity.Position.y, 0);
         }
 
-        public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
+        // public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
     }
 }

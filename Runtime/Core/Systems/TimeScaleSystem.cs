@@ -14,10 +14,15 @@ namespace Core.Systems
 		public void ClearTimeScaleModifiers();
 	}
 
-	public interface TimeScalerEntity : IComponent { }
+	public struct TimeScalerEntityData : IComponentData
+	{
+		public EntId ID { get; set; }
+	}
+
+	public interface TimeScalerEntity : Component<TimeScalerEntityData> { }
 
 
-	public sealed class TimeScaleSystemImplementation : ComponentSystem<TimeScalerEntity>,  TimeScaleSystem, IInitSystem
+	public sealed class TimeScaleSystemImplementation : OnDestroyComponent<TimeScalerEntityData>,  TimeScaleSystem, IInitSystem
 	{
 		private TimeScaleSystemModel TimeScaleSystemModel;
 		
@@ -44,17 +49,16 @@ namespace Core.Systems
 			UpdateCurrentScale();
 		}
 
-		public override void OnNew(TimeScalerEntity newComponent) {}
-
-		public override void OnDestroy(TimeScalerEntity newComponent)
+		public void OnDestroyComponent(ref TimeScalerEntityData destroyedComponent)
 		{
-			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(newComponent.ID))
+			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedComponent.ID))
 			{
-				TimeScaleSystemModel.scalerByOwners.Remove(newComponent.ID);
+				TimeScaleSystemModel.scalerByOwners.Remove(destroyedComponent.ID);
 			}
 
 			UpdateCurrentScale(); 
 		}
+
 
 
 		public Fix GetCurrentTimeScale()
@@ -77,13 +81,6 @@ namespace Core.Systems
 			}
 		}
 
-		public override void Update(TimeScalerEntity component, float deltaTime) 
-		{
-			// No per-frame update needed for this system
-		}
-
-		
-		public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
 		
 		private void UpdateCurrentScale()
 		{
@@ -104,9 +101,10 @@ namespace Core.Systems
 			TimeScaleSystemModel.currentScale = minScale;
 			Time.timeScale = (float) TimeScaleSystemModel.currentScale;
 		}
+
 	}
 
-	public sealed class TimeScaleSystemModel : BaseEntity
+	public sealed class TimeScaleSystemModel : Entity
 	{ 
 		[SerializeField]
 		public Fix currentScale = Fix.One;

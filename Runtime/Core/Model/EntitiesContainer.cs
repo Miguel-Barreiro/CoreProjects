@@ -10,9 +10,9 @@ namespace Core.Model
 
     public interface IEntitiesContainer
     {
-        public T? GetEntity<T>(EntId id) where T : BaseEntity;
-        public BaseEntity? GetEntity(EntId id);
-        public BaseEntity? GetNewEntity(EntId id);
+        public T? GetEntity<T>(EntId id) where T : Entity;
+        public Entity? GetEntity(EntId id);
+        public Entity? GetNewEntity(EntId id);
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity;
         public bool IsEntityOfType<TEntity>(EntId id) where TEntity : class, IEntity;
         public bool IsEntityOfType<TEntity>(EntId id, out TEntity? castEntity) where TEntity : class, IEntity;
@@ -23,14 +23,14 @@ namespace Core.Model
     {
 
         // ENTITY LIFETIME MANAGEMENT
-        private readonly Dictionary<EntId, BaseEntity> entitiesByID = new ();
+        private readonly Dictionary<EntId, Entity> entitiesByID = new ();
 
         // COMPONENT CACHING
-        private readonly Dictionary<Type, List<BaseEntity>> entitiesByComponentType = new ();
+        private readonly Dictionary<Type, List<Entity>> entitiesByComponentType = new ();
         
         //EVENT PROCESSING
-        private readonly List<BaseEntity> destroyedEntities = new ();
-        private readonly List<BaseEntity> newEntities = new ();
+        private readonly List<Entity> destroyedEntities = new ();
+        private readonly List<Entity> newEntities = new ();
         
         private int nextEntityID = 0;
 
@@ -65,24 +65,19 @@ namespace Core.Model
 
         private EntitiesContainer(){ }
         
-        public T? GetEntity<T>(EntId id) where T:BaseEntity
+        public T? GetEntity<T>(EntId id) where T:Entity
         {
             return entitiesByID.GetValueOrDefault(id) as T;
         }
 
-        public T? GetComponent<T>(EntId id) where T: class, IComponent
-        {
-            BaseEntity baseEntity = entitiesByID.GetValueOrDefault(id);
-            return baseEntity as T;
-        }
 
         
-        public BaseEntity? GetEntity(EntId id)
+        public Entity? GetEntity(EntId id)
         {
             return entitiesByID.GetValueOrDefault(id);
         }
         
-        public BaseEntity? GetNewEntity(EntId id)
+        public Entity? GetNewEntity(EntId id)
         {
             return newEntities.Find(newEntity => newEntity.ID == id);
         }
@@ -90,7 +85,7 @@ namespace Core.Model
         
         public bool IsEntityOfType<TEntity>(EntId id) where TEntity : class, IEntity
         {
-            BaseEntity? baseEntity = GetEntity(id);
+            Entity? baseEntity = GetEntity(id);
             if (baseEntity == null)
                 return false;
 
@@ -99,7 +94,7 @@ namespace Core.Model
 
         public bool IsEntityOfType<TEntity>(EntId id, out TEntity? castEntity) where TEntity : class, IEntity
         {
-            BaseEntity? baseEntity = GetEntity(id);
+            Entity? baseEntity = GetEntity(id);
             if (baseEntity == null)
             {
                 castEntity = null;
@@ -112,18 +107,18 @@ namespace Core.Model
 
         public int NewEntitiesCount() => newEntities.Count;
         
-        public IEnumerable<BaseEntity> GetAllNewEntities()
+        public IEnumerable<Entity> GetAllNewEntities()
         {
-            foreach (BaseEntity newEntity in newEntities)
+            foreach (Entity newEntity in newEntities)
             {
                 yield return newEntity;
             }
         }
 
         public int DestroyedEntitiesCount => destroyedEntities.Count;
-        public IEnumerable<BaseEntity> GetAllDestroyedEntities()
+        public IEnumerable<Entity> GetAllDestroyedEntities()
         {
-            foreach (BaseEntity destroyedEntity in destroyedEntities)
+            foreach (Entity destroyedEntity in destroyedEntities)
             {
                 yield return destroyedEntity;
             }
@@ -131,7 +126,7 @@ namespace Core.Model
         
         public void UpgradeCurrentNewEntities()
         {
-            foreach (BaseEntity newEntity in newEntities)
+            foreach (Entity newEntity in newEntities)
             {
                 AddEntityInternal(newEntity);
             }
@@ -140,7 +135,7 @@ namespace Core.Model
         
         public void ClearDestroyedEntities()
         {
-            foreach (BaseEntity destroyedEntity in destroyedEntities)
+            foreach (Entity destroyedEntity in destroyedEntities)
             {
                 RemoveEntityInternal(destroyedEntity);
             }
@@ -157,7 +152,7 @@ namespace Core.Model
             foreach (Type entityType in entityTypes)
             {
                 if(!entitiesByComponentType.ContainsKey(entityType))
-                    entitiesByComponentType.Add(entityType, new List<BaseEntity>());
+                    entitiesByComponentType.Add(entityType, new List<Entity>());
             }
         }
 
@@ -171,12 +166,12 @@ namespace Core.Model
             return new EntId(instance!.nextEntityID++);
         }
         
-        internal static void OnEntityCreated(BaseEntity entity)
+        internal static void OnEntityCreated(Entity entity)
         {
             instance!.newEntities.Add(entity);
         }
         
-        internal static void OnDestroyEntity(BaseEntity entity)
+        internal static void OnDestroyEntity(Entity entity)
         {
             if(instance!.destroyedEntities.Contains(entity))
                 return;
@@ -186,20 +181,20 @@ namespace Core.Model
         
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
         {
-            if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<BaseEntity> entities))
+            if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<Entity> entities))
             {
                 // Debug.Log($"no entities of type {typeof(TEntity)} found");
                 yield break;
             }
 
-            foreach (BaseEntity entity in entities)
+            foreach (Entity entity in entities)
             {
-                yield return (entity as TEntity)!;
+                yield return entity! as TEntity;
             }
         }
 
         
-        private void AddEntityInternal(BaseEntity entity)
+        private void AddEntityInternal(Entity entity)
         {
             Type entityType = entity.GetType();
 
@@ -208,21 +203,21 @@ namespace Core.Model
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                if (entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities))
+                if (entitiesByComponentType.TryGetValue(componentType, out List<Entity> entities))
                 {
                     entities.Add(entity);
                 }
             }
         }
         
-        private void RemoveEntityInternal(BaseEntity entity)
+        private void RemoveEntityInternal(Entity entity)
         {
             Type entityType = entity.GetType();
             
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                if (entitiesByComponentType.TryGetValue(componentType, out List<BaseEntity> entities))
+                if (entitiesByComponentType.TryGetValue(componentType, out List<Entity> entities))
                 {
                     entities.Remove(entity);
                 }

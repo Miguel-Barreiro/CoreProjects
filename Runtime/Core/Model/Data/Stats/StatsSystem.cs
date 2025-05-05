@@ -48,7 +48,7 @@ namespace Core.Model
 	
 
 
-	public class StatsSystemImplementation : EntitySystem<BaseEntity>, StatsSystem, StatsSystemRo, IInitSystem
+	public class StatsSystemImplementation : EntitySystem<Entity>, StatsSystem, StatsSystemRo, IInitSystem
 	{
 		private StatsModel _statsModel = null;
 		
@@ -60,7 +60,7 @@ namespace Core.Model
 
 		public override SystemGroup Group => CoreSystemGroups.CoreSystemGroup;
 
-		public override void OnNew(BaseEntity newEntity)
+		public override void OnNew(Entity newEntity)
 		{
 			// Initialize any default stats if needed
 		}
@@ -70,15 +70,10 @@ namespace Core.Model
 			_statsModel = new StatsModel();
 		}
 
-		public override void OnDestroy(BaseEntity entity)
+		public override void OnDestroy(Entity entity)
 		{
 			_statsModel.RemoveAllModifiersFrom(entity.ID); 
 			_statsModel.RemoveAllStatsFrom(entity.ID);
-		}
-
-		public override void Update(BaseEntity entity, float deltaTime)
-		{
-			// Handle any time-based stat updates if needed
 		}
 
 		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false)

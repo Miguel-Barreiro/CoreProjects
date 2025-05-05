@@ -14,6 +14,7 @@ namespace Core.Initialization
     public abstract class SystemsInstallerBase
 	{
         protected abstract void InstallSystems();
+        public abstract void ResetComponentContainers();
 
         protected readonly DiContainer Container;
         internal DiContainer ContainerInstance => Container;
@@ -103,6 +104,13 @@ namespace Core.Initialization
         {
             RegisterDisposableIfNeeded(instance);
             Container.BindInstance<T>(instance);
+            AddSystem(instance);
+        }
+        
+        protected void BindInstanceByDynamicType(object instance, Type type)
+        {
+            RegisterDisposableIfNeeded(instance);
+            Container.Bind(type).FromInstance(instance);
             AddSystem(instance);
         }
 

@@ -7,21 +7,33 @@ using Zenject;
 namespace Core.Core.Model.Data
 {
 
-	public interface NamedEntity : IComponent { }
+	public struct NamedEntityData : IComponentData
+	{
+		public string Name { get; set; }
+		public EntId ID { get; set; }
 
-	public interface NamedEntitiesSystem
+		public NamedEntityData(string name, EntId id)
+		{
+			Name = name;
+			ID = id;
+		}
+	}
+		
+	public interface NamedEntity : Component<NamedEntityData> { }
+
+	public interface NamedEntitiesSystem : ISystem
 	{
 		public void RegisterEntity(string name, EntId entityId);
 		public EntId GetEntityId(string name);
 	}
 
-	public sealed class NamedEntitiesSystemModel : BaseEntity
+	public sealed class NamedEntitiesSystemModel : Entity
 	{
 		internal Dictionary<string, EntId> NamedEntitiesByName = new ();
 		internal Dictionary<EntId, string> NamedEntitiesById = new ();
 	}
 
-	public sealed class NamedEntitiesSystemImplementation : ComponentSystem<NamedEntity>, NamedEntitiesSystem
+	public sealed class NamedEntitiesSystemImplementation : OnDestroyComponent<NamedEntityData>, NamedEntitiesSystem
 	{
 
 		[Inject] private readonly NamedEntitiesSystemModel NamedEntitiesSystemModel = null!;
@@ -37,19 +49,17 @@ namespace Core.Core.Model.Data
 			return NamedEntitiesSystemModel.NamedEntitiesByName.TryGetValue(name, out EntId entityId) ? entityId : EntId.Invalid;
 		}
 
-		public override void OnNew(NamedEntity newComponent) { }
 
-		public override void OnDestroy(NamedEntity namedEntity)
+		public void OnDestroyComponent(ref NamedEntityData destroyedComponent)
 		{
-			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(namedEntity.ID, out string name))
+			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(destroyedComponent.ID, out string name))
 			{
 				NamedEntitiesSystemModel.NamedEntitiesByName.Remove(name);
-				NamedEntitiesSystemModel.NamedEntitiesById.Remove(namedEntity.ID);
+				NamedEntitiesSystemModel.NamedEntitiesById.Remove(destroyedComponent.ID);
 			}
 		}
 
-		
-		public override void Update(NamedEntity component, float deltaTime) { }
-		public override SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
+		public bool Active { get; set; } = true;
+		public SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
 	}
 }

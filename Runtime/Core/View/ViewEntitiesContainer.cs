@@ -10,7 +10,7 @@ namespace Core.View
 	public interface IViewEntitiesContainer
 	{
 		public void Destroy(EntId entityID);
-		public GameObject? Spawn(GameObject entityPrefab, IEntity entity);
+		public GameObject? Spawn(GameObject entityPrefab, EntId entityID);
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
 		public void SetEntityViewParent(EntId entId, Transform newParent);
 	}
@@ -40,22 +40,22 @@ namespace Core.View
 			GameobjectsByEntityId.Remove(entityID);
 		}
 		
-		public GameObject? Spawn(GameObject entityPrefab, IEntity entity)
+		public GameObject? Spawn(GameObject entityPrefab, EntId entityID)
 		{
 			if (entityPrefab == null)
 			{
-				Debug.Log($"No prefab set for entity {entity.GetType().Name}({entity.ID})");
+				// Debug.Log($"No prefab set for entity {entity.GetType().Name}({entityID})");
 				return null;
 			}
 
 			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
 
-			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entity);
+			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entityID);
 			entityAttributes.GameObject = newGameObject;
 
 			EntityView entityView = newGameObject.GetComponent<EntityView>();
 			if(entityView != null)
-				entityView.EntityID = entity.ID;
+				entityView.EntityID = entityID;
 
 			return newGameObject;
 		}
@@ -82,12 +82,12 @@ namespace Core.View
 		}
 		
 
-		private EntityViewAtributes GetOrCreateEntityAttributes(IEntity entity)
+		private EntityViewAtributes GetOrCreateEntityAttributes(EntId entityID)
 		{
-			if (!GameobjectsByEntityId.TryGetValue(entity.ID, out EntityViewAtributes entityViewAtributes))
+			if (!GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes))
 			{
-				entityViewAtributes = new EntityViewAtributes(entity.ID);
-				GameobjectsByEntityId.Add(entity.ID, entityViewAtributes);
+				entityViewAtributes = new EntityViewAtributes(entityID);
+				GameobjectsByEntityId.Add(entityID, entityViewAtributes);
 			}
 
 			return entityViewAtributes;

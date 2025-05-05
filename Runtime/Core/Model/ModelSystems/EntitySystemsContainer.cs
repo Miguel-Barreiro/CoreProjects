@@ -1,222 +1,289 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using Core.Model.ModelSystems.ComponentSystems;
 using Core.Systems;
 using UnityEngine;
 
-namespace Core.Model
+namespace Core.Model.ModelSystems
 {
-    public class EntitySystemsContainer
+
+    internal interface EntitySystemsContainer
+    {
+
+        // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType);
+        // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority);
+        internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType();
+
+        internal void AddSystem(object system);
+        internal void RemoveComponentSystem(object system);
+        
+    }
+    
+    
+
+
+
+
+    public class EntitySystemsContainerImplementation : EntitySystemsContainer
     {
         
-        private readonly Dictionary<Type, SystemCache> systemByType = new();
-        private readonly Dictionary<Type, SystemListenerGroup> systemsByComponentType = new ();
+        private readonly Dictionary<Type, ComponentSystemListenerGroup> systemsCacheByComponentType = new ();
+        private readonly List<object> systems = new();
+
+
+        internal EntitySystemsContainerImplementation()
+        { 
+            foreach (var componentType in TypeCache.Get().GetAllEntityComponentTypes())
+            {
+                systemsCacheByComponentType.Add(componentType, new ComponentSystemListenerGroup());
+            }
+        }
+        
+        
         
         #region Public
         
-        internal IEnumerable<(Type, SystemListenerGroup)> GetAllComponentSystemsByComponentType()
+        // internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType()
+        // {
+        //     foreach ((Type componentType, ComponentSystemListenerGroup group)  in systemsByComponentType)
+        //     {
+        //         yield return (componentType, group);
+        //     }
+        // }
+        
+        
+        // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority) {
+        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
+        //     {
+        //         List<UpdateComponentSystemCache> priorityList = priority switch
+        //         {
+        //             SystemPriority.Early => systems.UpdateEarlierPriority,
+        //             SystemPriority.Default => systems.UpdateDefaultPriority,
+        //             SystemPriority.Late => systems.UpdateLatePriority,
+        //             _ => systems.UpdateDefaultPriority
+        //         };
+        //         foreach (UpdateComponentSystemCache systemCache in priorityList)
+        //         {
+        //             yield return systemCache;
+        //         }
+        //     }
+        // }
+        //
+        // internal IEnumerable<OnDestroyComponentSystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority) {
+        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
+        //     {
+        //         List<OnDestroyComponentSystemCache> priorityList = priority switch
+        //         {
+        //             SystemPriority.Early => systems.OnDestroyEarlierPriority,
+        //             SystemPriority.Default => systems.OnDestroyDefaultPriority,
+        //             SystemPriority.Late => systems.OnDestroyLatePriority,
+        //             _ => systems.OnDestroyDefaultPriority
+        //         };
+        //         foreach (OnDestroyComponentSystemCache systemCache in priorityList)
+        //         {
+        //             yield return systemCache;
+        //         }
+        //     }
+        // }
+        //
+        // internal IEnumerable<OnCreateComponentSystemCache> GetComponentSystemsForCreated(Type componentType, SystemPriority priority) {
+        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
+        //     {
+        //         List<OnCreateComponentSystemCache> priorityList = priority switch
+        //         {
+        //             SystemPriority.Early => systems.OnCreateEarlierPriority,
+        //             SystemPriority.Default => systems.OnCreateDefaultPriority,
+        //             SystemPriority.Late => systems.OnCreateLatePriority,
+        //             _ => systems.OnCreateDefaultPriority
+        //         };
+        //         foreach (OnCreateComponentSystemCache systemCache in priorityList)
+        //         {
+        //             yield return systemCache;
+        //         }
+        //     }
+        // }
+
+        internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType)
         {
-            foreach ((Type componentType, SystemListenerGroup group)  in systemsByComponentType)
+            if (!systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
             {
-                yield return (componentType, group);
+                Debug.LogError($"No systems found for component type {componentType}");
+                return null;
             }
+            return systems;
         }
-        
-        
-        internal IEnumerable<BaseEntitySystem> GetAllComponentSystems()
+
+        IEnumerable<(Type, ComponentSystemListenerGroup)> EntitySystemsContainer.GetAllComponentSystemsByComponentType()
         {
-            foreach (SystemCache systemCache in systemByType.Values)
+            foreach (KeyValuePair<Type, ComponentSystemListenerGroup> pair  in systemsCacheByComponentType)
             {
-                yield return systemCache.System;
+                yield return (pair.Key, pair.Value);
             }
         }
 
-        
-        internal IEnumerable<SystemCache> GetComponentSystemsFor(Type componentType, SystemPriority priority) {
-            if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
-            {
-                List<SystemCache> priorityList = priority switch
-                {
-                    SystemPriority.Early => systems.EarlierPriority,
-                    SystemPriority.Default => systems.DefaultPriority,
-                    SystemPriority.Late => systems.LatePriority,
-                    _ => systems.DefaultPriority
-                };
-                foreach (SystemCache systemCache in priorityList)
-                {
-                    yield return systemCache;
-                }
-            }
-        }
-        
-        internal IEnumerable<SystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority) {
-            if (systemsByComponentType.TryGetValue(componentType, out SystemListenerGroup systems))
-            {
-                List<SystemCache> priorityList = priority switch
-                {
-                    SystemPriority.Early => systems.EarlierPriority,
-                    SystemPriority.Default => systems.DefaultPriority,
-                    SystemPriority.Late => systems.LatePriority,
-                    _ => systems.DefaultPriority
-                };
-                foreach (SystemCache systemCache in priorityList)
-                {
-                    yield return systemCache;
-                }
-            }
-        }
-
-        
-
-        internal void AddComponentSystem(BaseEntitySystem system) 
+        void EntitySystemsContainer.AddSystem(object system) 
         {
             Type systemType = system.GetType();
-            if (systemByType.ContainsKey(systemType))
+            if (systems.Contains(system))
             {
                 Debug.LogError($"Model System of type {systemType} already added");
                 return;
             }
 
-            if (!systemsByComponentType.TryGetValue(system.EntityType, out SystemListenerGroup systemGroup))
+            IEnumerable<Type> components = ComponentUtils.GetAllComponentTypesFromSystem(systemType);
+            foreach (Type componentType in components)
             {
-                systemGroup = new SystemListenerGroup();
-                systemsByComponentType.Add(system.EntityType, systemGroup);
+                ComponentSystemListenerGroup componentSystemListenerGroup = systemsCacheByComponentType[componentType];
+                componentSystemListenerGroup.AddSystem(system, componentType);
             }
-
-            SystemCache systemCache = new SystemCache(system);
-            systemGroup.Add(systemCache);
-            systemByType.Add(systemType, systemCache);
         }
-        
-        internal void RemoveComponentSystem(BaseEntitySystem system)
+
+        void EntitySystemsContainer.RemoveComponentSystem(object system)
         {
             Type systemType = system.GetType();
-            if (!systemByType.TryGetValue(systemType, out SystemCache systemCache))
-            {
-                Debug.LogError($"System of type {systemType} not found");
-                return;
-            }
+            if (!systems.Contains(system)) return;
 
-            if (!systemsByComponentType.TryGetValue(system.EntityType, out SystemListenerGroup systemGroup))
+            IEnumerable<Type> components = ComponentUtils.GetAllComponentTypesFromSystem(systemType);
+            foreach (Type componentType in components)
             {
-                Debug.LogError($"System of type {systemType} not found in systemsByComponentType");
-                return;
+                ComponentSystemListenerGroup componentSystemListenerGroup = systemsCacheByComponentType[componentType];
+                componentSystemListenerGroup.RemoveSystem(system);
             }
-            
-            systemGroup.Remove(systemCache);
-            systemByType.Remove(systemType);
         }
 
         #endregion
         
-        public sealed class SystemListenerGroup
+        
+
+    }
+    public sealed class ComponentSystemListenerGroup
+    {
+        public readonly List<OnCreateComponentSystemCache> OnCreateEarlierPriority = new ();
+        public readonly List<OnCreateComponentSystemCache> OnCreateDefaultPriority = new();
+        public readonly List<OnCreateComponentSystemCache> OnCreateLatePriority = new();
+
+        public readonly List<OnDestroyComponentSystemCache> OnDestroyEarlierPriority = new ();
+        public readonly List<OnDestroyComponentSystemCache> OnDestroyDefaultPriority = new();
+        public readonly List<OnDestroyComponentSystemCache> OnDestroyLatePriority = new();
+        
+        public readonly List<UpdateComponentSystemCache> UpdateEarlierPriority = new ();
+        public readonly List<UpdateComponentSystemCache> UpdateDefaultPriority = new();
+        public readonly List<UpdateComponentSystemCache> UpdateLatePriority = new();
+
+        
+        public void AddSystem(object system, Type componentType)
         {
-            public readonly List<SystemCache> EarlierPriority = new ();
-            public readonly List<SystemCache> DefaultPriority = new();
-            public readonly List<SystemCache> LatePriority = new();
+            Add(OnCreateComponentSystemCache.CreateIfPossible(system, componentType));
+            Add(OnDestroyComponentSystemCache.CreateIfPossible(system, componentType));
+            Add(UpdateComponentSystemCache.CreateIfPossible(system, componentType));
+        }
 
-            public readonly List<SystemCache> UpdateEarlierPriority = new ();
-            public readonly List<SystemCache> UpdateDefaultPriority = new();
-            public readonly List<SystemCache> UpdateLatePriority = new();
+        public void RemoveSystem(object system)
+        {
+            OnCreateEarlierPriority.RemoveAll(cache => cache.System == system );
+            OnCreateDefaultPriority.RemoveAll(cache => cache.System == system );
+            OnCreateLatePriority.RemoveAll(cache => cache.System == system );
+            OnDestroyEarlierPriority.RemoveAll(cache => cache.System == system );
+            OnDestroyDefaultPriority.RemoveAll(cache => cache.System == system );
+            OnDestroyLatePriority.RemoveAll(cache => cache.System == system );
+            UpdateEarlierPriority.RemoveAll(cache => cache.System == system );
+            UpdateDefaultPriority.RemoveAll(cache => cache.System == system );
+            UpdateLatePriority.RemoveAll(cache => cache.System == system );
+        }
+        
+        private void Add(BaseSystemCache systemCache)
+        {
+            if(systemCache== null) return;
 
-            public void Add(SystemCache systemCache)
+            if (systemCache is OnDestroyComponentSystemCache onDestroyComponentSystemCache ) 
             {
+                List<OnDestroyComponentSystemCache> priorityList = onDestroyComponentSystemCache.SystemLifetimePriority switch
+                {
+                    SystemPriority.Early => OnDestroyEarlierPriority,
+                    SystemPriority.Default => OnDestroyEarlierPriority,
+                    SystemPriority.Late => OnDestroyLatePriority,
+                    _ => OnDestroyDefaultPriority
+                };
                 
-                List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
-                {
-                    SystemPriority.Early => UpdateEarlierPriority,
-                    SystemPriority.Default => UpdateDefaultPriority,
-                    SystemPriority.Late => UpdateLatePriority,
-                    _ => UpdateDefaultPriority
-                };
-                List<SystemCache> lifetimePriorityList = systemCache.SystemLifetimePriority switch
-                {
-                    SystemPriority.Early => EarlierPriority,
-                    SystemPriority.Default => DefaultPriority,
-                    SystemPriority.Late => LatePriority,
-                    _ => DefaultPriority
-                };
+                priorityList.Add(onDestroyComponentSystemCache);
+            }
 
-                updatePriorityList.Add(systemCache);
-                lifetimePriorityList.Add(systemCache);
+            if (systemCache is OnCreateComponentSystemCache onCreatecomponentSystemCache ) 
+            {
+                List<OnCreateComponentSystemCache> priorityList = onCreatecomponentSystemCache.SystemLifetimePriority switch
+                {
+                    SystemPriority.Early => OnCreateEarlierPriority,
+                    SystemPriority.Default => OnCreateEarlierPriority,
+                    SystemPriority.Late => OnCreateLatePriority,
+                    _ => OnCreateDefaultPriority
+                };
+                
+                priorityList.Add(onCreatecomponentSystemCache);
             }
             
-            public void Remove(SystemCache systemCache)
+            if (systemCache is UpdateComponentSystemCache updateComponentSystemCache ) 
             {
-                
-                List<SystemCache> updatePriorityList = systemCache.SystemUpdatePriority switch
+                List<UpdateComponentSystemCache> priorityList = updateComponentSystemCache.SystemUpdatePriority switch
                 {
                     SystemPriority.Early => UpdateEarlierPriority,
-                    SystemPriority.Default =>UpdateDefaultPriority,
+                    SystemPriority.Default => UpdateEarlierPriority,
                     SystemPriority.Late => UpdateLatePriority,
                     _ => UpdateDefaultPriority
                 };
-                List<SystemCache> LifetimePriorityList = systemCache.SystemLifetimePriority switch
-                {
-                    SystemPriority.Early => EarlierPriority,
-                    SystemPriority.Default => DefaultPriority,
-                    SystemPriority.Late => LatePriority,
-                    _ => DefaultPriority
-                };
-
-                updatePriorityList.Remove(systemCache);
-                LifetimePriorityList.Remove(systemCache);
+                
+                priorityList.Add(updateComponentSystemCache);
             }
         }
         
-        public sealed class SystemCache
+        private void Remove(BaseSystemCache systemCache)
         {
-            public readonly BaseEntitySystem System;
-            public readonly Type CachedType;
-            public readonly MethodInfo CachedOnNewEntityMethod;
-            public readonly MethodInfo CachedOnEntityDestroyedMethod;
-            public readonly MethodInfo CachedUpdateMethod;
-
-            public readonly SystemPriority SystemUpdatePriority = SystemPriority.Default;
-            public readonly SystemPriority SystemLifetimePriority = SystemPriority.Default;
             
-            public SystemCache(BaseEntitySystem system)
+            if(systemCache== null) return;
+
+            if (systemCache is OnDestroyComponentSystemCache onDestroyComponentSystemCache ) 
             {
-                System = system;
-
-                Type systemType = system.GetType();
-
-                Attribute[] attributes = Attribute.GetCustomAttributes(systemType);
-                EntitySystemPropertiesAttribute systemProperties = GetOfType<EntitySystemPropertiesAttribute>(attributes);
-                if (systemProperties != null)
+                List<OnDestroyComponentSystemCache> priorityList = onDestroyComponentSystemCache.SystemLifetimePriority switch
                 {
-                    SystemLifetimePriority = systemProperties.LifetimePriority;
-                    SystemUpdatePriority = systemProperties.LifetimePriority;
-                }
+                    SystemPriority.Early => OnDestroyEarlierPriority,
+                    SystemPriority.Default => OnDestroyEarlierPriority,
+                    SystemPriority.Late => OnDestroyLatePriority,
+                    _ => OnDestroyDefaultPriority
+                };
                 
-
-                Type d1 = typeof(IModelSystem<>);
-                Type generic = d1.MakeGenericType( system.EntityType );
-                
-                MethodInfo methodInfoOnNewEntityMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnNew));
-                MethodInfo methodInfoOnEntityDestroyedMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.OnDestroy));
-                MethodInfo methodInfoUpdateMethod = generic.GetMethod(nameof(IModelSystem<IEntity>.Update));
-                
-                CachedType = systemType;
-                CachedOnNewEntityMethod = methodInfoOnNewEntityMethod;
-                CachedOnEntityDestroyedMethod = methodInfoOnEntityDestroyedMethod;
-                CachedUpdateMethod = methodInfoUpdateMethod;
-            }
-            
-            private static T GetOfType<T>(Attribute[] attributes) where T : Attribute
-            {
-                foreach (Attribute attribute in attributes)
-                {
-                    if (attribute.GetType() == typeof(T))
-                    {
-                        return attribute as T;
-                    }
-                }
-
-                return default;
+                priorityList.Remove(onDestroyComponentSystemCache);
             }
 
+            if (systemCache is OnCreateComponentSystemCache onCreatecomponentSystemCache ) 
+            {
+                List<OnCreateComponentSystemCache> priorityList = onCreatecomponentSystemCache.SystemLifetimePriority switch
+                {
+                    SystemPriority.Early => OnCreateEarlierPriority,
+                    SystemPriority.Default => OnCreateEarlierPriority,
+                    SystemPriority.Late => OnCreateLatePriority,
+                    _ => OnCreateDefaultPriority
+                };
+                
+                priorityList.Remove(onCreatecomponentSystemCache);
+            }
+            
+            if (systemCache is UpdateComponentSystemCache updateComponentSystemCache ) 
+            {
+                List<UpdateComponentSystemCache> priorityList = updateComponentSystemCache.SystemUpdatePriority switch
+                {
+                    SystemPriority.Early => UpdateEarlierPriority,
+                    SystemPriority.Default => UpdateEarlierPriority,
+                    SystemPriority.Late => UpdateLatePriority,
+                    _ => UpdateDefaultPriority
+                };
+                
+                priorityList.Remove(updateComponentSystemCache);
+            }
         }
 
+
     }
+    
+    
+    
+    
 }

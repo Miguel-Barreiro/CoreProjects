@@ -1,6 +1,8 @@
 using Core.Initialization;
+using Core.Model;
 using Core.Systems;
 using Core.Zenject.Source.Main;
+using Testing_Core.Model.DataDrivenTests;
 
 namespace Core.Editor
 {
@@ -22,7 +24,12 @@ namespace Core.Editor
 			Test.AddUserSystems(this);
 			SetSystemsControllerForTests();
 		}
-		
+
+		public override void ResetComponentContainers()
+		{
+			ComponentContainersController.ResetContainer<TestDD1Data>(10);
+		}
+
 		private void SetSystemsControllerForTests()
 		{
 			SystemsController systemsController = Container.Resolve<SystemsController>();
