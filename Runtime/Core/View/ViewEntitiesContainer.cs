@@ -48,6 +48,12 @@ namespace Core.View
 				return null;
 			}
 
+			if (GameobjectsByEntityId.TryGetValue(entity.ID, out EntityViewAtributes entityViewAtributes) &&
+				entityViewAtributes.GameObject != null)
+			{
+				return entityViewAtributes.GameObject;
+			}
+
 			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
 
 			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entity);
