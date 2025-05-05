@@ -66,7 +66,7 @@ namespace Core.View
 			return newGameObject;
 		}
 
-		public void SetEntityViewParent(EntId entId, Transform newParent)
+		public void SetEntityViewParent(EntId entId, Transform? newParent)
 		{
 			if (!GameobjectsByEntityId.TryGetValue(entId, out EntityViewAtributes entityViewAtributes))
 			{
