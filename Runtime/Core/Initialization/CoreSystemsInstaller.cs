@@ -22,8 +22,8 @@ namespace Core.Initialization
 
         protected override void InstallSystems()
         {
-            TypeCache typeCache = BuildTypeCache();
-
+            BuildDataComponentContainers();
+            
             BuildEventManager();
             BuildGameLoopSystem();
             BuildEntityManager();
@@ -31,12 +31,15 @@ namespace Core.Initialization
             BuildTimerSystem();
             BuildStatsSystem();
 
-            BuildDD();
         }
 
-        private void BuildDD()
+        private void BuildDataComponentContainers()
         {
-            foreach ((object container, Type componentType, Type containerType) in ComponentContainersController.GetAllComponentContainers())
+            DataContainersControllerImplementation dataContainersController = DataContainersControllerImplementation.GetInstance(); 
+            BindInstance<DataContainersController>(dataContainersController);
+            BindInstance<DataContainersControllerImplementation>(dataContainersController);
+            
+            foreach ((object container, Type _, Type containerType) in dataContainersController.GetAllComponentContainers())
             {
                 BindInstanceByDynamicType(container, containerType);
             }
@@ -85,7 +88,7 @@ namespace Core.Initialization
 
         private void BuildComponentSystemsLogic()
         {
-            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainerImplementation();
+            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
             BindInstance(entitySystemsContainer);
         }
 

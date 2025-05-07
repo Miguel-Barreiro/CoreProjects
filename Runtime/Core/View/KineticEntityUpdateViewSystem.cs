@@ -11,13 +11,15 @@ namespace Core.View
     
     public sealed class KineticEntityUpdateViewSystem : OnCreateComponent<IKineticEntityData>, 
                                                         OnDestroyComponent<IKineticEntityData>, 
-                                                        UpdateComponent<IKineticEntityData>
+                                                        UpdateComponents<IKineticEntityData>
     {
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
-        [Inject] private readonly ComponentContainer<IKineticEntityData> ComponentContainer = null!;
 
-        public void OnCreateComponent(ref IKineticEntityData newComponent)  
+        [Inject] private readonly ComponentContainer<IKineticEntityData> KineticEntityComponentContainer = null!;
+        
+        public void OnCreateComponent(EntId newComponentId)
         {
+            ref IKineticEntityData newComponent = ref KineticEntityComponentContainer.GetComponent(newComponentId);
             if (newComponent.Prefab == null)
             {
                 Debug.LogError($"Prefab not found for entity {newComponent.GetType().Name}({newComponent.ID})");
@@ -32,30 +34,31 @@ namespace Core.View
 
         }
 
-        public void OnDestroyComponent(ref IKineticEntityData destroyedComponent)
+        public void OnDestroyComponent(EntId destroyedComponentId)
         {
-            EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(destroyedComponent.ID);
+            EntityViewAtributes? entityViewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(destroyedComponentId);
             if (entityViewAtributes == null)
             {
-                Debug.LogError($"view for Entity with id {destroyedComponent.ID} not found");
+                Debug.LogError($"view for Entity with id {destroyedComponentId} not found");
                 return;
             }
 
-            ViewEntitiesContainer.Destroy(destroyedComponent.ID);
+            ViewEntitiesContainer.Destroy(destroyedComponentId);
         }
 
-        public void UpdateComponents(float deltaTime)
+        public void UpdateComponents(ComponentContainer<IKineticEntityData> componentContainer, float deltaTime)
         {
             
-            ComponentContainer.ResetIterator();
-            while (ComponentContainer.MoveNext())
+            componentContainer.ResetIterator();
+            while (componentContainer.MoveNext())
             {
-                ref IKineticEntityData kineticEntityData = ref ComponentContainer.GetCurrent();
+                ref IKineticEntityData kineticEntityData = ref componentContainer.GetCurrent();
+                EntId entityID = kineticEntityData.ID;
                 
-                EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(kineticEntityData.ID);
+                EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entityID);
                 if (viewAtributes == null || viewAtributes.GameObject== null)
                 {
-                    GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticEntityData.Prefab, kineticEntityData.ID);
+                    GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticEntityData.Prefab, entityID);
                     return;
                 }
 
@@ -65,6 +68,7 @@ namespace Core.View
 
         }
 
-        // public override SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
+        public bool Active { get; set; } = true;
+        public SystemGroup Group { get; } = CoreSystemGroups.CoreViewEntitySystemGroup;
     }
 }

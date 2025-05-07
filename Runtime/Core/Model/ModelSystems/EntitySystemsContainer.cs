@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Model.ModelSystems.ComponentSystems;
 using Core.Systems;
 using UnityEngine;
@@ -7,31 +8,31 @@ using UnityEngine;
 namespace Core.Model.ModelSystems
 {
 
-    internal interface EntitySystemsContainer
-    {
-
-        // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType);
-        // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority);
-        internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType();
-
-        internal void AddSystem(object system);
-        internal void RemoveComponentSystem(object system);
-        
-    }
+    // internal interface EntitySystemsContainer
+    // {
+    //
+    //     // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType);
+    //     // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority);
+    //     internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType();
+    //
+    //     internal void AddSystem(object system);
+    //     internal void RemoveComponentSystem(object system);
+    //     
+    // }
     
     
 
 
 
 
-    public class EntitySystemsContainerImplementation : EntitySystemsContainer
+    public class EntitySystemsContainer
     {
         
         private readonly Dictionary<Type, ComponentSystemListenerGroup> systemsCacheByComponentType = new ();
         private readonly List<object> systems = new();
 
 
-        internal EntitySystemsContainerImplementation()
+        internal EntitySystemsContainer()
         { 
             foreach (var componentType in TypeCache.Get().GetAllEntityComponentTypes())
             {
@@ -113,15 +114,17 @@ namespace Core.Model.ModelSystems
             return systems;
         }
 
-        IEnumerable<(Type, ComponentSystemListenerGroup)> EntitySystemsContainer.GetAllComponentSystemsByComponentType()
+        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllComponentSystemsByComponentType()
         {
-            foreach (KeyValuePair<Type, ComponentSystemListenerGroup> pair  in systemsCacheByComponentType)
-            {
-                yield return (pair.Key, pair.Value);
-            }
+            return systemsCacheByComponentType.AsEnumerable();
+            
+            // foreach (KeyValuePair<Type, ComponentSystemListenerGroup> pair  in systemsCacheByComponentType)
+            // {
+            //     yield return (pair.Key, pair.Value);
+            // }
         }
 
-        void EntitySystemsContainer.AddSystem(object system) 
+        internal void AddSystem(object system) 
         {
             Type systemType = system.GetType();
             if (systems.Contains(system))
@@ -138,7 +141,7 @@ namespace Core.Model.ModelSystems
             }
         }
 
-        void EntitySystemsContainer.RemoveComponentSystem(object system)
+        internal void RemoveComponentSystem(object system)
         {
             Type systemType = system.GetType();
             if (!systems.Contains(system)) return;

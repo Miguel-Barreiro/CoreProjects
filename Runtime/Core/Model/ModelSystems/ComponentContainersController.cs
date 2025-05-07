@@ -3,27 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Core.Model
+namespace Core.Model.ModelSystems
 {
 	
-	public interface IComponentData
+	
+	public interface DataContainersController
 	{
-		public EntId ID { get; set; }
+		public void ResetContainer<T>(int maxNumber) where T : struct, IComponentData;
 	}
 
-	public interface Component<T> where T : IComponentData
+	public class DataContainersControllerImplementation : DataContainersController
 	{
-		public EntId ID { get; set; }
-	}
-
-	
-	
-	
-	public static class ComponentContainersController
-	{
-		private static readonly Dictionary<Type, object> ContainersByComponentType = new();
+		private readonly Dictionary<Type, object> ContainersByComponentType = new();
 		
-		public static void ResetContainer<T>(int maxNumber) 
+		private static DataContainersControllerImplementation? instance = null;
+
+		internal static DataContainersControllerImplementation GetInstance()
+		{
+			if (instance == null)
+			{
+				instance = new DataContainersControllerImplementation();
+			}
+			
+			return instance;
+		}
+		private DataContainersControllerImplementation()
+		{
+			foreach ((object container, Type type) in CreateAllComponentContainers(20))
+			{
+				ContainersByComponentType[type] = container;
+			}
+		}
+		
+		
+
+		public void ResetContainer<T>(int maxNumber) 
 			where T : struct, IComponentData
 		{
 			Type componentType = typeof(T);
@@ -55,7 +69,7 @@ namespace Core.Model
 		}
 		
 		
-		internal static IEnumerable<(object container, Type componentType, Type containerType)> GetAllComponentContainers()
+		internal IEnumerable<(object container, Type componentType, Type containerType)> GetAllComponentContainers()
 		{
 			foreach ((Type componentType, object container)  in ContainersByComponentType)
 			{
@@ -64,18 +78,9 @@ namespace Core.Model
 			}
 		}
 		
-
 		
-		
-		static ComponentContainersController()
-		{
-			foreach ((object container, Type type)  in CreateAllComponentContainers(20))
-			{
-				ContainersByComponentType[type] = container;
-			}
-		}
 
-		internal static object GetComponentContainer(Type componentDataType)
+		internal object GetComponentContainer(Type componentDataType)
 		{
 			if (!ContainersByComponentType.TryGetValue(componentDataType, out object container))
 			{
@@ -86,7 +91,7 @@ namespace Core.Model
 			return container;
 		}
 
-		private static IEnumerable<(object, Type)> CreateAllComponentContainers(int maxNumber)
+		private IEnumerable<(object, Type)> CreateAllComponentContainers(int maxNumber)
 		{
 			IEnumerable<Type> allComponentDataTypes = GetAllComponentDataTypes();
 			

@@ -13,7 +13,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
         public readonly MethodInfo CachedUpdateMethod;
         public readonly SystemPriority SystemUpdatePriority = SystemPriority.Default;
         
-        private static readonly Type UPDATE_SYSTEM_TYPE = typeof(UpdateComponent<>); 
+        private static readonly Type UPDATE_SYSTEM_TYPE = typeof(UpdateComponents<>); 
         
         private UpdateComponentSystemCache(object system, Type desiredComponentType) : 
             base(system)
@@ -28,7 +28,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
             }
             
             Type generic = UPDATE_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
-            CachedUpdateMethod = generic.GetMethod(nameof(UpdateComponent<IComponentData>.UpdateComponents));
+            CachedUpdateMethod = generic.GetMethod(nameof(UpdateComponents<MockComponentData>.UpdateComponents));
         }
         
         internal static UpdateComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
@@ -40,6 +40,24 @@ namespace Core.Model.ModelSystems.ComponentSystems
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;
 
             return new UpdateComponentSystemCache(system, desiredComponentType);
+        }
+        
+        internal void Call(object[] args)
+        {
+            
+#if !UNITY_EDITOR
+            try
+            {
+#endif   
+            CachedUpdateMethod?.Invoke(System, args);
+            
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError($"Error in a componentSystem({system.GetType()}) .UpdateComponents:\n {e.GetType()}");
+                Debug.LogException(e);
+            }
+#endif            
         }
     }
 
@@ -64,7 +82,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
             
             Type generic = ON_CREATE_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
             
-            CachedOnCreateMethod = generic.GetMethod(nameof(OnCreateComponent<IComponentData>.OnCreateComponent));
+            CachedOnCreateMethod = generic.GetMethod(nameof(OnCreateComponent<MockComponentData>.OnCreateComponent));
         }
         
         internal static OnCreateComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
@@ -76,6 +94,24 @@ namespace Core.Model.ModelSystems.ComponentSystems
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;
 
             return new OnCreateComponentSystemCache(system, desiredComponentType);
+        }
+        
+        internal void Call(object[] args)
+        {
+            
+#if !UNITY_EDITOR
+            try
+            {
+#endif   
+            CachedOnCreateMethod?.Invoke(System, args);
+            
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError($"Error in a system({system.GetType()}) .OnCreateComponent:\n {e.GetType()}");
+                Debug.LogException(e);
+            }
+#endif            
         }
     }
 
@@ -100,7 +136,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
             
             Type generic = DESTROY_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
             
-            CachedOnDestroyedMethod = generic.GetMethod(nameof(OnDestroyComponent<IComponentData>.OnDestroyComponent));
+            CachedOnDestroyedMethod = generic.GetMethod(nameof(OnDestroyComponent<MockComponentData>.OnDestroyComponent));
         }
         
         internal static OnDestroyComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
@@ -112,6 +148,24 @@ namespace Core.Model.ModelSystems.ComponentSystems
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;
 
             return new OnDestroyComponentSystemCache(system, desiredComponentType);
+        }
+        
+        internal void Call(object[] args)
+        {
+            
+#if !UNITY_EDITOR
+            try
+            {
+#endif   
+            CachedOnDestroyedMethod?.Invoke(System, args);
+            
+#if !UNITY_EDITOR
+            } catch (Exception e)
+            {
+                Debug.LogError($"Error in a system({system.GetType()}) .OnDestroyComponent:\n {e.GetType()}");
+                Debug.LogException(e);
+            }
+#endif            
         }
     }
 

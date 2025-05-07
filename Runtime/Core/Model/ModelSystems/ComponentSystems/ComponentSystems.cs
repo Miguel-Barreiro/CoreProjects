@@ -1,28 +1,28 @@
+using Core.Systems;
+
 namespace Core.Model.ModelSystems
 {
 	
-	public interface IComponentSystem<T>  where T : IComponentData { }
-		
-	
-	
+	public interface IComponentSystem<T>  where T : struct, IComponentData { }
 	
 	
 	public interface OnCreateComponent<T> : IComponentSystem<T> 
-		where T : IComponentData
+		where T : struct, IComponentData
 	{
-		void OnCreateComponent(ref T newComponent);
+		void OnCreateComponent(EntId newComponentId);
 	}
+	
 	
 	public interface OnDestroyComponent<T> : IComponentSystem<T> 
-		where T : IComponentData
+		where T : struct, IComponentData
 	{
-		void OnDestroyComponent(ref T destroyedComponent);
+		void OnDestroyComponent(EntId destroyedComponentId);
 	}
 	
-	public interface UpdateComponent<T> : IComponentSystem<T> 
-		where T : IComponentData
+	public interface UpdateComponents<T> : IComponentSystem<T> , ISystem
+		where T : struct, IComponentData
 	{
-		void UpdateComponents(float deltaTime);
+		void UpdateComponents(ComponentContainer<T> componentsContainer, float deltaTime);
 	}
 	
 	

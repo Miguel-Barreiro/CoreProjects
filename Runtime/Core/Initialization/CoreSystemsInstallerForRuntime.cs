@@ -1,4 +1,5 @@
 using Core.Core.Model.Data;
+using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.View;
 using Core.View.UI;
@@ -35,7 +36,7 @@ namespace Core.Initialization
 			BuildDataContainer();
 		}
 
-		public override void ResetComponentContainers() {  }
+		public override void ResetComponentContainers(DataContainersController dataContainersController) {  }
 
 		private void BuildDataContainer()
 		{

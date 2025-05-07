@@ -50,12 +50,12 @@ namespace Core.Core.Model.Data
 		}
 
 
-		public void OnDestroyComponent(ref NamedEntityData destroyedComponent)
-		{
-			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(destroyedComponent.ID, out string name))
+		public void OnDestroyComponent(EntId destroyedComponentId)
+		{ 
+			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(destroyedComponentId, out string name))
 			{
 				NamedEntitiesSystemModel.NamedEntitiesByName.Remove(name);
-				NamedEntitiesSystemModel.NamedEntitiesById.Remove(destroyedComponent.ID);
+				NamedEntitiesSystemModel.NamedEntitiesById.Remove(destroyedComponentId);
 			}
 		}
 

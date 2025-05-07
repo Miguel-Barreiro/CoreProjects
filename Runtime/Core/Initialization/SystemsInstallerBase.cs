@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
@@ -14,7 +15,7 @@ namespace Core.Initialization
     public abstract class SystemsInstallerBase
 	{
         protected abstract void InstallSystems();
-        public abstract void ResetComponentContainers();
+        public abstract void ResetComponentContainers(DataContainersController dataContainersController);
 
         protected readonly DiContainer Container;
         internal DiContainer ContainerInstance => Container;

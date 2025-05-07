@@ -49,7 +49,7 @@ namespace Core.Events
 			return eventCount;
 		}
 
-		internal IEnumerable<BaseEvent> PopEvents()
+		internal void PopEvents(List<BaseEvent> to)
 		{
 			using CachedList<BaseEvent> currentEventList = ListCache<BaseEvent>.Get();
 			foreach (EventOrder eventOrder in ProcessOrder)
@@ -60,11 +60,13 @@ namespace Core.Events
 					currentEventList.Clear();
 					currentEventList.AddRange(currentQueu);
 					currentQueu.Clear();
-					foreach (BaseEvent currentEvent in currentEventList)
-					{
-						// Debug.Log($"Event {currentEvent.GetType().Name} popped"); 
-						yield return currentEvent;
-					}
+					
+					to.AddRange(currentEventList);
+					// foreach (BaseEvent currentEvent in currentEventList)
+					// {
+					// 	// Debug.Log($"Event {currentEvent.GetType().Name} popped"); 
+					// 	yield return currentEvent;
+					// }
 				}
 			}
 		}

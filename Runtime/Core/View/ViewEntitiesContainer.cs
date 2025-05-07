@@ -48,7 +48,7 @@ namespace Core.View
 				return null;
 			}
 
-			if (GameobjectsByEntityId.TryGetValue(entity.ID, out EntityViewAtributes entityViewAtributes) &&
+			if (GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes) &&
 				entityViewAtributes.GameObject != null)
 			{
 				return entityViewAtributes.GameObject;

@@ -115,7 +115,7 @@ namespace Core.Model
             }
         }
 
-        public int DestroyedEntitiesCount => destroyedEntities.Count;
+        public int destroyedEntitiesCount => destroyedEntities.Count;
         public IEnumerable<Entity> GetAllDestroyedEntities()
         {
             foreach (Entity destroyedEntity in destroyedEntities)
@@ -123,23 +123,39 @@ namespace Core.Model
                 yield return destroyedEntity;
             }
         }
+
         
-        public void UpgradeCurrentNewEntities()
+        private readonly List<Entity> FlushedDeadEntities = new();
+        private readonly List<Entity> FlushedNewEntities = new();
+        
+        
+        public void FlushCurrentDestroyedEntities()
         {
-            foreach (Entity newEntity in newEntities)
-            {
-                AddEntityInternal(newEntity);
-            }
+            FlushedDeadEntities.AddRange(destroyedEntities);
+            destroyedEntities.Clear();
+        }
+        
+        public void FlushCurrentNewEntities()
+        {
+            FlushedNewEntities.AddRange(newEntities);
             newEntities.Clear();
         }
         
-        public void ClearDestroyedEntities()
+        
+        public void ClearAllFlushedDeadEntities()
         {
-            foreach (Entity destroyedEntity in destroyedEntities)
-            {
+            foreach (Entity destroyedEntity in FlushedDeadEntities)
                 RemoveEntityInternal(destroyedEntity);
-            }
-            destroyedEntities.Clear();
+            
+            FlushedDeadEntities.Clear();
+        }
+        
+        public void UpgradeAllFlushedNewEntities()
+        {
+            foreach (Entity newEntity in FlushedNewEntities)
+                AddEntityInternal(newEntity);
+
+            FlushedNewEntities.Clear();
         }
 
         

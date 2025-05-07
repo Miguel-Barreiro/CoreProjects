@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Core.Model;
+using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
@@ -78,10 +80,14 @@ namespace Core.Initialization
 				List<SystemsInstallerBase> systemsInstallerBases = new List<SystemsInstallerBase>(Installers);
 				Installers.Clear();
 
+				//we need to have get a reference to type cache so it can be initialized before anything 
+				TypeCache typeCache = TypeCache.Get();
+				
+				DataContainersControllerImplementation dataContainersController =
+						DataContainersControllerImplementation.GetInstance();
 
-				foreach (SystemsInstallerBase installer in systemsInstallerBases) { 
-					installer.ResetComponentContainers();
-				}
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+					installer.ResetComponentContainers(dataContainersController);
 				
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{

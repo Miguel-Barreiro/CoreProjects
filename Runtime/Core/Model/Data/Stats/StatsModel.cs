@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using Core.Model.ModelSystems;
 using Core.Model.Stats;
 using FixedPointy;
 using Debug = UnityEngine.Debug;
 
-namespace Core.Model
+namespace Core.Model.Data.Stats
 {
 
 	public struct StatsEntityData : IComponentData

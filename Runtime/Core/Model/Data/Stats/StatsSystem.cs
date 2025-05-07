@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Model.Data.Stats;
 using Core.Model.Stats;
 using Core.Systems;
 using FixedPointy;

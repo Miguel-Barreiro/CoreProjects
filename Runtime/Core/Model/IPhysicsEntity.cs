@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Core.Model.ModelSystems;
+using UnityEngine;
 
 #nullable enable
 
@@ -12,9 +13,9 @@ namespace Core.Model
     
     public struct I2DPhysicsEntityData : IComponentData
     {
-        Vector2 Position { get; set; }
-        GameObject Prefab { get; set; }
-        Rigidbody2D Rigidbody2D { get; set; }
+        public Vector2 Position { get; set; }
+        public GameObject Prefab { get; set; }
+        public Rigidbody2D Rigidbody2D { get; set; }
         public EntId ID { get; set; }
     }
 

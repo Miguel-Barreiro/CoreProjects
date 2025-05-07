@@ -240,10 +240,10 @@ namespace Core.Model.Time
         
         
 
-        public void OnDestroyComponent(ref TimerComponent destroyedComponent)
+        public void OnDestroyComponent(EntId destroyedComponentID)
         {
-            if (TimerModel.Timers.ContainsKey(destroyedComponent.ID))
-                TimerModel.Timers.Remove(destroyedComponent.ID);
+            if (TimerModel.Timers.ContainsKey(destroyedComponentID))
+                TimerModel.Timers.Remove(destroyedComponentID);
         }
 
         

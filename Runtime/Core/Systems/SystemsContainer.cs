@@ -11,7 +11,7 @@ namespace Core.Systems
         private readonly Dictionary<Type, HashSet<Object>> systemsByInterface = new Dictionary<Type, HashSet<Object>>();
         private readonly List<Object> systems = new List<Object>();
 
-        private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainerImplementation();
+        private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
         private readonly EventListenerSystemsContainer eventListenerSystemsContainer = new EventListenerSystemsContainer();
 
         private readonly Dictionary<Object, string > SystemByInstallerName = new Dictionary<Object, string>();
@@ -30,7 +30,7 @@ namespace Core.Systems
         
 
 
-        public IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllEntitySystemsByComponentType()
+        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllEntitySystemsByComponentType()
         {
             return entitySystemsContainer.GetAllComponentSystemsByComponentType();
         }

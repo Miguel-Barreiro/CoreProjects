@@ -49,11 +49,12 @@ namespace Core.Systems
 			UpdateCurrentScale();
 		}
 
-		public void OnDestroyComponent(ref TimeScalerEntityData destroyedComponent)
+
+		public void OnDestroyComponent(EntId destroyedComponentID)
 		{
-			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedComponent.ID))
+			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedComponentID))
 			{
-				TimeScaleSystemModel.scalerByOwners.Remove(destroyedComponent.ID);
+				TimeScaleSystemModel.scalerByOwners.Remove(destroyedComponentID);
 			}
 
 			UpdateCurrentScale(); 
@@ -101,6 +102,7 @@ namespace Core.Systems
 			TimeScaleSystemModel.currentScale = minScale;
 			Time.timeScale = (float) TimeScaleSystemModel.currentScale;
 		}
+
 
 	}
 

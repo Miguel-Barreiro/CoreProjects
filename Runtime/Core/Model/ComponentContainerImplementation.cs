@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Model.ModelSystems;
 using UnityEngine;
 
 
@@ -23,13 +24,6 @@ namespace Core.Model
 		public void ResetIterator();
 	}
 
-	
-	
-	
-
-	
-	
-	
 	
 	
 	
