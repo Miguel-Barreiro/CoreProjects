@@ -34,7 +34,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
         internal static UpdateComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
         {
             Type systemType = system.GetType();
-            if (!systemType.IsAssignableToGenericType(UPDATE_SYSTEM_TYPE)) return null;
+            if (!systemType.IsAssignableToGenericWithArgType(UPDATE_SYSTEM_TYPE)) return null;
 
             Type fullGeneric = UPDATE_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;
@@ -88,7 +88,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
         internal static OnCreateComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
         {
             Type systemType = system.GetType();
-            if (!systemType.IsAssignableToGenericType(ON_CREATE_SYSTEM_TYPE)) return null;
+            if (!systemType.IsAssignableToGenericWithArgType(ON_CREATE_SYSTEM_TYPE)) return null;
 
             Type fullGeneric = ON_CREATE_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;
@@ -142,7 +142,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
         internal static OnDestroyComponentSystemCache CreateIfPossible(object system, Type desiredComponentType)
         {
             Type systemType = system.GetType();
-            if (!systemType.IsAssignableToGenericType(DESTROY_SYSTEM_TYPE)) return null;
+            if (!systemType.IsAssignableToGenericWithArgType(DESTROY_SYSTEM_TYPE)) return null;
 
             Type fullGeneric = DESTROY_SYSTEM_TYPE.MakeGenericType( desiredComponentType );
             if (!systemType.ImplementsGenericFullTypeDefinition(fullGeneric)) return null;

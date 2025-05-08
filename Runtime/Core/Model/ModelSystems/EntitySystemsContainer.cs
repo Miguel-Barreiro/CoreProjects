@@ -28,16 +28,14 @@ namespace Core.Model.ModelSystems
     public class EntitySystemsContainer
     {
         
-        private readonly Dictionary<Type, ComponentSystemListenerGroup> systemsCacheByComponentType = new ();
+        private readonly Dictionary<Type, ComponentSystemListenerGroup> SystemsCacheByComponentDataType = new ();
         private readonly List<object> systems = new();
 
 
         internal EntitySystemsContainer()
         { 
-            foreach (var componentType in TypeCache.Get().GetAllEntityComponentTypes())
-            {
-                systemsCacheByComponentType.Add(componentType, new ComponentSystemListenerGroup());
-            }
+            foreach (var componentDataType in TypeCache.Get().GetAllComponentDataTypes())
+                SystemsCacheByComponentDataType.Add(componentDataType, new ComponentSystemListenerGroup());
         }
         
         
@@ -104,24 +102,19 @@ namespace Core.Model.ModelSystems
         //     }
         // }
 
-        internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType)
-        {
-            if (!systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
-            {
-                Debug.LogError($"No systems found for component type {componentType}");
-                return null;
-            }
-            return systems;
-        }
+        // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType)
+        // {
+        //     if (!systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
+        //     {
+        //         Debug.LogError($"No systems found for component type {componentType}");
+        //         return null;
+        //     }
+        //     return systems;
+        // }
 
-        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllComponentSystemsByComponentType()
+        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllComponentSystemsByComponentDataType()
         {
-            return systemsCacheByComponentType.AsEnumerable();
-            
-            // foreach (KeyValuePair<Type, ComponentSystemListenerGroup> pair  in systemsCacheByComponentType)
-            // {
-            //     yield return (pair.Key, pair.Value);
-            // }
+            return SystemsCacheByComponentDataType.AsEnumerable();
         }
 
         internal void AddSystem(object system) 
@@ -133,11 +126,11 @@ namespace Core.Model.ModelSystems
                 return;
             }
 
-            IEnumerable<Type> components = ComponentUtils.GetAllComponentTypesFromSystem(systemType);
-            foreach (Type componentType in components)
+            IEnumerable<Type> componentDatas = ComponentUtils.GetAllComponentDataTypesFromSystem(systemType);
+            foreach (Type componentDataType in componentDatas)
             {
-                ComponentSystemListenerGroup componentSystemListenerGroup = systemsCacheByComponentType[componentType];
-                componentSystemListenerGroup.AddSystem(system, componentType);
+                ComponentSystemListenerGroup componentSystemListenerGroup = SystemsCacheByComponentDataType[componentDataType];
+                componentSystemListenerGroup.AddSystem(system, componentDataType);
             }
         }
 
@@ -146,10 +139,10 @@ namespace Core.Model.ModelSystems
             Type systemType = system.GetType();
             if (!systems.Contains(system)) return;
 
-            IEnumerable<Type> components = ComponentUtils.GetAllComponentTypesFromSystem(systemType);
+            IEnumerable<Type> components = ComponentUtils.GetAllComponentDataTypesFromSystem(systemType);
             foreach (Type componentType in components)
             {
-                ComponentSystemListenerGroup componentSystemListenerGroup = systemsCacheByComponentType[componentType];
+                ComponentSystemListenerGroup componentSystemListenerGroup = SystemsCacheByComponentDataType[componentType];
                 componentSystemListenerGroup.RemoveSystem(system);
             }
         }
@@ -203,7 +196,7 @@ namespace Core.Model.ModelSystems
                 List<OnDestroyComponentSystemCache> priorityList = onDestroyComponentSystemCache.SystemLifetimePriority switch
                 {
                     SystemPriority.Early => OnDestroyEarlierPriority,
-                    SystemPriority.Default => OnDestroyEarlierPriority,
+                    SystemPriority.Default => OnDestroyDefaultPriority,
                     SystemPriority.Late => OnDestroyLatePriority,
                     _ => OnDestroyDefaultPriority
                 };
@@ -216,7 +209,7 @@ namespace Core.Model.ModelSystems
                 List<OnCreateComponentSystemCache> priorityList = onCreatecomponentSystemCache.SystemLifetimePriority switch
                 {
                     SystemPriority.Early => OnCreateEarlierPriority,
-                    SystemPriority.Default => OnCreateEarlierPriority,
+                    SystemPriority.Default => OnCreateDefaultPriority,
                     SystemPriority.Late => OnCreateLatePriority,
                     _ => OnCreateDefaultPriority
                 };
@@ -229,7 +222,7 @@ namespace Core.Model.ModelSystems
                 List<UpdateComponentSystemCache> priorityList = updateComponentSystemCache.SystemUpdatePriority switch
                 {
                     SystemPriority.Early => UpdateEarlierPriority,
-                    SystemPriority.Default => UpdateEarlierPriority,
+                    SystemPriority.Default => UpdateDefaultPriority,
                     SystemPriority.Late => UpdateLatePriority,
                     _ => UpdateDefaultPriority
                 };
@@ -248,7 +241,7 @@ namespace Core.Model.ModelSystems
                 List<OnDestroyComponentSystemCache> priorityList = onDestroyComponentSystemCache.SystemLifetimePriority switch
                 {
                     SystemPriority.Early => OnDestroyEarlierPriority,
-                    SystemPriority.Default => OnDestroyEarlierPriority,
+                    SystemPriority.Default => OnDestroyDefaultPriority,
                     SystemPriority.Late => OnDestroyLatePriority,
                     _ => OnDestroyDefaultPriority
                 };
@@ -261,7 +254,7 @@ namespace Core.Model.ModelSystems
                 List<OnCreateComponentSystemCache> priorityList = onCreatecomponentSystemCache.SystemLifetimePriority switch
                 {
                     SystemPriority.Early => OnCreateEarlierPriority,
-                    SystemPriority.Default => OnCreateEarlierPriority,
+                    SystemPriority.Default => OnCreateDefaultPriority,
                     SystemPriority.Late => OnCreateLatePriority,
                     _ => OnCreateDefaultPriority
                 };
@@ -274,7 +267,7 @@ namespace Core.Model.ModelSystems
                 List<UpdateComponentSystemCache> priorityList = updateComponentSystemCache.SystemUpdatePriority switch
                 {
                     SystemPriority.Early => UpdateEarlierPriority,
-                    SystemPriority.Default => UpdateEarlierPriority,
+                    SystemPriority.Default => UpdateDefaultPriority,
                     SystemPriority.Late => UpdateLatePriority,
                     _ => UpdateDefaultPriority
                 };

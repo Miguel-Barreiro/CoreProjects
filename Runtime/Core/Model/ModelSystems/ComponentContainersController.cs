@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Core.Model.ModelSystems
@@ -54,20 +53,6 @@ namespace Core.Model.ModelSystems
 
 
 		#region Internal
-
-		internal static IEnumerable<Type> GetAllComponentDataTypes()
-		{
-			var componentTypes = AppDomain.CurrentDomain.GetAssemblies()
-										.SelectMany(assembly => assembly.GetTypes())
-										.Where(type => type.IsValueType && 
-														type.GetInterfaces().Contains(typeof(IComponentData)));
-
-			foreach (var type in componentTypes)
-			{
-				yield return type;
-			}
-		}
-		
 		
 		internal IEnumerable<(object container, Type componentType, Type containerType)> GetAllComponentContainers()
 		{
@@ -91,15 +76,15 @@ namespace Core.Model.ModelSystems
 			return container;
 		}
 
-		private IEnumerable<(object, Type)> CreateAllComponentContainers(int maxNumber)
+		private IEnumerable<(object, Type)> CreateAllComponentContainers(uint maxNumber)
 		{
-			IEnumerable<Type> allComponentDataTypes = GetAllComponentDataTypes();
+			IEnumerable<Type> allComponentDataTypes = TypeCache.Get().GetAllComponentDataTypes();
 			
-			foreach (var type in allComponentDataTypes)
+			foreach (var componentDataType in allComponentDataTypes)
 			{
-				var containerType = typeof(ComponentContainerImplementation<>).MakeGenericType(type);
+				var containerType = typeof(ComponentContainerImplementation<>).MakeGenericType(componentDataType);
 				object newComponentContainer = Activator.CreateInstance(containerType, maxNumber);
-				yield return (newComponentContainer, type);
+				yield return (newComponentContainer, componentDataType);
 			}
 		}
 		

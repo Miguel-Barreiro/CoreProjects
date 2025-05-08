@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Core.Model.ModelSystems;
 using Core.Systems;
+using Zenject;
 
 #nullable enable
 
@@ -29,13 +31,21 @@ namespace Core.Model
         private readonly Dictionary<Type, List<Entity>> entitiesByComponentType = new ();
         
         //EVENT PROCESSING
-        private readonly List<Entity> destroyedEntities = new ();
+        private readonly List<EntId> destroyedEntities = new ();
         private readonly List<Entity> newEntities = new ();
         
-        private int nextEntityID = 0;
+        private uint nextEntityID = 0;
 
         private static EntitiesContainer? instance = null!;
         
+
+        public static void DestroyEntity(EntId entityId)
+        {
+            if(!(instance!.destroyedEntities.Contains(entityId)))
+                instance!.destroyedEntities.Add(entityId);
+        }
+
+
         public static EntitiesContainer CreateInstance()
         {
             if (instance == null)
@@ -77,9 +87,9 @@ namespace Core.Model
             return entitiesByID.GetValueOrDefault(id);
         }
         
-        public Entity? GetNewEntity(EntId id)
+        public Entity? GetNewEntity(EntId entID)
         {
-            return newEntities.Find(newEntity => newEntity.ID == id);
+           return newEntities.Find(entity => entity.ID == entID);
         }
 
         
@@ -105,7 +115,7 @@ namespace Core.Model
         }
 
 
-        public int NewEntitiesCount() => newEntities.Count;
+        public int newEntitiesCount => newEntities.Count;
         
         public IEnumerable<Entity> GetAllNewEntities()
         {
@@ -118,9 +128,14 @@ namespace Core.Model
         public int destroyedEntitiesCount => destroyedEntities.Count;
         public IEnumerable<Entity> GetAllDestroyedEntities()
         {
-            foreach (Entity destroyedEntity in destroyedEntities)
+            foreach (EntId destroyedEntityId in destroyedEntities)
             {
-                yield return destroyedEntity;
+                Entity? destroyedEntity = GetEntity(destroyedEntityId);
+                if(destroyedEntity == null)
+                    destroyedEntity = newEntities.Find(entity => entity.ID == destroyedEntityId);
+    
+                if(destroyedEntity != null)
+                    yield return destroyedEntity;
             }
         }
 
@@ -129,32 +144,38 @@ namespace Core.Model
         private readonly List<Entity> FlushedNewEntities = new();
         
         
-        public void FlushCurrentDestroyedEntities()
+        internal void FlushCurrentDestroyedEntities()
         {
-            FlushedDeadEntities.AddRange(destroyedEntities);
+            FlushedDeadEntities.AddRange(GetAllDestroyedEntities());
             destroyedEntities.Clear();
         }
-        
-        public void FlushCurrentNewEntities()
+        internal void FlushCurrentNewEntities()
         {
             FlushedNewEntities.AddRange(newEntities);
             newEntities.Clear();
         }
         
-        
-        public void ClearAllFlushedDeadEntities()
+
+
+        internal void ProcessAllFlushedEntities()
+        {
+            UpgradeAllFlushedNewEntities();
+            ClearAllFlushedDeadEntities();
+        }
+
+        private void ClearAllFlushedDeadEntities()
         {
             foreach (Entity destroyedEntity in FlushedDeadEntities)
                 RemoveEntityInternal(destroyedEntity);
             
             FlushedDeadEntities.Clear();
         }
-        
-        public void UpgradeAllFlushedNewEntities()
+
+        private void UpgradeAllFlushedNewEntities()
         {
             foreach (Entity newEntity in FlushedNewEntities)
                 AddEntityInternal(newEntity);
-
+            
             FlushedNewEntities.Clear();
         }
 
@@ -185,15 +206,16 @@ namespace Core.Model
         internal static void OnEntityCreated(Entity entity)
         {
             instance!.newEntities.Add(entity);
+
+            DataContainersControllerImplementation dataContainersController = DataContainersControllerImplementation.GetInstance();
+            IEnumerable<Type> componentDatasType = TypeCache.Get().GetComponentDatasOfEntityType(entity.GetType());
+            foreach (Type componentDataType in componentDatasType)
+            {
+                object componentContainer = dataContainersController.GetComponentContainer(componentDataType);
+                ((IGenericComponentContainer)componentContainer).SetupComponent(entity.ID);
+            }
         }
         
-        internal static void OnDestroyEntity(Entity entity)
-        {
-            if(instance!.destroyedEntities.Contains(entity))
-                return;
-            
-            instance!.destroyedEntities.Add(entity);
-        }
         
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
         {
@@ -237,6 +259,14 @@ namespace Core.Model
                 {
                     entities.Remove(entity);
                 }
+            }
+            
+            DataContainersControllerImplementation dataContainersController = DataContainersControllerImplementation.GetInstance();
+            IEnumerable<Type> componentDatasType = TypeCache.Get().GetComponentDatasOfEntityType(entity.GetType());
+            foreach (Type componentDataType in componentDatasType)
+            {
+                object componentContainer = dataContainersController.GetComponentContainer(componentDataType);
+                ((IGenericComponentContainer)componentContainer).RemoveComponent(entity.ID);
             }
 
             entitiesByID.Remove(entity.ID);

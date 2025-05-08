@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Model.ModelSystems;
 using Core.Utils.Reflection;
+using Zenject;
 
 namespace Core.Systems
 {
     public sealed class SystemsContainer
     {
+        
         private readonly Dictionary<Type, HashSet<Object>> systemsByInterface = new Dictionary<Type, HashSet<Object>>();
         private readonly List<Object> systems = new List<Object>();
 
-        private readonly EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
+        private readonly EntitySystemsContainer EntitySystemsContainer;
         private readonly EventListenerSystemsContainer eventListenerSystemsContainer = new EventListenerSystemsContainer();
 
         private readonly Dictionary<Object, string > SystemByInstallerName = new Dictionary<Object, string>();
-        
+
+        internal SystemsContainer(EntitySystemsContainer entitySystemsContainer)
+        {
+            EntitySystemsContainer = entitySystemsContainer;
+        }
+
         #region Public
         
         public IEnumerable<Object> GetAllSystems()
@@ -23,23 +30,12 @@ namespace Core.Systems
             return systems;
         }
         
-        // public ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType)
-        // {
-        //     return entitySystemsContainer.GetAllComponentSystemsFor(componentType);
-        // }
-        
 
-
-        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllEntitySystemsByComponentType()
+        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllEntitySystemsByComponentDataType()
         {
-            return entitySystemsContainer.GetAllComponentSystemsByComponentType();
+            return EntitySystemsContainer.GetAllComponentSystemsByComponentDataType();
         }
 
-
-        // public IEnumerable<BaseEntitySystem> GetAllComponentSystems()
-        // {
-        //     return entitySystemsContainer.GetAllComponentSystems();
-        // }
         
         public IEnumerable<T> GetAllSystemsByInterface<T>() where T : class
         {
@@ -89,15 +85,15 @@ namespace Core.Systems
             
             if (ComponentUtils.IsComponentSystem(systemType))
             {
-                entitySystemsContainer.AddSystem(system);
+                EntitySystemsContainer.AddSystem(system);
             }
 
-            if (systemType.IsAssignableToGenericType(typeof(IEventListener<>)))
+            if (systemType.IsAssignableToGenericWithArgType(typeof(IEventListener<>)))
             {
                 eventListenerSystemsContainer.AddEventListener(system);
             }
 
-            if (systemType.IsAssignableToGenericType(typeof(IPostEventListener<>)))
+            if (systemType.IsAssignableToGenericWithArgType(typeof(IPostEventListener<>)))
             {
                 eventListenerSystemsContainer.AddPostEventListener(system);
             }
@@ -112,14 +108,14 @@ namespace Core.Systems
             
             SystemByInstallerName.Remove(system);
             
-            entitySystemsContainer.RemoveComponentSystem(system);
+            EntitySystemsContainer.RemoveComponentSystem(system);
             
-            if (systemType.IsAssignableToGenericType(typeof(IEventListener<>)))
+            if (systemType.IsAssignableToGenericWithArgType(typeof(IEventListener<>)))
             {
                 eventListenerSystemsContainer.RemoveEventListener(system);
             }
             
-            if (systemType.IsAssignableToGenericType(typeof(IPostEventListener<>)))
+            if (systemType.IsAssignableToGenericWithArgType(typeof(IPostEventListener<>)))
             {
                 eventListenerSystemsContainer.RemovePostEventListener(system);
             }

@@ -12,7 +12,8 @@ namespace Core.Model
 
     public abstract class Entity : IEntity
     {
-        public EntId ID => id;
+        public EntId ID { get =>id; set=>id=value; }
+
         private EntId id;
     
         protected Entity()
@@ -23,7 +24,7 @@ namespace Core.Model
     
         public void Destroy()
         {
-            EntitiesContainer.OnDestroyEntity(this);
+            EntitiesContainer.DestroyEntity(this.ID);
         }
     }
     
@@ -34,11 +35,11 @@ namespace Core.Model
         /// <summary>
         /// This is an indicator of an invalid entity which has no entry in the WorldState.
         /// </summary>
-        public static EntId Invalid = new(int.MinValue);
+        public static EntId Invalid = new(uint.MinValue);
     
-        public readonly int Id;
+        public readonly uint Id;
     
-        public EntId(int setId)
+        public EntId(uint setId)
         {
             Id = setId;
         }
@@ -62,7 +63,7 @@ namespace Core.Model
     
         public override int GetHashCode()
         {
-            return Id;
+            return (int) Id;
         }
     
         public override string ToString()

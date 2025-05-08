@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Core.Events;
 using Core.Model.ModelSystems;
+using Core.Utils.CachedDataStructures;
 using Core.Utils.Reflection;
+using UnityEngine;
+using Component = UnityEngine.Component;
 
 #nullable enable
 
@@ -25,6 +28,7 @@ namespace Core.Model
     {
         private readonly Dictionary<Type, List<Type>> componentsBySystemType = new ();
         private readonly Dictionary<Type, List<Type>> componentsByEntityType = new ();
+        private readonly Dictionary<Type, List<Type>> componentDatasByEntityType = new ();
         private readonly List<Type> entityTypes = new ();
         private readonly List<Type> componentTypes = new ();
         private readonly List<Type> componentDataTypes = new ();
@@ -49,6 +53,9 @@ namespace Core.Model
             componentsByEntityType.Clear();
             entityTypes.Clear();
 
+            BuildComponentsTypeCache();
+            BuildComponentDataTypeCache();
+            
             IEnumerable<Type> types = ReflectionUtils.GetAllTypesOf<Entity>();
             foreach (Type entityType in types)
             {
@@ -56,12 +63,22 @@ namespace Core.Model
             }
 
             BuildEventTypeCache();
-            BuildComponentDataTypeCache();
+        }
+
+        private void BuildComponentsTypeCache()
+        {
+            IEnumerable<Type> components = ReflectionUtils.GetAllTypesImplementingGenericDefinition(typeof(Component<>));
+            foreach (Type currentPotentialComponentType in components)
+            {
+                if(currentPotentialComponentType.IsInterface)
+                    componentTypes.Add(currentPotentialComponentType);
+            }
         }
 
 
         private void BuildComponentDataTypeCache()
         {
+
             IEnumerable<Type> types = ReflectionUtils.GetAllTypesOf<IComponentData>();
             foreach (Type currentPotentialComponentDataType in types)
             {
@@ -76,14 +93,21 @@ namespace Core.Model
                 Type componentDataType = componentType.GetFirstGenericArgumentTypeDefinition(typeof(Component<>));
                 if (componentDataType == null)
                 {
-                    // Debug.LogError($"componentType {componentType} not found in cache");
+#if UNITY_EDITOR
+                    Debug.LogError($"could not found componentData for {componentType}");
+#endif                    
                     continue;
                 }
                 
                 if (!componentDataTypes.Contains(componentDataType))
                 {
-                    componentDataTypeByComponentType.Add(componentType, componentDataType);
+#if UNITY_EDITOR
+                    Debug.LogError($"Found invalid componentData {componentDataType} for component {componentType}");
+#endif                    
+                   continue;
                 }
+                if (!componentDataTypeByComponentType.ContainsKey(componentType))
+                    componentDataTypeByComponentType.Add(componentType, componentDataType);
             }
         }
 
@@ -147,6 +171,22 @@ namespace Core.Model
                 yield return componentType;
             }
         }
+
+        public IEnumerable<Type> GetComponentDatasOfEntityType(Type entityType)
+        {
+            if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
+            {
+                // Debug.LogError($"entityType {entityType} not found in cache");
+                yield break;
+            }
+            
+            foreach (Type componentType in componentTypes)
+            {
+                yield return componentDataTypeByComponentType[componentType];
+            }
+        }
+
+        
         
         public IEnumerable<Type> GetAllEntityComponentTypes()
         {
@@ -189,6 +229,7 @@ namespace Core.Model
         
         private void BuildEntityTypeCache(Type entityType)
         {
+            
             if(!componentsByEntityType.ContainsKey(entityType)){
                 
                 List<Type> cachedComponentTypeList = new List<Type>();
@@ -196,33 +237,53 @@ namespace Core.Model
                 
                 IEnumerable<Type> entityComponentTypes = GetEntityComponentTypes(entityType);
                 cachedComponentTypeList.AddRange(entityComponentTypes);
+            }
+            
+            if(!componentDatasByEntityType.ContainsKey(entityType))
+            {
+                List<Type> cachedComponentDataTypeList = new List<Type>();
+                componentDatasByEntityType.Add(entityType, cachedComponentDataTypeList);
                 
-                foreach (Type componentType in cachedComponentTypeList)
+                IEnumerable<Type> entityComponentTypes = GetEntityComponentTypes(entityType);
+                foreach (Type componentType in entityComponentTypes)
                 {
-                    if (!componentTypes.Contains(componentType))
+                    if (!componentDataTypeByComponentType.TryGetValue(componentType, out Type componentDataType))
                     {
-                        componentTypes.Add(componentType);
+#if UNITY_EDITOR
+                        Debug.LogError($"could not found componentData for {componentType}");
+#endif
+                        continue;
                     }
+
+
+                    if (componentDataType != null && !cachedComponentDataTypeList.Contains(componentDataType))
+                        cachedComponentDataTypeList.Add(componentDataType);
                 }
             }
-
+            
             if (!entityTypes.Contains(entityType))
             {
                 entityTypes.Add(entityType);
             }
-            
 
             static IEnumerable<Type> GetEntityComponentTypes(Type entityType)
             {
+                using CachedList<Type> result = ListCache<Type>.Get();
+                
                 IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
                 foreach (Type implementedInterface in implementedInterfaces)
                 {
-                    if (implementedInterface.IsAssignableToGenericType(typeof(Component<>)))
-                    {
-                        yield return implementedInterface;
-                    }
+
+                    bool isActualComponentType = implementedInterface.IsGenericType && implementedInterface.GetGenericTypeDefinition() == typeof(Component<>);
+                    if ( !isActualComponentType && implementedInterface.IsAssignableToGenericWithArgType(typeof(Component<>)) &&
+                        !result.Contains(implementedInterface))
+                        result.Add(implementedInterface);
                 }
-                // yield return typeof(Entity);
+
+                foreach (Type implementedComponent in result)
+                {
+                    yield return implementedComponent;
+                }
             }
         }
         

@@ -22,12 +22,15 @@ namespace Core.Initialization
 
         protected override void InstallSystems()
         {
+            EntitiesContainer entitiesContainer = EntitiesContainer.CreateInstance();
+            BindInstance(entitiesContainer);
+
             BuildDataComponentContainers();
             
             BuildEventManager();
             BuildGameLoopSystem();
             BuildEntityManager();
-            BuildComponentSystemsLogic();
+
             BuildTimerSystem();
             BuildStatsSystem();
 
@@ -85,13 +88,6 @@ namespace Core.Initialization
             BindInstance(typeCache);
             return typeCache;
         }
-
-        private void BuildComponentSystemsLogic()
-        {
-            EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
-            BindInstance(entitySystemsContainer);
-        }
-
 
         
         protected void BuildEntityManager()

@@ -36,17 +36,17 @@ namespace Core.Model.Time
         public void Update(float deltaTimeMs);
     }
 
-    public struct TimerComponent : IComponentData
+    public struct TimerComponentData : IComponentData
     {
         public EntId ID { get; set; }
     }
     
-    public interface ITimerComponent : Component<TimerComponent> { }
+    public interface ITimerComponent : Component<TimerComponentData> { }
 
     public class TimerSystemImplementation : TimerSystemRo, 
                                              TimerSystem, 
                                              ITimerSystemImplementationInternal, 
-                                             OnDestroyComponent<TimerComponent>
+                                             OnDestroyComponent<TimerComponentData>
                                              
     {
 
@@ -258,6 +258,7 @@ namespace Core.Model.Time
         {
             if (!TimerModel.Timers.ContainsKey(entity))
             {
+                // TODO: cache dictionaries to avoid allocations
                 TimerModel.Timers[entity] = new Dictionary<string, TimerModel.InternalTimer>();
             }
 
@@ -265,8 +266,9 @@ namespace Core.Model.Time
         }
 
         #endregion
-        
 
+
+        public bool Active { get; set; } = true;
         public SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
     }
 }

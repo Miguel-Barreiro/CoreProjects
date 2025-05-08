@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace Core.Model
 {
+	public interface IGenericComponentContainer
+	{
+		public void SetupComponent(EntId owner);
+		public void RemoveComponent(EntId owner);
+	}
 
 	public interface ComponentContainer<T>
 		where T : struct, IComponentData
@@ -13,12 +18,8 @@ namespace Core.Model
 
 		public ref T GetComponent(EntId owner);
 		
-		public ref T AddComponent(EntId owner);
-		public void RemoveComponent(EntId owner);
-
-		public void RebuildWithMax(int maxNumber);
-
-
+		// public void RebuildWithMax(int maxNumber);
+		
 		public bool MoveNext();
 		public ref T GetCurrent();
 		public void ResetIterator();
@@ -27,13 +28,13 @@ namespace Core.Model
 	
 	
 	
-	public class ComponentContainerImplementation<T> : ComponentContainer<T> 
+	public class ComponentContainerImplementation<T> : ComponentContainer<T>, IGenericComponentContainer
 		where T : struct, IComponentData
 	{
 		private T[] _components = null;
-		private int _index = 0;
+		private int _iteratorIndex = 0;
 
-		private readonly Dictionary<EntId, int> ComponentIndexByOwner = new Dictionary<EntId, int>();
+		private readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
 		
 		/// This is a dummy component to return when the requested component is not found
 		/// do not override it
@@ -43,37 +44,16 @@ namespace Core.Model
 		};
 		
 		
-		public ComponentContainerImplementation(int maxNumber)
+		public ComponentContainerImplementation(uint maxNumber)
 		{
 			_components = new T[maxNumber];
-			for (int i = 0; i < _components.Length; i++)
+			for (uint i = 0; i < _components.Length; i++)
 			{
 				_components[i].ID = EntId.Invalid;
 			}
 		}
 		
-		public ref T AddComponent(EntId owner)
-		{
-			if (ComponentIndexByOwner.ContainsKey(owner))
-			{
-				Debug.LogError($"Component already exists for owner {owner}");
-				return ref Invalid;
-			}
-
-			int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
-			if (index == -1)
-			{
-				Debug.LogError("No available space for new component");
-				return ref Invalid;
-			}
-			
-			_components[index].ID = owner;
-			ComponentIndexByOwner[owner] = index;
-
-			return ref _components[index];
-		}
-		
-		public void RemoveComponent(EntId owner)
+		public void SetupComponent(EntId owner)
 		{
 			if (ComponentIndexByOwner.ContainsKey(owner))
 			{
@@ -81,14 +61,29 @@ namespace Core.Model
 				return;
 			}
 
-			int index = ComponentIndexByOwner[owner];
+			int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
+			if (index == -1)
+			{
+				Debug.LogError("No available space for new component");
+				return;
+			}
+			
+			_components[index].ID = owner;
+			ComponentIndexByOwner[owner] = (uint) index;
+		}
+
+		public void RemoveComponent(EntId owner)
+		{
+			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
+				return;
+
 			_components[index].ID = EntId.Invalid;
-			ComponentIndexByOwner[owner] = index;
+			ComponentIndexByOwner.Remove(owner);
 		}
 		
 		public ref T GetComponent(EntId owner)
 		{
-			if (!ComponentIndexByOwner.TryGetValue(owner, out int index))
+			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 			{
 				Debug.LogError($"Component not found for owner {owner}");
 				return ref Invalid;
@@ -96,6 +91,7 @@ namespace Core.Model
 			
 			return ref _components[index];
 		}
+		
 
 		public void RebuildWithMax(int maxNumber)
 		{
@@ -112,18 +108,18 @@ namespace Core.Model
 
 		public bool MoveNext()
 		{ 
-			_index++;
-			if (_index >= _components.Length)
+			_iteratorIndex++;
+			if (_iteratorIndex >= _components.Length)
 				return false;
 
-			ref T component = ref _components[_index];
+			ref T component = ref _components[_iteratorIndex];
 			while ( component.ID == EntId.Invalid)
 			{
-				_index++;
-				if (_index >= _components.Length)
+				_iteratorIndex++;
+				if (_iteratorIndex >= _components.Length)
 					return false;
 
-				component = ref _components[_index];
+				component = ref _components[_iteratorIndex];
 			}
 
 			return true;
@@ -132,18 +128,17 @@ namespace Core.Model
 		
 		public ref T GetCurrent()
 		{
-			if (_index < 0 || _index >= _components.Length)
-				_index = 0;
+			if (_iteratorIndex < 0 || _iteratorIndex >= _components.Length)
+				_iteratorIndex = 0;
 
-			return ref _components[_index];
+			return ref _components[_iteratorIndex];
 		}
 
 		
 		public void ResetIterator()
-			=> _index = -1;
+			=> _iteratorIndex = -1;
 
-		
-		
+
 	}
 
 }

@@ -8,16 +8,6 @@ using Debug = UnityEngine.Debug;
 namespace Core.Model.Data.Stats
 {
 
-	public struct StatsEntityData : IComponentData
-	{
-		public EntId ID { get; set; }
-	}
-
-	public interface IStatsEntity : Component<StatsEntityData>
-    {
-        // Marker interface for entities that can have stats
-    }
-
 	public sealed class StatsModel 
 	{
 		
@@ -36,9 +26,9 @@ namespace Core.Model.Data.Stats
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
 			{
-#if DEBUG
+#if UNITY_EDITOR
 				Debug.Log($"StatsModel.ModifyDepletedValue: entity({targetEntId}) not found"); 
-#endif				
+#endif
 				return;
 			}
 

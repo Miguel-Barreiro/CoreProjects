@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Model.Data.Stats;
+using Core.Model.ModelSystems;
 using Core.Model.Stats;
 using Core.Systems;
 using FixedPointy;
@@ -17,6 +18,15 @@ namespace Core.Model
 		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId);
 
 	}
+	
+	
+	public interface IStatsComponent : Component<StatsComponentData> { }
+
+	public struct StatsComponentData : IComponentData
+	{
+		public EntId ID { get; set; }
+	}
+	
 
 	public interface StatsSystem : StatsSystemRo
 	{
@@ -49,7 +59,8 @@ namespace Core.Model
 	
 
 
-	public class StatsSystemImplementation : EntitySystem<Entity>, StatsSystem, StatsSystemRo, IInitSystem
+	public class StatsSystemImplementation : StatsSystem, StatsSystemRo, IInitSystem, 
+											OnDestroyComponent<StatsComponentData>
 	{
 		private StatsModel _statsModel = null;
 		
@@ -59,22 +70,21 @@ namespace Core.Model
 				_statsModel = new StatsModel();
 		}
 
-		public override SystemGroup Group => CoreSystemGroups.CoreSystemGroup;
-
-		public override void OnNew(Entity newEntity)
+		public void OnDestroyComponent(EntId destroyedComponentId)
 		{
-			// Initialize any default stats if needed
+			_statsModel.RemoveAllModifiersFrom(destroyedComponentId); 
+			_statsModel.RemoveAllStatsFrom(destroyedComponentId);
+			
 		}
+
+
+		public bool Active { get; set; } = true;
+		public SystemGroup Group => CoreSystemGroups.CoreSystemGroup;
+
 
 		public void Reset()
 		{
 			_statsModel = new StatsModel();
-		}
-
-		public override void OnDestroy(Entity entity)
-		{
-			_statsModel.RemoveAllModifiersFrom(entity.ID); 
-			_statsModel.RemoveAllStatsFrom(entity.ID);
 		}
 
 		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false)

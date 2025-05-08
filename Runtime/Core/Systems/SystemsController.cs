@@ -34,19 +34,19 @@ namespace Core.Systems
         private SystemsControllerMode mode = SystemsControllerMode.UNIT_TESTS;
         
         
-        private readonly Dictionary<Type, List<EntId>> DestroyedEntitiesByComponentType = new Dictionary<Type, List<EntId>>();
-        private readonly Dictionary<Type, List<EntId>> NewEntitiesByComponentType = new Dictionary<Type, List<EntId>>();
+        private readonly Dictionary<Type, List<EntId>> DestroyedEntitiesByComponentDataType = new Dictionary<Type, List<EntId>>();
+        private readonly Dictionary<Type, List<EntId>> NewEntitiesByComponentDataType = new Dictionary<Type, List<EntId>>();
 
         
         public void Initialize()
         {
             running = false;
-            DestroyedEntitiesByComponentType.Clear();
-            NewEntitiesByComponentType.Clear();
-            foreach (Type componentType in TypeCache.Get().GetAllEntityComponentTypes())
+            DestroyedEntitiesByComponentDataType.Clear();
+            NewEntitiesByComponentDataType.Clear();
+            foreach (Type componentDataType in TypeCache.Get().GetAllComponentDataTypes())
             {
-                DestroyedEntitiesByComponentType.Add(componentType, new List<EntId>());
-                NewEntitiesByComponentType.Add(componentType, new List<EntId>());
+                DestroyedEntitiesByComponentDataType.Add(componentDataType, new List<EntId>());
+                NewEntitiesByComponentDataType.Add(componentDataType, new List<EntId>());
             }
         }
         
@@ -105,7 +105,6 @@ namespace Core.Systems
             
             ITimerSystem.Update(deltaTime*1000);
             
-            
 #if !UNITY_EDITOR
             try
             {
@@ -119,11 +118,7 @@ namespace Core.Systems
 #endif                
             
             ExecuteEventsAndUpdates();
-
-            
-            EntitiesContainer.ClearAllFlushedDeadEntities();
-            EntitiesContainer.UpgradeAllFlushedNewEntities();
-
+            EntitiesContainer.ProcessAllFlushedEntities();
             
             void ExecuteFrameUpdateSystems()
             {
@@ -137,92 +132,69 @@ namespace Core.Systems
 
             void ExecuteEventsAndUpdates()
             {
+                
+                ProcessAllEntitiesEvents();
+                
+                bool hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
                 int loopGard = 0;
                 while ( loopGard < 10 && 
-                        (
-                            eventQueue.EventsCount > 0 || 
-                            EntitiesContainer.NewEntitiesCount() > 0 ||
-                            EntitiesContainer.destroyedEntitiesCount > 0))
+                        (eventQueue.EventsCount > 0 || hasEntitiesToProcess))
                 {
+                    if(hasEntitiesToProcess)
+                        ProcessDestroyAndCreateEntitiesEvents();
+    
+                    if(eventQueue.EventsCount > 0)
+                        ProcessGlobalEvents();
+                    
+                    hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
                     loopGard++;
-                    
-                    //only call update on components the first time
-                    ProcessEntitiesEvents(loopGard == 0);
-                    
-                    ProcessEvents();
                 }
                 
             }
-            
-            
-            void ProcessEntitiesEvents(bool callUpdate)
+
+
+            #region utility
+
+            void ProcessAllEntitiesEvents()
             {
-                foreach (List<EntId> list in NewEntitiesByComponentType.Values)
-                    list.Clear();
-
-                foreach (List<EntId> list in DestroyedEntitiesByComponentType.Values)
-                    list.Clear();
-                
-                //first we optimize by grouping by component type
-                foreach (Entity destroyedEntity in EntitiesContainer.GetAllDestroyedEntities())
-                {
-                    EntId destroyedEntityID = destroyedEntity.ID;
-                    
-                    Type entityType = destroyedEntity.GetType();
-                    IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
-                    foreach (Type component in components)
-                        DestroyedEntitiesByComponentType[component].Add(destroyedEntityID);
-                }
-                foreach (Entity newEntity in EntitiesContainer.GetAllNewEntities())
-                {
-                    EntId newEntityID = newEntity.ID;
-                    
-                    Type entityType = newEntity.GetType();
-                    IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
-                    foreach (Type component in components)
-                        NewEntitiesByComponentType[component].Add(newEntityID);
-                }
-                
-                
-                EntitiesContainer.FlushCurrentDestroyedEntities();
-                EntitiesContainer.FlushCurrentNewEntities();
-
+                GroupNewAndDestroyEntitiesByComponent();
                 
                 // then we call the systems by component type
                 
-                IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentType();
-                foreach ((Type componentType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
+                IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
+                foreach ((Type componentDataType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
                 {
 
-                    if(callUpdate)
-                        CallComponentUpdate(listenerGroup, componentType);
-                    
-                    List<EntId> destroyedEntities = DestroyedEntitiesByComponentType[componentType];
-                    List<EntId> newEntities = NewEntitiesByComponentType[componentType];
-                    
-                    foreach (EntId destroyedEntityID in destroyedEntities)
+                    CallComponentUpdate(listenerGroup, componentDataType);
+
+                    if (DestroyedEntitiesByComponentDataType.TryGetValue(componentDataType, out List<EntId> destroyedEntities))
                     {
-                        ARGUMENT_SINGLE[0] = destroyedEntityID;
-                        foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyEarlierPriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
-                        foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyDefaultPriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
-                        foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
+                        foreach (EntId destroyedEntityID in destroyedEntities)
+                        {
+                            ARGUMENT_SINGLE[0] = destroyedEntityID;
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyEarlierPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyDefaultPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                        }
                     }
-                    
-                    foreach (EntId newEntityID in newEntities)
+
+                    if (NewEntitiesByComponentDataType.TryGetValue(componentDataType, out List<EntId> newEntities))
                     {
-                        ARGUMENT_SINGLE[0] = newEntityID;
-                        foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateEarlierPriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
-                        foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateDefaultPriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
-                        foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateLatePriority)
-                            systemCache.Call(ARGUMENT_SINGLE);
+                        foreach (EntId newEntityID in newEntities)
+                        {
+                            ARGUMENT_SINGLE[0] = newEntityID;
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateEarlierPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateDefaultPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateLatePriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                        }
                     }
                 }
-                
                 
                 void CallComponentUpdate(ComponentSystemListenerGroup group, Type componentType)
                 {
@@ -254,11 +226,83 @@ namespace Core.Systems
                 }
             }
             
-        }
+            void ProcessDestroyAndCreateEntitiesEvents()
+            {
+                GroupNewAndDestroyEntitiesByComponent();
+                
+                // then we call the systems by component type
+                
+                IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
+                foreach ((Type componentDataType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
+                {
+                    
+                    if (DestroyedEntitiesByComponentDataType.TryGetValue(componentDataType, out List<EntId> destroyedEntities))
+                    {
+                        foreach (EntId destroyedEntityID in destroyedEntities)
+                        {
+                            ARGUMENT_SINGLE[0] = destroyedEntityID;
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyEarlierPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyDefaultPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                        }
+                    }
 
+                    if (NewEntitiesByComponentDataType.TryGetValue(componentDataType, out List<EntId> newEntities))
+                    {
+                        foreach (EntId newEntityID in newEntities)
+                        {
+                            ARGUMENT_SINGLE[0] = newEntityID;
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateEarlierPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateDefaultPriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                            foreach (OnCreateComponentSystemCache systemCache in listenerGroup.OnCreateLatePriority)
+                                systemCache.Call(ARGUMENT_SINGLE);
+                        }
+                    }
+                }
+            }
+            
+            void GroupNewAndDestroyEntitiesByComponent()
+            {
+                foreach (List<EntId> list in NewEntitiesByComponentDataType.Values)
+                    list.Clear();
+
+                foreach (List<EntId> list in DestroyedEntitiesByComponentDataType.Values)
+                    list.Clear();
+                    
+                //first we optimize by grouping by component type
+                foreach (Entity destroyedEntity in EntitiesContainer.GetAllDestroyedEntities())
+                {
+                    Type entityType = destroyedEntity.GetType();
+                    IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
+                    foreach (Type componentData in componentDatas)
+                        DestroyedEntitiesByComponentDataType[componentData].Add(destroyedEntity.ID);
+                }
+                foreach (Entity newEntity in EntitiesContainer.GetAllNewEntities())
+                {
+                    EntId newEntityID = newEntity.ID;
+                    Type entityType = newEntity.GetType();
+                    IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
+                    foreach (Type componentData in componentDatas)
+                        NewEntitiesByComponentDataType[componentData].Add(newEntityID);
+                }
+                    
+                    
+                EntitiesContainer.FlushCurrentDestroyedEntities();
+                EntitiesContainer.FlushCurrentNewEntities();
+            }
+
+            #endregion
+        }
+        
+        
         
         private readonly List<BaseEvent> EventsToProcessList = new List<BaseEvent>();
-        private void ProcessEvents()
+        private void ProcessGlobalEvents()
         {
             EventsToProcessList.Clear();
             eventQueue.PopEvents(EventsToProcessList);
@@ -287,117 +331,6 @@ namespace Core.Systems
             
             EventsToProcessList.Clear();
         }
-
-        
-        
-       
-        
-       
-        
-        
-
-        // private void ProcessDestroyedEntities()
-        // {
-        //     //TODO: Optimize this by grouping by component type
-        //     using CachedList<Entity> destroyedEntitiesList = ListCache<Entity>.Get();
-        //     IEnumerable<Entity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
-        //     destroyedEntitiesList.AddRange(allDestroyedEntities);
-        //
-        //     while (destroyedEntitiesList.Count > 0)
-        //     {
-        //         EntitiesContainer.ClearDestroyedEntities();
-        //
-        //         // using CachedList<EntitySystemsContainer.SystemCache> latetList = ListCache<EntitySystemsContainer.SystemCache>.Get();
-        //         // using CachedList<EntitySystemsContainer.SystemCache> defaultList = ListCache<EntitySystemsContainer.SystemCache>.Get();
-        //         // using CachedList<EntitySystemsContainer.SystemCache> earlytList = ListCache<EntitySystemsContainer.SystemCache>.Get();
-        //         //
-        //         //
-        //         // foreach (Entity destroyedEntity in destroyedEntitiesList)
-        //         // {
-        //         //     Type entityType = destroyedEntity.GetType();
-        //         //     IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
-        //         //     foreach (Type componentType in components)
-        //         //     {
-        //         //         latetList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
-        //         //                                                                             SystemPriority.Late));
-        //         //         defaultList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
-        //         //                                                                             SystemPriority.Default));
-        //         //         earlytList.AddRange(systemsContainer.GetComponentSystemsForDestroyed(componentType, 
-        //         //                                                                             SystemPriority.Early));
-        //         //     }
-        //         //     
-        //         //     CallOnDestroy(latetList, destroyedEntity);
-        //         //     CallOnDestroy(defaultList, destroyedEntity);
-        //         //     CallOnDestroy(earlytList, destroyedEntity);
-        //         //
-        //         //     earlytList.Clear();
-        //         //     defaultList.Clear();
-        //         //     latetList.Clear();
-        //         // }
-        //         //
-        //         allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
-        //         destroyedEntitiesList.Clear();
-        //         destroyedEntitiesList.AddRange(allDestroyedEntities);
-        //     }
-        //
-        //     void CallOnDestroy(CachedList<OnDestroyComponentSystemCache> systemList, Entity destroyedEntity)
-        //     {
-        //         ARGUMENT_PAIR[0] = destroyedEntity;
-        //         foreach (OnDestroyComponentSystemCache systemCache in systemList)
-        //         {
-        //             systemCache.CachedOnDestroyedMethod?.Invoke(systemCache.System, ARGUMENT_SINGLE);
-        //         }
-        //     }
-        // }
-
-        
-        // private void ProcessNewEntities()
-        // {
-        //     
-        //     //TODO: Optimize this by grouping by component type
-        //     using CachedList<Entity> newEntitiesList = ListCache<Entity>.Get();
-        //     IEnumerable<Entity> newEntities = EntitiesContainer.GetAllNewEntities();
-        //     newEntitiesList.AddRange(newEntities);
-        //
-        //     while (newEntitiesList.Count > 0)
-        //     {
-        //         EntitiesContainer.UpgradeCurrentNewEntities();
-        //      
-        //
-        //         
-        //         foreach (Entity newEntity in newEntitiesList)
-        //         {
-        //             Type entityType = newEntity.GetType();
-        //             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
-        //             foreach (Type componentType in components)
-        //             {
-        //                 latetList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Late));
-        //                 defaultList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Default));
-        //                 earlytList.AddRange(systemsContainer.GetOnCreateComponentSystemsFor(componentType, SystemPriority.Early));
-        //             }
-        //             
-        //             CallOnNew(earlytList, newEntity);
-        //             CallOnNew(defaultList, newEntity);
-        //             CallOnNew(latetList, newEntity);
-        //
-        //             earlytList.Clear();
-        //             defaultList.Clear();
-        //             latetList.Clear();
-        //         }
-        //         
-        //         newEntities = EntitiesContainer.GetAllNewEntities();
-        //         newEntitiesList.Clear();
-        //         newEntitiesList.AddRange(newEntities);
-        //         
-        //     }
-        //     
-        //     void CallOnNew(CachedList<OnCreateComponentSystemCache> systemList, Entity newEntity)
-        //     {
-        //         ARGUMENT_SINGLE[0] = newEntity;
-        //         foreach (OnCreateComponentSystemCache systemCache in systemList)
-        //             systemCache.CachedOnCreateMethod?.Invoke(systemCache.System, ARGUMENT_SINGLE);
-        //     }
-        // }
 
         public enum SystemsControllerMode
         {

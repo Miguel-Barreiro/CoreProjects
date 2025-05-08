@@ -178,7 +178,11 @@ namespace Core.Initialization
 		{
 			if (!Container.HasBinding<SystemsContainer>())
 			{
-				SystemsContainer systemsContainer = new SystemsContainer();
+				EntitySystemsContainer entitySystemsContainer = new EntitySystemsContainer();
+				Container.BindInstance(entitySystemsContainer);
+
+				
+				SystemsContainer systemsContainer = new SystemsContainer(entitySystemsContainer);
 				Container.BindInstance(systemsContainer);
 			}
 		}

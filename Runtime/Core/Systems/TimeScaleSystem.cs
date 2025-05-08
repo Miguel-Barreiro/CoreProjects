@@ -104,6 +104,8 @@ namespace Core.Systems
 		}
 
 
+		public bool Active { get; set; } = true;
+		public SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;
 	}
 
 	public sealed class TimeScaleSystemModel : Entity

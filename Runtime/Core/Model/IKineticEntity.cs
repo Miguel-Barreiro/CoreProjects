@@ -7,14 +7,11 @@ namespace Core.Model
 	
 	public struct IKineticEntityData : IComponentData
 	{
-		public Vector3 Position { get; set; }
-		public GameObject Prefab { get; set; }
-		public Rigidbody Rigidbody { get; set; }
+		public Vector3 Position;
+		public GameObject Prefab;
+		public Rigidbody Rigidbody;
 		public EntId ID { get; set; }
 	}
 	
-	public interface IKineticEntity : Component<IKineticEntityData>
-	{
-		GameObject Prefab { get; }
-	}
+	public interface IKineticEntity : Component<IKineticEntityData> { }
 }

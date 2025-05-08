@@ -248,15 +248,6 @@ namespace Core.Initialization
         }
 
         #region Injection
-
-        private void UpdateSystemsContainer()
-        {
-            if (!Container.HasBinding<SystemsContainer>())
-            {
-                SystemsContainer systemsContainer = new SystemsContainer();
-                Container.BindInstance(systemsContainer);
-            }
-        }
         
         protected void AddInjectable(GameObject logicInstance)
         {

@@ -3,7 +3,8 @@ using Core.Systems;
 namespace Core.Model.ModelSystems
 {
 	
-	public interface IComponentSystem<T>  where T : struct, IComponentData { }
+	public interface IComponentSystem<T> : ISystem
+		where T : struct, IComponentData { }
 	
 	
 	public interface OnCreateComponent<T> : IComponentSystem<T> 
@@ -19,7 +20,7 @@ namespace Core.Model.ModelSystems
 		void OnDestroyComponent(EntId destroyedComponentId);
 	}
 	
-	public interface UpdateComponents<T> : IComponentSystem<T> , ISystem
+	public interface UpdateComponents<T> : IComponentSystem<T>
 		where T : struct, IComponentData
 	{
 		void UpdateComponents(ComponentContainer<T> componentsContainer, float deltaTime);

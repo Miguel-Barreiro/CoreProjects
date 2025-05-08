@@ -41,7 +41,7 @@ namespace Core.Utils.Reflection
             return targetType.IsAssignableFrom(type);
         }
 
-        public static bool IsAssignableToGenericType(this Type givenType, Type genericType)
+        public static bool IsAssignableToGenericWithArgType(this Type givenType, Type genericType)
         {
             var interfaceTypes = givenType.GetInterfaces();
 
@@ -57,7 +57,7 @@ namespace Core.Utils.Reflection
             Type baseType = givenType.BaseType;
             if (baseType == null) return false;
 
-            return IsAssignableToGenericType(baseType, genericType);
+            return IsAssignableToGenericWithArgType(baseType, genericType);
         }
         
         
@@ -132,6 +132,34 @@ namespace Core.Utils.Reflection
                 }
             }
         }
+
+        public static IEnumerable<Type> GetAllTypesImplementingGenericDefinition(Type genericTypeDefinition)
+        {
+            using CachedList<Type> result = ListCache<Type>.Get();
+            
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] types = assembly.GetTypes();
+                foreach (Type type in types)
+                {
+                    Type[] interfaces = type.GetInterfaces();
+                    foreach (Type interfaceType in interfaces)
+                    {
+                        if(interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == genericTypeDefinition)
+                        {
+                            if (!result.Contains(type))
+                                result.Add(type);
+                        }
+                    }
+                }
+            }
+            foreach (Type type in result)
+            {
+                yield return type;
+            }
+        }
+
         
         
         public static IEnumerable<Type> GetAllTypesImplementingGeneric(Type genericType)
@@ -142,7 +170,7 @@ namespace Core.Utils.Reflection
                 Type[] types = assembly.GetTypes();
                 foreach (Type type in types)
                 {
-                    if (type.IsAssignableToGenericType(genericType) && type != genericType)
+                    if (type.IsAssignableToGenericWithArgType(genericType) && type != genericType)
                     {
                         yield return type;
                     }
