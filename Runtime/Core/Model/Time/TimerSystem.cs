@@ -15,14 +15,14 @@ namespace Core.Model.Time
 {
 	public interface TimerSystem : TimerSystemRo
     {
-        public void AddOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener);
-        public void RemoveOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener);
+        public void AddOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener);
+        public void RemoveOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener);
 
-        public void RemoveTimer(ITimerComponent entity, string timerId);
+        public void RemoveTimer(EntId entityID, string timerId);
         
-        public void SetTimer(ITimerComponent entity, string id, float expirationMs, bool autoReset, bool isUnscaledTime);
-        public void SetTimer(ITimerComponent entity, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime);
-        public void ResetTimer(ITimerComponent entity, string id);
+        public void SetTimer(EntId entityID, string id, float expirationMs, bool autoReset, bool isUnscaledTime);
+        public void SetTimer(EntId entityID, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime);
+        public void ResetTimer(EntId entityID, string id);
     }
 
 	public interface TimerSystemRo
@@ -61,9 +61,9 @@ namespace Core.Model.Time
         
         #region Public
 
-        public void ResetTimer(ITimerComponent entity, string id)
+        public void ResetTimer(EntId entityID, string id)
         {
-            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entity.ID);
+            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(id, out TimerModel.InternalTimer internalTimer))
             {
                 return;
@@ -72,9 +72,9 @@ namespace Core.Model.Time
             internalTimer.Running = true;
         }
 
-        public void SetTimer(ITimerComponent entity, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime)
+        public void SetTimer(EntId entityID, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime)
         {
-            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entity.ID);
+            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(id, out TimerModel.InternalTimer internalTimer))
             {
                 internalTimer = new TimerModel.InternalTimer(expirationMsStat, id, autoReset, isUnscaledTime);
@@ -90,9 +90,9 @@ namespace Core.Model.Time
             internalTimer.Running = true;
         }
 
-        public void SetTimer(ITimerComponent entity, string id, float expirationMs, bool autoReset, bool isUnscaledTime)
+        public void SetTimer(EntId entityID, string id, float expirationMs, bool autoReset, bool isUnscaledTime)
         {
-            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entity.ID);
+            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(id, out TimerModel.InternalTimer internalTimer))
             {
                 internalTimer = new TimerModel.InternalTimer(expirationMs, id, autoReset, isUnscaledTime);
@@ -108,25 +108,26 @@ namespace Core.Model.Time
             internalTimer.Running = true;
         }
 
-        public void RemoveTimer(ITimerComponent entity, string timerId)
+
+        public void RemoveTimer(EntId entityID, string timerId)
         {
-            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entity.ID);
+            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (timersById.ContainsKey(timerId))
             {
                 timersById.Remove(timerId);
             }
         }
 
-        public void AddOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener)
+        public void AddOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener)
         {
-            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entity.ID);
+            Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(timerId, out TimerModel.InternalTimer internalTimer))
             {
-                Debug.Log($"Trying to add a listener to an invalid timer. ([{entity.ID}].<{timerId})>");
+                Debug.Log($"Trying to add a listener to an invalid timer. ([{entityID}].<{timerId})>");
                 return;
             }
 
-            List<Action<EntId>> list = GetOrCreateFinishListenersList(entity.ID, timerId);
+            List<Action<EntId>> list = GetOrCreateFinishListenersList(entityID, timerId);
             list.Add(onFinishListener);
         }
 
@@ -141,15 +142,15 @@ namespace Core.Model.Time
             return OnFinishListeners[entityID][timerId];
         }
 
-        public void RemoveOnFinishListener(ITimerComponent entity, string timerId, Action<EntId> onFinishListener)
+        public void RemoveOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener)
         {
-            if (!OnFinishListeners.ContainsKey(entity.ID))
+            if (!OnFinishListeners.ContainsKey(entityID))
                 return;
 
-            if (!OnFinishListeners[entity.ID].ContainsKey(timerId))
+            if (!OnFinishListeners[entityID].ContainsKey(timerId))
                 return;
 
-            OnFinishListeners[entity.ID][timerId].Remove(onFinishListener);
+            OnFinishListeners[entityID][timerId].Remove(onFinishListener);
         }
 
 

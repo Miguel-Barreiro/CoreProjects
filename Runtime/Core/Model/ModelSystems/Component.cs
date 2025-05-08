@@ -10,9 +10,6 @@ namespace Core.Model.ModelSystems
 		public EntId ID { get; set; }
 	}
 
-	public interface Component<T> where T : IComponentData
-	{
-		public EntId ID { get; set; }
-	}
+	public interface Component<T> : IEntity  where T : IComponentData { }
 
 }

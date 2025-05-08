@@ -12,13 +12,11 @@ namespace Core.Model
 
     public abstract class Entity : IEntity
     {
-        public EntId ID { get =>id; set=>id=value; }
+        public EntId ID { get; }
 
-        private EntId id;
-    
         protected Entity()
         {
-            id = EntitiesContainer.GenerateNewEntityID();
+            ID = EntitiesContainer.GenerateNewEntityID();
             EntitiesContainer.OnEntityCreated(this);
         }
     

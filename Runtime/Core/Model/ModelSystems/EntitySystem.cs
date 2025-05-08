@@ -7,6 +7,7 @@ namespace Core.Model
     {
         public abstract void OnNew(TEntity newEntity);
         public abstract void OnDestroy(TEntity newEntity);
+        
         // public abstract void Update(TEntity entity, float deltaTime);
         //
         // internal override void Update(EntitiesContainer entitiesContainerOld, float deltaTime)
@@ -19,6 +20,27 @@ namespace Core.Model
         // }
     
         protected EntitySystem() : base(typeof(TEntity)) { }
+    }
+
+
+    public interface IEntitySystem { }
+
+    public interface OnEntityCreated<TEntity> : IEntitySystem
+        where TEntity : Entity
+    {
+        public void OnEntityCreated(TEntity newEntity);
+    }
+    
+    public interface OnEntityDestroyed<TEntity>: IEntitySystem
+        where TEntity : Entity
+    {
+        public void OnEntityDestroyed(TEntity newEntity);
+    }
+
+    public interface UpdateEntitiesSystem<TEntity>: IEntitySystem
+        where TEntity : Entity
+    {
+        public void UpdateEntities(IEnumerable<TEntity> newEntity);
     }
     
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Core.Model.ModelSystems;
 using Core.Systems;
-using Zenject;
 
 #nullable enable
 
@@ -28,7 +27,7 @@ namespace Core.Model
         private readonly Dictionary<EntId, Entity> entitiesByID = new ();
 
         // COMPONENT CACHING
-        private readonly Dictionary<Type, List<Entity>> entitiesByComponentType = new ();
+        private readonly Dictionary<Type, List<EntId>> entitiesByComponentType = new ();
         
         //EVENT PROCESSING
         private readonly List<EntId> destroyedEntities = new ();
@@ -189,7 +188,14 @@ namespace Core.Model
             foreach (Type entityType in entityTypes)
             {
                 if(!entitiesByComponentType.ContainsKey(entityType))
-                    entitiesByComponentType.Add(entityType, new List<Entity>());
+                    entitiesByComponentType.Add(entityType, new List<EntId>());
+
+                IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
+                foreach (Type componentType in components)
+                {
+                    if (!entitiesByComponentType.ContainsKey(componentType))
+                        entitiesByComponentType.Add(componentType, new List<EntId>());
+                }
             }
         }
 
@@ -219,14 +225,15 @@ namespace Core.Model
         
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity
         {
-            if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<Entity> entities))
+            if (!entitiesByComponentType.TryGetValue(typeof(TEntity), out List<EntId> entitieIds))
             {
                 // Debug.Log($"no entities of type {typeof(TEntity)} found");
                 yield break;
             }
 
-            foreach (Entity entity in entities)
+            foreach (EntId entityId in entitieIds)
             {
+                Entity entity = entitiesByID[entityId];
                 yield return entity! as TEntity;
             }
         }
@@ -241,10 +248,8 @@ namespace Core.Model
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                if (entitiesByComponentType.TryGetValue(componentType, out List<Entity> entities))
-                {
-                    entities.Add(entity);
-                }
+                if (entitiesByComponentType.TryGetValue(componentType, out List<EntId> entities))
+                    entities.Add(entity.ID);
             }
         }
         
@@ -255,10 +260,8 @@ namespace Core.Model
             IEnumerable<Type> components = TypeCache.Get().GetComponentsOf(entityType);
             foreach (Type componentType in components)
             {
-                if (entitiesByComponentType.TryGetValue(componentType, out List<Entity> entities))
-                {
-                    entities.Remove(entity);
-                }
+                if (entitiesByComponentType.TryGetValue(componentType, out List<EntId> entities))
+                    entities.Remove(entity.ID);
             }
             
             DataContainersControllerImplementation dataContainersController = DataContainersControllerImplementation.GetInstance();
