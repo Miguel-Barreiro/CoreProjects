@@ -39,6 +39,7 @@ namespace Core.Model.Time
     public struct TimerComponentData : IComponentData
     {
         public EntId ID { get; set; }
+        public void Init() {}
     }
     
     public interface ITimerComponent : Component<TimerComponentData> { }

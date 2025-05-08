@@ -12,17 +12,17 @@ namespace Core.View
 	[OnDestroyComponentProperties(Priority = SystemPriority.Early)]
 	[UpdateComponentProperties(Priority = SystemPriority.Early)]
 	public sealed class PhisycsEntitiesUpdateViewSystem: ISystem, 
-														UpdateComponents<I2DPhysicsEntityData>, 
-														OnCreateComponent<I2DPhysicsEntityData>,
-														OnDestroyComponent<I2DPhysicsEntityData>
+														UpdateComponents<PhysicsEntity2DData>, 
+														OnCreateComponent<PhysicsEntity2DData>,
+														OnDestroyComponent<PhysicsEntity2DData>
 	
 	{
 		[Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
-		[Inject] private readonly ComponentContainer<I2DPhysicsEntityData> ComponentContainer = null!;
+		[Inject] private readonly ComponentContainer<PhysicsEntity2DData> ComponentContainer = null!;
 		
 		public void OnCreateComponent(EntId newComponentId)
 		{
-			ref I2DPhysicsEntityData newEntity = ref ComponentContainer.GetComponent(newComponentId);
+			ref PhysicsEntity2DData newEntity = ref ComponentContainer.GetComponent(newComponentId);
 			if (newEntity.Prefab == null)
 			{
 				Debug.LogError($"Prefab not found for entity {newEntity.GetType().Name}({newComponentId})");
@@ -45,12 +45,12 @@ namespace Core.View
 		}
 
 
-		public void UpdateComponents(ComponentContainer<I2DPhysicsEntityData> componentsContainer, float deltaTime)
+		public void UpdateComponents(ComponentContainer<PhysicsEntity2DData> componentsContainer, float deltaTime)
 		{
 			componentsContainer.ResetIterator();
 			while (componentsContainer.MoveNext())
 			{
-				ref I2DPhysicsEntityData entity = ref componentsContainer.GetCurrent();
+				ref PhysicsEntity2DData entity = ref componentsContainer.GetCurrent();
 
 				EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entity.ID);
 				if (viewAtributes == null || viewAtributes.GameObject== null)
@@ -76,7 +76,7 @@ namespace Core.View
 			}
 		}
 
-		private void Spawn(ref I2DPhysicsEntityData newEntity)
+		private void Spawn(ref PhysicsEntity2DData newEntity)
 		{
 			GameObject? newGameObject = ViewEntitiesContainer.Spawn(newEntity.Prefab.gameObject, newEntity.ID);
 			if (newGameObject == null)

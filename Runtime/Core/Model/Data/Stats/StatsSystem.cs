@@ -25,6 +25,7 @@ namespace Core.Model
 	public struct StatsComponentData : IComponentData
 	{
 		public EntId ID { get; set; }
+		public void Init() { }
 	}
 	
 

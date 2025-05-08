@@ -17,6 +17,7 @@ namespace Core.Systems
 	public struct TimeScalerEntityData : IComponentData
 	{
 		public EntId ID { get; set; }
+		public void Init() {}
 	}
 
 	public interface TimeScalerEntity : Component<TimeScalerEntityData> { }

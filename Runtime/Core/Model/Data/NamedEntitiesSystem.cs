@@ -9,13 +9,12 @@ namespace Core.Core.Model.Data
 
 	public struct NamedEntityData : IComponentData
 	{
-		public string Name { get; set; }
+		public string Name;
 		public EntId ID { get; set; }
 
-		public NamedEntityData(string name, EntId id)
+		public void Init()
 		{
-			Name = name;
-			ID = id;
+			Name = "";
 		}
 	}
 		

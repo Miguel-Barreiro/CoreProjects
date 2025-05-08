@@ -18,8 +18,8 @@ namespace Core.Model.Data.Stats
 		private readonly Dictionary<EntId, Dictionary<StatConfig, StatId>> StatsByOwnerAndType = new();
 		private readonly Dictionary<EntId, List<StatModId>> ModifiersByOwner = new();
 		
-		private int _statIdGenerator = 0;
-		private int _statModIdGenerator = 0;
+		private uint _statIdGenerator = 0;
+		private uint _statModIdGenerator = 0;
 
 		
 		public void ModifyDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)

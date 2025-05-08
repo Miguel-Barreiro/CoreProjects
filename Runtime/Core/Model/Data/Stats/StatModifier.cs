@@ -41,11 +41,11 @@ namespace Core.Model
         /// <summary>
         /// This is an indicator of an invalid entity which has no entry in the WorldState.
         /// </summary>
-        public static StatModId Invalid = new(int.MinValue);
+        public static StatModId Invalid = new(uint.MinValue);
 
-        public readonly int Id;
+        public readonly uint Id;
 
-        public StatModId(int setId)
+        public StatModId(uint setId)
         {
             Id = setId;
         }
@@ -69,7 +69,7 @@ namespace Core.Model
 
         public override int GetHashCode()
         {
-            return Id;
+            return (int) Id;
         }
 
         public override string ToString()

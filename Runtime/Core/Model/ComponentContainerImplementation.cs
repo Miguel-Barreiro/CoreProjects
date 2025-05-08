@@ -50,6 +50,7 @@ namespace Core.Model
 			for (uint i = 0; i < _components.Length; i++)
 			{
 				_components[i].ID = EntId.Invalid;
+				_components[i].Init();
 			}
 		}
 		
@@ -101,6 +102,7 @@ namespace Core.Model
 			for (int i = 0; i < _components.Length; i++)
 			{
 				_components[i].ID = EntId.Invalid;
+				_components[i].Init();
 			}
 		}
 

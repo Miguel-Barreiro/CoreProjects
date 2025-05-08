@@ -5,9 +5,14 @@ namespace Core.Model
 {
     public struct PositionEntity : IComponentData
     {
-        Vector2 Position { get; set; }
+        public Vector2 Position;
 
         public EntId ID { get; set; }
+
+        public void Init()
+        {
+            Position = Vector2.zero;
+        }
     }
     
     public interface IPositionEntity : Component<PositionEntity> { }
