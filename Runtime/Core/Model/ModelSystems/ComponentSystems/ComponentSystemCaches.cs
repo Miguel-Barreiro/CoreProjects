@@ -49,7 +49,8 @@ namespace Core.Model.ModelSystems.ComponentSystems
             try
             {
 #endif   
-            CachedUpdateMethod?.Invoke(System, args);
+            if(Active)
+                CachedUpdateMethod?.Invoke(System, args);
             
 #if !UNITY_EDITOR
             } catch (Exception e)
@@ -173,6 +174,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
     
     public class BaseSystemCache
     {
+        public bool Active => ((ISystem)System).Active;
         public readonly object System;
         public readonly Type CachedType;
         

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Model.ModelSystems;
 using Core.Utils.Reflection;
-using Zenject;
 
 namespace Core.Systems
 {
@@ -162,6 +161,5 @@ namespace Core.Systems
         #endregion
 
 
-        
     }
 }
