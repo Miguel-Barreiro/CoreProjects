@@ -50,7 +50,6 @@ namespace Core.Model
 			for (uint i = 0; i < _components.Length; i++)
 			{
 				_components[i].ID = EntId.Invalid;
-				_components[i].Init();
 			}
 		}
 		
@@ -71,6 +70,8 @@ namespace Core.Model
 			
 			_components[index].ID = owner;
 			ComponentIndexByOwner[owner] = (uint) index;
+
+			_components[index].Init();
 		}
 
 		public void RemoveComponent(EntId owner)
@@ -102,7 +103,6 @@ namespace Core.Model
 			for (int i = 0; i < _components.Length; i++)
 			{
 				_components[i].ID = EntId.Invalid;
-				_components[i].Init();
 			}
 		}
 
