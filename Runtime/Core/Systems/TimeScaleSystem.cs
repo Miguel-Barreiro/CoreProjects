@@ -8,8 +8,8 @@ namespace Core.Systems
 {
 	public interface TimeScaleSystem
 	{
-		public void AddTimeScale(Fix percentage, TimeScalerEntity owner);
-		public void RemoveTimeScale(TimeScalerEntity owner);
+		public void AddTimeScale(Fix percentage, EntId owner);
+		public void RemoveTimeScale(EntId owner);
 		public Fix GetCurrentTimeScale();
 		public void ClearTimeScaleModifiers();
 	}
@@ -34,7 +34,7 @@ namespace Core.Systems
 		}
 
 
-		public void AddTimeScale(Fix percentage, TimeScalerEntity owner)
+		public void AddTimeScale(Fix percentage, EntId ownerID)
 		{
 			if (percentage < Fix.Zero)
 			{
@@ -42,10 +42,10 @@ namespace Core.Systems
 				return;
 			}
 			
-			if(TimeScaleSystemModel.scalerByOwners.ContainsKey(owner.ID))
-				TimeScaleSystemModel.scalerByOwners[owner.ID] = percentage;
+			if(TimeScaleSystemModel.scalerByOwners.ContainsKey(ownerID))
+				TimeScaleSystemModel.scalerByOwners[ownerID] = percentage;
 			else
-				TimeScaleSystemModel.scalerByOwners.Add(owner.ID, percentage);
+				TimeScaleSystemModel.scalerByOwners.Add(ownerID, percentage);
 			
 			UpdateCurrentScale();
 		}
@@ -74,11 +74,11 @@ namespace Core.Systems
 			UpdateCurrentScale();
 		}
 
-		public void RemoveTimeScale(TimeScalerEntity owner)
+		public void RemoveTimeScale(EntId ownerID)
 		{
-			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(owner.ID))
+			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(ownerID))
 			{
-				TimeScaleSystemModel.scalerByOwners.Remove(owner.ID);
+				TimeScaleSystemModel.scalerByOwners.Remove(ownerID);
 				UpdateCurrentScale();
 			}
 		}
