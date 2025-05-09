@@ -5,7 +5,7 @@ namespace Core.Model
 {
 	
 	
-	public struct KineticEntityData : IComponentData
+	public struct KineticComponentData : IComponentData
 	{
 		public Vector3 Position;
 		public GameObject Prefab;
@@ -20,5 +20,5 @@ namespace Core.Model
 		}
 	}
 	
-	public interface IKineticEntity : Component<KineticEntityData> { }
+	public interface IKineticComponent : Component<KineticComponentData> { }
 }

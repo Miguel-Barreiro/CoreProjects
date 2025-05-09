@@ -9,17 +9,17 @@ using Zenject;
 namespace Core.View
 {
     
-    public sealed class KineticEntityUpdateViewSystem : OnCreateComponent<KineticEntityData>, 
-                                                        OnDestroyComponent<KineticEntityData>, 
-                                                        UpdateComponents<KineticEntityData>
+    public sealed class KineticEntityUpdateViewSystem : OnCreateComponent<KineticComponentData>, 
+                                                        OnDestroyComponent<KineticComponentData>, 
+                                                        UpdateComponents<KineticComponentData>
     {
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 
-        [Inject] private readonly ComponentContainer<KineticEntityData> KineticEntityComponentContainer = null!;
+        [Inject] private readonly ComponentContainer<KineticComponentData> KineticEntityComponentContainer = null!;
         
         public void OnCreateComponent(EntId newComponentId)
         {
-            ref KineticEntityData newComponent = ref KineticEntityComponentContainer.GetComponent(newComponentId);
+            ref KineticComponentData newComponent = ref KineticEntityComponentContainer.GetComponent(newComponentId);
             if (newComponent.Prefab == null)
             {
                 Debug.LogError($"Prefab not found for entity {newComponent.GetType().Name}({newComponent.ID})");
@@ -46,24 +46,24 @@ namespace Core.View
             ViewEntitiesContainer.Destroy(destroyedComponentId);
         }
 
-        public void UpdateComponents(ComponentContainer<KineticEntityData> componentContainer, float deltaTime)
+        public void UpdateComponents(ComponentContainer<KineticComponentData> componentContainer, float deltaTime)
         {
             
             componentContainer.ResetIterator();
             while (componentContainer.MoveNext())
             {
-                ref KineticEntityData kineticEntityData = ref componentContainer.GetCurrent();
-                EntId entityID = kineticEntityData.ID;
+                ref KineticComponentData kineticComponentData = ref componentContainer.GetCurrent();
+                EntId entityID = kineticComponentData.ID;
                 
                 EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entityID);
                 if (viewAtributes == null || viewAtributes.GameObject== null)
                 {
-                    GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticEntityData.Prefab, entityID);
+                    GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticComponentData.Prefab, entityID);
                     return;
                 }
 
                 GameObject entityGameobject = viewAtributes.GameObject;
-                entityGameobject.transform.position = new Vector3(kineticEntityData.Position.x, kineticEntityData.Position.y, 0);
+                entityGameobject.transform.position = new Vector3(kineticComponentData.Position.x, kineticComponentData.Position.y, 0);
             }
 
         }

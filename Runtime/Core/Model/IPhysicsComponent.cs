@@ -6,12 +6,9 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public interface PhysicsComponent2D : IPositionComponent, Component<PhysicsEntity2DData>
-    {
-        // public EntId ID { get; set; }
-    }
+    public interface IPhysics2DComponent : IPositionComponent, Component<Physics2DComponentData> { }
     
-    public struct PhysicsEntity2DData : IComponentData
+    public struct Physics2DComponentData : IComponentData
     {
         public Vector2 Position;
         public GameObject Prefab;

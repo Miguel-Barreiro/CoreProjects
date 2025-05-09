@@ -7,7 +7,7 @@ using Zenject;
 namespace Core.Core.Model.Data
 {
 
-	public struct NamedEntityData : IComponentData
+	public struct NamedComponentData : IComponentData
 	{
 		public string Name;
 		public EntId ID { get; set; }
@@ -18,8 +18,9 @@ namespace Core.Core.Model.Data
 		}
 	}
 		
-	public interface NamedEntity : Component<NamedEntityData> { }
+	public interface NamedComponent : Component<NamedComponentData> { }
 
+	
 	public interface NamedEntitiesSystem : ISystem
 	{
 		public void RegisterEntity(string name, EntId entityId);
@@ -32,7 +33,7 @@ namespace Core.Core.Model.Data
 		internal Dictionary<EntId, string> NamedEntitiesById = new ();
 	}
 
-	public sealed class NamedEntitiesSystemImplementation : OnDestroyComponent<NamedEntityData>, NamedEntitiesSystem
+	public sealed class NamedEntitiesSystemImplementation : OnDestroyComponent<NamedComponentData>, NamedEntitiesSystem
 	{
 
 		[Inject] private readonly NamedEntitiesSystemModel NamedEntitiesSystemModel = null!;
