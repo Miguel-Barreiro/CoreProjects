@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public interface IPhysicsEntity2D : IPositionEntity, Component<PhysicsEntity2DData>
+    public interface PhysicsComponent2D : IPositionComponent, Component<PhysicsEntity2DData>
     {
         // public EntId ID { get; set; }
     }

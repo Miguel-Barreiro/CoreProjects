@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public struct PositionEntity : IComponentData
+    public struct PositionComponentData : IComponentData
     {
         public Vector2 Position;
 
@@ -15,6 +15,6 @@ namespace Core.Model
         }
     }
     
-    public interface IPositionEntity : Component<PositionEntity> { }
+    public interface IPositionComponent : Component<PositionComponentData> { }
     
 }
