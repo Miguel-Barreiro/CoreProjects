@@ -11,7 +11,7 @@ namespace Core.Model
 
     public interface IEntitiesContainer
     {
-        public T? GetEntity<T>(EntId id) where T : Entity;
+        public T? GetEntity<T>(EntId id) where T : class, IEntity;
         public Entity? GetEntity(EntId id);
         public Entity? GetNewEntity(EntId id);
         public IEnumerable<TEntity> GetAllEntitiesByType<TEntity>() where TEntity : class, IEntity;
@@ -74,7 +74,7 @@ namespace Core.Model
 
         private EntitiesContainer(){ }
         
-        public T? GetEntity<T>(EntId id) where T:Entity
+        public T? GetEntity<T>(EntId id) where T : class, IEntity
         {
             return entitiesByID.GetValueOrDefault(id) as T;
         }
