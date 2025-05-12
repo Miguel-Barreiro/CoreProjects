@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public interface IPhysics2DComponent : IPositionComponent, Component<Physics2DComponentData> { }
+    public interface IPhysics2DComponent : Component<Physics2DComponentData> { }
     
     public struct Physics2DComponentData : IComponentData
     {
