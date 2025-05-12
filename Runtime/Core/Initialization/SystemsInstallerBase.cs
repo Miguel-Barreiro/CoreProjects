@@ -15,7 +15,7 @@ namespace Core.Initialization
     public abstract class SystemsInstallerBase
 	{
         protected abstract void InstallSystems();
-        public abstract void ResetComponentContainers(DataContainersController dataContainersController);
+        public abstract void ResetComponentContainers(DataContainersController dataController);
 
         protected readonly DiContainer Container;
         internal DiContainer ContainerInstance => Container;

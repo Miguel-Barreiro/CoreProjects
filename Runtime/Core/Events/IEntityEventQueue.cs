@@ -2,11 +2,21 @@ using System;
 using System.Collections.Generic;
 using Core.Model;
 using Core.Utils.CachedDataStructures;
-using Zenject;
+using UnityEngine;
 
 namespace Core.Events
 {
-	public interface EntityEventQueue <TEntityEvent>
+
+	public static class EntityEventQueue
+	{
+		public static TEntityEvent Execute<TEntityEvent>(EntId entId)
+			where TEntityEvent : EntityEvent<TEntityEvent>, new()
+		{
+			return EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.Execute(entId);
+		}
+	}
+
+	public interface IEntityEventQueue <TEntityEvent>
 		where TEntityEvent : EntityEvent<TEntityEvent>, new()
 	{
 		public delegate void EntityEventListener(TEntityEvent entityEvent);
@@ -21,6 +31,7 @@ namespace Core.Events
 
 		public TEntityEvent Execute(EntId targetEntId);
 		
+		
 	}
 
 	public abstract class BaseEntityEventQueueImplementation
@@ -34,13 +45,13 @@ namespace Core.Events
 	}
 
 	public sealed class EntityEventQueueImplementation<TEntityEvent> : BaseEntityEventQueueImplementation, 
-																		EntityEventQueue<TEntityEvent>
+																		IEntityEventQueue<TEntityEvent>
 		where TEntityEvent : EntityEvent<TEntityEvent>, new()
 	{
 		// [Inject] private readonly ObjectBuilder ObjectBuilder = null!;
 		
-		private readonly List<EntityEventQueue<TEntityEvent>.EntityEventListener> AllEntityEventListeners = new();
-		private readonly Dictionary<EntId, List<EntityEventQueue<TEntityEvent>.EntityEventListener>> EntityEventListeners = new();
+		private readonly List<IEntityEventQueue<TEntityEvent>.EntityEventListener> AllEntityEventListeners = new();
+		private readonly Dictionary<EntId, List<IEntityEventQueue<TEntityEvent>.EntityEventListener>> EntityEventListeners = new();
 		private readonly List<TEntityEvent> EntityEvents = new();
 		
 		
@@ -53,9 +64,9 @@ namespace Core.Events
 
 		
 		
-		public void AddEntityEventListener(EntId targetEntId, EntityEventQueue<TEntityEvent>.EntityEventListener callback)
+		public void AddEntityEventListener(EntId targetEntId, IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
 		{
-			if (!EntityEventListeners.TryGetValue(targetEntId, out List<EntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
+			if (!EntityEventListeners.TryGetValue(targetEntId, out List<IEntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
 			{
 				eventListeners = new();
 				EntityEventListeners.Add(targetEntId, eventListeners);
@@ -63,19 +74,19 @@ namespace Core.Events
 			eventListeners.Add(callback);
 		}
 
-		public void AddAllEntitiesEventListener(EntityEventQueue<TEntityEvent>.EntityEventListener callback)
+		public void AddAllEntitiesEventListener(IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
 		{
 			AllEntityEventListeners.Add(callback);
 		}
 
-		public void RemoveAllEntitiesEventListener(EntityEventQueue<TEntityEvent>.EntityEventListener callback)
+		public void RemoveAllEntitiesEventListener(IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
 		{
 			AllEntityEventListeners.Remove(callback);
 		}
 
-		public void RemoveEntityEventListener(EntId targetEntId, EntityEventQueue<TEntityEvent>.EntityEventListener callback)
+		public void RemoveEntityEventListener(EntId targetEntId, IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
 		{
-			if (!EntityEventListeners.TryGetValue(targetEntId, out List<EntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
+			if (!EntityEventListeners.TryGetValue(targetEntId, out List<IEntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
 				return;
 			eventListeners.Remove(callback);
 		}
@@ -104,13 +115,13 @@ namespace Core.Events
 			foreach (TEntityEvent entityEvent in toProcess)
 			{
 				if (EntityEventListeners.TryGetValue(entityEvent.EntityID, 
-													out List<EntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
+													out List<IEntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
 				{
-					foreach (EntityEventQueue<TEntityEvent>.EntityEventListener eventListener in eventListeners)
+					foreach (IEntityEventQueue<TEntityEvent>.EntityEventListener eventListener in eventListeners)
 						eventListener.Invoke(entityEvent);
 				}
 
-				foreach (EntityEventQueue<TEntityEvent>.EntityEventListener eventListener in AllEntityEventListeners)
+				foreach (IEntityEventQueue<TEntityEvent>.EntityEventListener eventListener in AllEntityEventListeners)
 					eventListener.Invoke(entityEvent);
 				
 				entityEvent.Dispose();
@@ -123,7 +134,16 @@ namespace Core.Events
 	{
 		private Dictionary<Type, BaseEntityEventQueueImplementation> _entityEventQueuesByEventType = new();
 
-		internal EntityEventQueuesContainer()
+		private static EntityEventQueuesContainer _instance = null!;
+		internal static EntityEventQueuesContainer Get()
+		{
+			if(_instance == null)
+				_instance = new EntityEventQueuesContainer();
+
+			return _instance;
+		}
+
+		private EntityEventQueuesContainer()
 		{
 			IEnumerable<Type> allEntityEventTypes = TypeCache.Get().GetAllEntityEventTypes();
 			
@@ -173,6 +193,20 @@ namespace Core.Events
 					}
 				}
 			}
+		}
+
+		public EntityEventQueueImplementation<TEntityEvent> GetQueue<TEntityEvent>()
+			where TEntityEvent : EntityEvent<TEntityEvent>, new()
+		{
+			Type entityEventType = typeof(TEntityEvent);
+			if(!_entityEventQueuesByEventType.TryGetValue(entityEventType, 
+														out BaseEntityEventQueueImplementation? entityEventQueue))
+			{
+				Debug.LogError($"No entity event queue found for type {entityEventType.Name}"); 
+				return null;
+			}
+			
+			return (EntityEventQueueImplementation<TEntityEvent>)entityEventQueue;
 		}
 	}
 	

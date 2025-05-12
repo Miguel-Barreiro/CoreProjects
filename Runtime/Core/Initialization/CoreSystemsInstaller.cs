@@ -40,12 +40,12 @@ namespace Core.Initialization
 
         private void BuildEntityEventManagers()
         {
-            EntityEventQueuesContainer entityEventQueuesContainer = new EntityEventQueuesContainer();
+            EntityEventQueuesContainer entityEventQueuesContainer = EntityEventQueuesContainer.Get();
             BindInstance(entityEventQueuesContainer);
             
             foreach ((Type entityEventType,BaseEntityEventQueueImplementation queue) in entityEventQueuesContainer.GetAllEntityEventQueues())
             {
-                Type queueType = typeof(EntityEventQueue<>).MakeGenericType(entityEventType);
+                Type queueType = typeof(IEntityEventQueue<>).MakeGenericType(entityEventType);
                 BindInstanceByDynamicType(queue, queueType);
             }
             
