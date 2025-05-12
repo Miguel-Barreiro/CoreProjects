@@ -6,11 +6,10 @@ using UnityEngine;
 
 namespace Core.Model
 {
-    public interface IPhysics2DComponent : Component<Physics2DComponentData> { }
+    public interface IPhysics2DComponent : IPositionComponent, Component<Physics2DComponentData> { }
     
     public struct Physics2DComponentData : IComponentData
     {
-        public Vector2 Position;
         public GameObject Prefab;
         public Rigidbody2D Rigidbody2D;
         public EntId ID { get; set; }
@@ -19,7 +18,7 @@ namespace Core.Model
         {
             Prefab = null;
             Rigidbody2D = null;
-            Position = Vector2.zero;
+            // Position = Vector2.zero;
         }
     }
 

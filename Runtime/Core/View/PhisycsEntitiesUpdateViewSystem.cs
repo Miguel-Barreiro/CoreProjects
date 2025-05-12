@@ -19,6 +19,7 @@ namespace Core.View
 	{
 		[Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 		[Inject] private readonly ComponentContainer<Physics2DComponentData> ComponentContainer = null!;
+		[Inject] private readonly ComponentContainer<PositionComponentData> PositionComponentContainer = null!;
 		
 		public void OnCreateComponent(EntId newComponentId)
 		{
@@ -51,8 +52,10 @@ namespace Core.View
 			while (componentsContainer.MoveNext())
 			{
 				ref Physics2DComponentData component = ref componentsContainer.GetCurrent();
-
-				EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(component.ID);
+				EntId entityID = component.ID;
+				ref PositionComponentData positionComponent = ref PositionComponentContainer.GetComponent(entityID);
+				
+				EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entityID);
 				if (viewAtributes == null || viewAtributes.GameObject== null)
 				{
 					Spawn(ref component);
@@ -64,10 +67,10 @@ namespace Core.View
 				switch (component.Rigidbody2D.bodyType)
 				{
 					case RigidbodyType2D.Dynamic:
-						component.Position = entityGameobject.transform.position;
+						positionComponent.Position = entityGameobject.transform.position;
 						break;
 					case RigidbodyType2D.Kinematic:
-						entityGameobject.transform.position = new Vector3(component.Position.x, component.Position.y, 0);
+						entityGameobject.transform.position = positionComponent.Position;
 						break;
 					case RigidbodyType2D.Static:
 						break;
@@ -84,8 +87,9 @@ namespace Core.View
 				Debug.LogError($"no Gameobject was able to be created for physics entity with prefab {newComponent.Prefab.name}");
 				return;
 			}
-
-			newGameObject.transform.position = new Vector3(newComponent.Position.x, newComponent.Position.y, 0);
+			ref PositionComponentData positionComponent = ref PositionComponentContainer.GetComponent(newComponent.ID);
+			
+			newGameObject.transform.position = positionComponent.Position;
 
 			Rigidbody2D rigidbody2D = newGameObject.GetComponent<Rigidbody2D>();
 			if(rigidbody2D == null)

@@ -16,10 +16,13 @@ namespace Core.View
         [Inject] private readonly ViewEntitiesContainer ViewEntitiesContainer = null!;
 
         [Inject] private readonly ComponentContainer<KineticComponentData> KineticEntityComponentContainer = null!;
+        [Inject] private readonly ComponentContainer<PositionComponentData> PositionComponentContainer = null!;
         
         public void OnCreateComponent(EntId newComponentId)
         {
             ref KineticComponentData newComponent = ref KineticEntityComponentContainer.GetComponent(newComponentId);
+            ref PositionComponentData positionComponentData = ref PositionComponentContainer.GetComponent(newComponentId);
+            
             if (newComponent.Prefab == null)
             {
                 Debug.LogError($"Prefab not found for entity {newComponent.GetType().Name}({newComponent.ID})");
@@ -28,9 +31,7 @@ namespace Core.View
 
             GameObject? newGameObject = ViewEntitiesContainer.Spawn(newComponent.Prefab, newComponent.ID);
             if (newGameObject != null)
-            {
-                newGameObject.transform.position = new Vector3(newComponent.Position.x, newComponent.Position.y, 0);
-            }
+                newGameObject.transform.position = positionComponentData.Position;
 
         }
 
@@ -48,22 +49,24 @@ namespace Core.View
 
         public void UpdateComponents(ComponentContainer<KineticComponentData> componentContainer, float deltaTime)
         {
-            
             componentContainer.ResetIterator();
             while (componentContainer.MoveNext())
             {
                 ref KineticComponentData kineticComponentData = ref componentContainer.GetCurrent();
                 EntId entityID = kineticComponentData.ID;
+                ref PositionComponentData positionComponentData = ref PositionComponentContainer.GetComponent(entityID);
                 
                 EntityViewAtributes? viewAtributes = ViewEntitiesContainer.GetEntityViewAtributes(entityID);
                 if (viewAtributes == null || viewAtributes.GameObject== null)
                 {
                     GameObject? newGameObject = ViewEntitiesContainer.Spawn(kineticComponentData.Prefab, entityID);
+                    if (newGameObject != null)
+                        newGameObject.transform.position = positionComponentData.Position;
                     return;
                 }
 
                 GameObject entityGameobject = viewAtributes.GameObject;
-                entityGameobject.transform.position = new Vector3(kineticComponentData.Position.x, kineticComponentData.Position.y, 0);
+                entityGameobject.transform.position = positionComponentData.Position;
             }
 
         }
