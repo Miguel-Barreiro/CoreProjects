@@ -1,4 +1,5 @@
 using Core.Initialization;
+using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils;
 using Core.Zenject.Source.Main;
@@ -11,12 +12,19 @@ namespace Core.Editor
 	public abstract class UnitTest : ScriptableObject
 	{
 		protected abstract void InstallTestSystems(IUnitTestInstaller installer);
+		protected abstract void ResetComponentContainers(DataContainersController dataController);
 		
 		protected DiContainer Container => container;
 		private DiContainer container;
 
 		
 		[Inject] private readonly SystemsController SystemsController = null!;
+
+
+		internal void ResetComponentContainersInternal(DataContainersController dataController)
+		{
+			ResetComponentContainers(dataController);
+		}
 
 		internal void AddUserSystems(CoreSystemsForTestsInstaller installer)
 		{

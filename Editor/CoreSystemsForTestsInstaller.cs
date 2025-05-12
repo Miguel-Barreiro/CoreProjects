@@ -24,7 +24,10 @@ namespace Core.Editor
 			SetSystemsControllerForTests();
 		}
 
-		public override void ResetComponentContainers(DataContainersController dataContainersController) { }
+		public override void ResetComponentContainers(DataContainersController dataContainersController)
+		{
+			Test.ResetComponentContainersInternal(dataContainersController);
+		}
 		
 		private void SetSystemsControllerForTests()
 		{

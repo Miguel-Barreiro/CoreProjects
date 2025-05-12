@@ -21,6 +21,7 @@ namespace Core.Model
         IEnumerable<Type> GetAllEventTypes();
         IEnumerable<TypeCache.EventAttributes> GetAllEventAttributes();
         TypeCache.EventAttributes? GetEventAttributes(Type eventType);
+        IEnumerable<Type> GetAllEntityEventTypes();
         IEnumerable<Type> GetComponentsOf(Type entityType);
     }
     
@@ -33,7 +34,8 @@ namespace Core.Model
         private readonly List<Type> componentTypes = new ();
         private readonly List<Type> componentDataTypes = new ();
         private readonly List<Type> eventTypes = new();
-
+        private readonly List<Type> entityEventTypes = new();
+        
         private readonly Dictionary<Type, Type> componentDataTypeByComponentType = new();
         
         private readonly Dictionary<Type,EventAttributes> EventAttributesByType = new();
@@ -142,6 +144,14 @@ namespace Core.Model
                 yield return eventType;
             }
         }
+        
+        public IEnumerable<Type> GetAllEntityEventTypes()
+        {
+            foreach (Type eventType in entityEventTypes)
+            {
+                yield return eventType;
+            }
+        }
 
         public IEnumerable<Type> GetAllEntityTypes()
         {
@@ -223,6 +233,17 @@ namespace Core.Model
             foreach (Type eventType in eventTypes)
             {
                 EventAttributesByType.Add(eventType, new EventAttributes(eventType));
+            }
+            
+            
+            IEnumerable<Type> allEntityEventTypes = ReflectionUtils.GetAllTypesOf<BaseEntityEvent>();
+            foreach (Type potentialEntityEventType in allEntityEventTypes)
+            {
+                if (potentialEntityEventType.IsGenericType)
+                {
+                    continue;
+                }
+                entityEventTypes.Add(potentialEntityEventType);
             }
         }
 

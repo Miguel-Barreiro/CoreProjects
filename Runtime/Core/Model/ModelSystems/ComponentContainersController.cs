@@ -8,7 +8,7 @@ namespace Core.Model.ModelSystems
 	
 	public interface DataContainersController
 	{
-		public void ResetContainer<T>(int maxNumber) where T : struct, IComponentData;
+		public void ResizeComponentsContainer<T>(int maxNumber) where T : struct, IComponentData;
 	}
 
 	public class DataContainersControllerImplementation : DataContainersController
@@ -36,7 +36,7 @@ namespace Core.Model.ModelSystems
 		
 		
 
-		public void ResetContainer<T>(int maxNumber) 
+		public void ResizeComponentsContainer<T>(int maxNumber) 
 			where T : struct, IComponentData
 		{
 			Type componentType = typeof(T);

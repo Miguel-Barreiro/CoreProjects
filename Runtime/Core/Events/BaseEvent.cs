@@ -29,7 +29,7 @@ namespace Core.Events
 
 		[Inject] private readonly SystemsContainer SystemsContainer = null!; 
 		
-		public static readonly StaticMemoryPool<TEvent> Pool =
+		internal static readonly StaticMemoryPool<TEvent> Pool =
 			new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned);
 
 		protected virtual void OnSpawned() { }

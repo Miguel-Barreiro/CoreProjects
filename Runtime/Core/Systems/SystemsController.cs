@@ -26,6 +26,7 @@ namespace Core.Systems
         [Inject] private readonly EventQueue eventQueue = null!;
         [Inject] private readonly ITimerSystemImplementationInternal ITimerSystem = null!;
         [Inject] private readonly DataContainersControllerImplementation DataContainersController = null!;
+        [Inject] private readonly EntityEventQueuesContainer EntityEventQueuesContainer = null!;
 
         public event Action OnEndFrame;
         
@@ -115,7 +116,7 @@ namespace Core.Systems
             {
                 Debug.LogError("Error in a system: " + e);
             }
-#endif                
+#endif
             
             ExecuteEventsAndUpdates();
             EntitiesContainer.ProcessAllFlushedEntities();
@@ -134,6 +135,8 @@ namespace Core.Systems
             {
                 
                 ProcessAllEntitiesEvents();
+                
+                EntityEventQueuesContainer.ExecuteAllEntityEvents();
                 
                 bool hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
                 int loopGard = 0;
@@ -178,6 +181,8 @@ namespace Core.Systems
                                 systemCache.Call(ARGUMENT_SINGLE);
                             foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
                                 systemCache.Call(ARGUMENT_SINGLE);
+                            
+                            EntityEventQueuesContainer.RemoveEntity(destroyedEntityID);
                         }
                     }
 
@@ -232,6 +237,8 @@ namespace Core.Systems
                                 systemCache.Call(ARGUMENT_SINGLE);
                             foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
                                 systemCache.Call(ARGUMENT_SINGLE);
+                            
+                            EntityEventQueuesContainer.RemoveEntity(destroyedEntityID);
                         }
                     }
 

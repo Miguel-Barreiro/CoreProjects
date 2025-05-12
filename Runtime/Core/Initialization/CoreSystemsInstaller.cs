@@ -28,12 +28,27 @@ namespace Core.Initialization
             BuildDataComponentContainers();
             
             BuildEventManager();
+            BuildEntityEventManagers();
+            
             BuildGameLoopSystem();
             BuildEntityManager();
 
             BuildTimerSystem();
             BuildStatsSystem();
 
+        }
+
+        private void BuildEntityEventManagers()
+        {
+            EntityEventQueuesContainer entityEventQueuesContainer = new EntityEventQueuesContainer();
+            BindInstance(entityEventQueuesContainer);
+            
+            foreach ((Type entityEventType,BaseEntityEventQueueImplementation queue) in entityEventQueuesContainer.GetAllEntityEventQueues())
+            {
+                Type queueType = typeof(EntityEventQueue<>).MakeGenericType(entityEventType);
+                BindInstanceByDynamicType(queue, queueType);
+            }
+            
         }
 
         private void BuildDataComponentContainers()
