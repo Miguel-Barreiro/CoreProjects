@@ -1,4 +1,5 @@
 ﻿using System;
+using Core.Model.ModelSystems;
 
 namespace Core.Model
 {
@@ -20,6 +21,12 @@ namespace Core.Model
             EntitiesContainer.OnEntityCreated(this);
         }
     
+        protected ref TComponentData GetComponent<TComponentData>() where TComponentData : struct, IComponentData
+        {
+            object componentContainer = DataContainersControllerImplementation.GetInstance().GetComponentContainer(typeof(TComponentData));
+            return ref ((ComponentContainer<TComponentData>) componentContainer).GetComponent(ID);
+        }
+        
         public void Destroy()
         {
             EntitiesContainer.DestroyEntity(this.ID);

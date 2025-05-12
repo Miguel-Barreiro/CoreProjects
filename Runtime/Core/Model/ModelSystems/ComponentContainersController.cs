@@ -64,7 +64,8 @@ namespace Core.Model.ModelSystems
 		}
 		
 		
-
+		
+		
 		internal object GetComponentContainer(Type componentDataType)
 		{
 			if (!ContainersByComponentType.TryGetValue(componentDataType, out object container))
