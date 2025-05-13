@@ -184,16 +184,26 @@ namespace Core.Model
 
         public IEnumerable<Type> GetComponentDatasOfEntityType(Type entityType)
         {
-            if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
+            if(!componentDatasByEntityType.TryGetValue(entityType, out List<Type> componentDataTypes))
             {
-                // Debug.LogError($"entityType {entityType} not found in cache");
+                Debug.LogError($"entityType {entityType} not found in cache");
                 yield break;
             }
             
-            foreach (Type componentType in componentTypes)
-            {
-                yield return componentDataTypeByComponentType[componentType];
-            }
+            foreach (Type componentDataType in componentDataTypes)
+                yield return componentDataType;
+            
+            
+            // if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
+            // {
+            //     // Debug.LogError($"entityType {entityType} not found in cache");
+            //     yield break;
+            // }
+            //
+            // foreach (Type componentType in componentTypes)
+            // {
+            //     yield return componentDataTypeByComponentType[componentType];
+            // }
         }
 
         
