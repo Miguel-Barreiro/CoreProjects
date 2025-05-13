@@ -23,6 +23,8 @@ namespace Core.Model
 		public bool MoveNext();
 		public ref T GetCurrent();
 		public void ResetIterator();
+
+		public int Count { get; }
 	}
 
 	
@@ -57,7 +59,7 @@ namespace Core.Model
 		{
 			if (ComponentIndexByOwner.ContainsKey(owner))
 			{
-				Debug.LogError($"Component({{typeof(T)}}) already exists for owner {owner}");
+				Debug.LogError($"Component({typeof(T)}) already exists for owner {owner}");
 				return;
 			}
 
@@ -87,7 +89,7 @@ namespace Core.Model
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 			{
-				Debug.LogError($"Component({{typeof(T)}}) not found for owner {owner}");
+				Debug.LogError($"Component({typeof(T)}) not found for owner {owner}");
 				return ref Invalid;
 			}
 			
@@ -135,12 +137,11 @@ namespace Core.Model
 
 			return ref _components[_iteratorIndex];
 		}
-
 		
 		public void ResetIterator()
 			=> _iteratorIndex = -1;
 
-
+		public int Count => ComponentIndexByOwner.Count;
 	}
 
 }
