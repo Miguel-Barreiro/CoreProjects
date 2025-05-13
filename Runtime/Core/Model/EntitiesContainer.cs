@@ -251,6 +251,15 @@ namespace Core.Model
                 if (entitiesByComponentType.TryGetValue(componentType, out List<EntId> entities))
                     entities.Add(entity.ID);
             }
+            //
+            // DataContainersControllerImplementation dataContainersController = DataContainersControllerImplementation.GetInstance();
+            // IEnumerable<Type> componentDatasType = TypeCache.Get().GetComponentDatasOfEntityType(entity.GetType());
+            // foreach (Type componentDataType in componentDatasType)
+            // {
+            //     object componentContainer = dataContainersController.GetComponentContainer(componentDataType);
+            //     ((IGenericComponentContainer)componentContainer).UpgradeNewComponent(entity.ID);
+            // }
+
         }
         
         private void RemoveEntityInternal(Entity entity)

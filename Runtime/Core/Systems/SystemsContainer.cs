@@ -30,7 +30,7 @@ namespace Core.Systems
         }
         
 
-        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllEntitySystemsByComponentDataType()
+        internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllEntitySystemsByComponentDataType()
         {
             return EntitySystemsContainer.GetAllComponentSystemsByComponentDataType();
         }

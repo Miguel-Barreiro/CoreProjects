@@ -27,15 +27,49 @@ namespace Core.Model.ModelSystems
 
     public class EntitySystemsContainer
     {
+
+        private readonly List<Type> EarlyComponentData= new List<Type>();
+        private readonly List<Type> DefaultComponentData= new List<Type>();
+        private readonly List<Type> LateComponentData= new List<Type>();
         
         private readonly Dictionary<Type, ComponentSystemListenerGroup> SystemsCacheByComponentDataType = new ();
         private readonly List<object> systems = new();
 
 
         internal EntitySystemsContainer()
-        { 
+        {
             foreach (var componentDataType in TypeCache.Get().GetAllComponentDataTypes())
+            {
                 SystemsCacheByComponentDataType.Add(componentDataType, new ComponentSystemListenerGroup());
+    
+                Attribute[] attributes = Attribute.GetCustomAttributes(componentDataType);
+                ComponentDataPropertiesAttribute systemProperties = GetAttributesOfType<ComponentDataPropertiesAttribute>(attributes);
+                SystemPriority systemPriority = systemProperties?.Priority ?? SystemPriority.Default;
+
+                List<Type> target = systemPriority switch
+                {
+                    SystemPriority.Early => EarlyComponentData,
+                    SystemPriority.Default => DefaultComponentData,
+                    SystemPriority.Late => LateComponentData,
+                    _ => DefaultComponentData
+                };
+                target.Add(componentDataType);
+            }
+            
+            T GetAttributesOfType<T>(Attribute[] attributes) where T : Attribute
+            {
+                foreach (Attribute attribute in attributes)
+                {
+                    if (attribute.GetType() == typeof(T))
+                    {
+                        return attribute as T;
+                    }
+                }
+
+                return default;
+            }
+
+
         }
         
         
@@ -112,9 +146,26 @@ namespace Core.Model.ModelSystems
         //     return systems;
         // }
 
-        internal IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> GetAllComponentSystemsByComponentDataType()
+        internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentDataType()
         {
-            return SystemsCacheByComponentDataType.AsEnumerable();
+            foreach (Type componentData in EarlyComponentData)
+            {
+                yield return (componentData, SystemsCacheByComponentDataType[componentData]);
+            }
+            foreach (Type componentData in DefaultComponentData)
+            {
+                yield return (componentData, SystemsCacheByComponentDataType[componentData]);
+            }
+            foreach (Type componentData in LateComponentData)
+            {
+                yield return (componentData, SystemsCacheByComponentDataType[componentData]);
+            }
+            //
+            // foreach (var kvp in SystemsCacheByComponentDataType)
+            // {
+            //     yield return kvp;
+            // }
+            // return SystemsCacheByComponentDataType.AsEnumerable();
         }
 
         internal void AddSystem(object system) 

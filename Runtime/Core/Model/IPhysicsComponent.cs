@@ -1,4 +1,5 @@
 ﻿using Core.Model.ModelSystems;
+using Core.Systems;
 using UnityEngine;
 
 #nullable enable
@@ -10,6 +11,7 @@ namespace Core.Model
                                            IPositionComponent 
     { }
     
+    [ComponentDataProperties(Priority = SystemPriority.Early)]
     public struct Physics2DComponentData : IComponentData
     {
         public GameObject Prefab;

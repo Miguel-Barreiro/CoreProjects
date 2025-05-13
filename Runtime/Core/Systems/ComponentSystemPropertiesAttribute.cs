@@ -20,6 +20,14 @@ namespace Core.Systems
 		public SystemPriority Priority { get; set; } = SystemPriority.Default;
 	}
 	
+	[AttributeUsage(AttributeTargets.Struct)]
+	public class ComponentDataPropertiesAttribute : Attribute
+	{
+		public SystemPriority Priority { get; set; } = SystemPriority.Default;
+	}
+	
+	
+	
 	public enum SystemPriority
 	{
 		Early = 0, 

@@ -164,7 +164,7 @@ namespace Core.Systems
                 
                 // then we call the systems by component type
                 
-                IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
+                IEnumerable<(Type componentDataType, ComponentSystemListenerGroup listenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
                 foreach ((Type componentDataType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
                 {
 
@@ -222,7 +222,7 @@ namespace Core.Systems
                 
                 // then we call the systems by component type
                 
-                IEnumerable<KeyValuePair<Type, ComponentSystemListenerGroup>> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
+                IEnumerable<(Type componentDataType, ComponentSystemListenerGroup listenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
                 foreach ((Type componentDataType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
                 {
                     
@@ -257,6 +257,8 @@ namespace Core.Systems
                     }
                 }
             }
+            
+            
             
             void GroupNewAndDestroyEntitiesByComponent()
             {
