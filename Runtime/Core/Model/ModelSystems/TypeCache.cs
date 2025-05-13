@@ -257,7 +257,13 @@ namespace Core.Model
                 componentsByEntityType.Add(entityType, cachedComponentTypeList);
                 
                 IEnumerable<Type> entityComponentTypes = GetEntityComponentTypes(entityType);
-                cachedComponentTypeList.AddRange(entityComponentTypes);
+                foreach (Type entityComponentType in entityComponentTypes)
+                {
+                    if(cachedComponentTypeList.Contains(entityComponentType))
+                        continue;
+                    
+                    cachedComponentTypeList.Add(entityComponentType);
+                }
             }
             
             if(!componentDatasByEntityType.ContainsKey(entityType))
@@ -276,7 +282,6 @@ namespace Core.Model
                         continue;
                     }
 
-
                     if (componentDataType != null && !cachedComponentDataTypeList.Contains(componentDataType))
                         cachedComponentDataTypeList.Add(componentDataType);
                 }
@@ -290,21 +295,45 @@ namespace Core.Model
             static IEnumerable<Type> GetEntityComponentTypes(Type entityType)
             {
                 using CachedList<Type> result = ListCache<Type>.Get();
-                
-                IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
-                foreach (Type implementedInterface in implementedInterfaces)
-                {
 
-                    bool isActualComponentType = implementedInterface.IsGenericType && implementedInterface.GetGenericTypeDefinition() == typeof(Component<>);
-                    if ( !isActualComponentType && implementedInterface.IsAssignableToGenericWithArgType(typeof(Component<>)) &&
-                        !result.Contains(implementedInterface))
-                        result.Add(implementedInterface);
-                }
+                GetEntityComponentTypesRec(entityType, result);
+                // IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
+                // foreach (Type implementedInterface in implementedInterfaces)
+                // {
+                //
+                //     bool isActualComponentType = implementedInterface.IsGenericType && 
+                //                                  implementedInterface.GetGenericTypeDefinition() == typeof(Component<>);
+                //     
+                //     if ( !isActualComponentType && 
+                //          implementedInterface.IsAssignableToGenericWithArgType(typeof(Component<>)) &&
+                //         !result.Contains(implementedInterface))
+                //         result.Add(implementedInterface);
+                // }
 
                 foreach (Type implementedComponent in result)
                 {
                     yield return implementedComponent;
                 }
+                
+                static void GetEntityComponentTypesRec(Type type, CachedList<Type> result)
+                {
+                    IEnumerable<Type> implementedInterfaces = type.GetImplementedInterfaces();
+                    foreach (Type implementedInterface in implementedInterfaces)
+                    {
+
+                        GetEntityComponentTypesRec(implementedInterface, result);
+
+                        bool isActualComponentType = implementedInterface.IsGenericType && 
+                                                     implementedInterface.GetGenericTypeDefinition() == typeof(Component<>);
+                    
+                        if ( !isActualComponentType && 
+                             implementedInterface.IsAssignableToGenericWithArgType(typeof(Component<>)) &&
+                             !result.Contains(implementedInterface))
+                            result.Add(implementedInterface);
+                    }
+                    
+                }
+
             }
         }
         
