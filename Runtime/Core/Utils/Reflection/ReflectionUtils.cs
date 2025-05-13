@@ -112,7 +112,7 @@ namespace Core.Utils.Reflection
 
             Type parentType = givenType.BaseType;
             if (parentType == null) return null;
-
+            
             return GetFirstGenericArgumentTypeDefinition(parentType, genericType);
         }
         

@@ -57,7 +57,7 @@ namespace Core.Model
 		{
 			if (ComponentIndexByOwner.ContainsKey(owner))
 			{
-				Debug.LogError($"Component already exists for owner {owner}");
+				Debug.LogError($"Component({{typeof(T)}}) already exists for owner {owner}");
 				return;
 			}
 
@@ -87,7 +87,7 @@ namespace Core.Model
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 			{
-				Debug.LogError($"Component not found for owner {owner}");
+				Debug.LogError($"Component({{typeof(T)}}) not found for owner {owner}");
 				return ref Invalid;
 			}
 			

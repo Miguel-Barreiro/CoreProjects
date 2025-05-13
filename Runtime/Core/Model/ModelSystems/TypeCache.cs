@@ -92,7 +92,7 @@ namespace Core.Model
 
             foreach (Type componentType in componentTypes)
             {
-                Type componentDataType = componentType.GetFirstGenericArgumentTypeDefinition(typeof(Component<>));
+                Type? componentDataType = GetComponentDataFromType(componentType);
                 if (componentDataType == null)
                 {
 #if UNITY_EDITOR
@@ -111,6 +111,56 @@ namespace Core.Model
                 if (!componentDataTypeByComponentType.ContainsKey(componentType))
                     componentDataTypeByComponentType.Add(componentType, componentDataType);
             }
+            
+            
+            Type? GetComponentDataFromType(Type componentType)
+            {
+                Type genericType = typeof(Component<>);
+                if (componentType.IsGenericType && componentType.GetGenericTypeDefinition() == genericType)
+                {
+                    Type[] genericArguments = componentType.GetGenericArguments();
+                    if (genericArguments.Length > 0)
+                        return genericArguments[0];
+                    else
+                        // If the generic type has no arguments, return null
+                        return null;
+                }
+                
+                using CachedList<Type> baseInterfaces = ListCache<Type>.Get();
+                GetBaseOnlyInterfaces(componentType, baseInterfaces);
+                
+                foreach (Type baseInterface in baseInterfaces)
+                {
+                    if (baseInterface.IsGenericType && baseInterface.GetGenericTypeDefinition() == genericType)
+                    {
+                        Type[] genericArguments = baseInterface.GetGenericArguments();
+                        if (genericArguments.Length > 0)
+                            return genericArguments[0];
+                    }
+                }
+
+                Type? parentType = componentType.BaseType;
+                if (parentType == null) return null;
+            
+                return GetComponentDataFromType(parentType);
+            }
+
+            //naive implementation that does not take into account multiple inheritance but works for our case
+            void GetBaseOnlyInterfaces(Type type, List<Type> result)
+            {
+                Type[] potentialBaseInterfaces = type.GetInterfaces();
+                result.AddRange(potentialBaseInterfaces);
+                
+                foreach (Type potentialBaseInterface in potentialBaseInterfaces)
+                {
+                    Type[] nonBaseInterfaces = potentialBaseInterface.GetInterfaces();
+
+                    foreach (Type nonBaseInterface in nonBaseInterfaces)
+                        result.Remove(nonBaseInterface);
+                }
+            }
+
+
         }
 
 
