@@ -20,5 +20,5 @@ namespace Core.Model
 		}
 	}
 	
-	public interface IKineticComponent : Component<KineticComponentData> { }
+	public interface IKineticComponent : IPositionComponent, Component<KineticComponentData> { }
 }
