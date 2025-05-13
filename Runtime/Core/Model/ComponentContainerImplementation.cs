@@ -70,7 +70,7 @@ namespace Core.Model
 			// int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
 			if (_topEmptyIndex >= _components.Length)
 			{
-				Debug.LogError($"No available space for new component({typeof(T)})");
+				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{_topEmptyIndex}/{_components.Length}] ");
 				return;
 			}
 			
