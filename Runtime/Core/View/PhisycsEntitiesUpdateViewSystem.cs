@@ -8,7 +8,6 @@ using Zenject;
 
 namespace Core.View
 {
-	// [OnDestroyProperties(LifetimePriority = SystemPriority.Early, UpdatePriority = SystemPriority.Early)]
 	[OnDestroyComponentProperties(Priority = SystemPriority.Late)]
 	[UpdateComponentProperties(Priority = SystemPriority.Early)]
 	public sealed class PhisycsEntitiesUpdateViewSystem: ISystem, 
@@ -48,9 +47,6 @@ namespace Core.View
 
 		public void UpdateComponents(ComponentContainer<Physics2DComponentData> componentsContainer, float deltaTime)
 		{
-			
-			Debug.Log($"PhisycsEntitiesUpdateViewSystem: update {componentsContainer.Count}	 components"); 
-			
 			componentsContainer.ResetIterator();
 			while (componentsContainer.MoveNext())
 			{
