@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Core.Systems;
 using Core.Utils.Reflection;
+using UnityEngine;
 
 namespace Core.Model.ModelSystems.ComponentSystems
 {
@@ -55,7 +56,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
 #if !UNITY_EDITOR
             } catch (Exception e)
             {
-                Debug.LogError($"Error in a componentSystem({system.GetType()}) .UpdateComponents:\n {e.GetType()}");
+                Debug.LogError($"Error in a componentSystem({System.GetType()}) .UpdateComponents:\n {e.GetType()}");
                 Debug.LogException(e);
             }
 #endif            
@@ -109,7 +110,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
 #if !UNITY_EDITOR
             } catch (Exception e)
             {
-                Debug.LogError($"Error in a system({system.GetType()}) .OnCreateComponent:\n {e.GetType()}");
+                Debug.LogError($"Error in a system({System.GetType()}) .OnCreateComponent:\n {e.GetType()}");
                 Debug.LogException(e);
             }
 #endif            
@@ -163,7 +164,7 @@ namespace Core.Model.ModelSystems.ComponentSystems
 #if !UNITY_EDITOR
             } catch (Exception e)
             {
-                Debug.LogError($"Error in a system({system.GetType()}) .OnDestroyComponent:\n {e.GetType()}");
+                Debug.LogError($"Error in a system({System.GetType()}) .OnDestroyComponent:\n {e.GetType()}");
                 Debug.LogException(e);
             }
 #endif            
