@@ -12,33 +12,35 @@ namespace Core.Model
 		public void RemoveComponent(EntId owner);
 	}
 
-	public interface ComponentContainer<T>
-		where T : struct, IComponentData
-	{
-
-		public ref T GetComponent(EntId owner);
-		
-		// public void RebuildWithMax(int maxNumber);
-		
-		// public bool MoveNext();
-		// public ref T GetCurrent();
-		// public void ResetIterator();
-
-		public uint Count { get; }
-		
-		public uint MaxCount  { get; }
-	}
+	// public interface ComponentContainer<T>
+	// 	where T : struct, IComponentData
+	// {
+	//
+	// 	public 
+	// 	
+	// 	public ref T GetComponent(EntId owner);
+	// 	
+	// 	// public void RebuildWithMax(int maxNumber);
+	// 	
+	// 	// public bool MoveNext();
+	// 	// public ref T GetCurrent();
+	// 	// public void ResetIterator();
+	//
+	// 	public uint Count { get; }
+	// 	
+	// 	public uint MaxCount  { get; }
+	// }
 
 	
 	
 	
-	public class ComponentContainerImplementation<T> : ComponentContainer<T>, IGenericComponentContainer
+	public class ComponentContainer<T> : IGenericComponentContainer
 		where T : struct, IComponentData
 	{
 		public T[] Components = null;
 		// private int _iteratorIndex = 0;
 		
-		private uint _topEmptyIndex = 0;
+		public uint TopEmptyIndex = 0;
 
 		private readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
 		
@@ -50,9 +52,9 @@ namespace Core.Model
 		};
 		
 		
-		public ComponentContainerImplementation(uint maxNumber)
+		public ComponentContainer(uint maxNumber)
 		{
-			_topEmptyIndex = 0;
+			TopEmptyIndex = 0;
 			Components = new T[maxNumber];
 			// for (uint i = 0; i < _components.Length; i++)
 			// {
@@ -70,17 +72,17 @@ namespace Core.Model
 
 			
 			// int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
-			if (_topEmptyIndex >= Components.Length)
+			if (TopEmptyIndex >= Components.Length)
 			{
-				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{_topEmptyIndex}/{Components.Length}] ");
+				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{TopEmptyIndex}/{Components.Length}] ");
 				return;
 			}
 			
-			Components[_topEmptyIndex].ID = owner;
-			ComponentIndexByOwner[owner] = _topEmptyIndex;
-			Components[_topEmptyIndex].Init();
+			Components[TopEmptyIndex].ID = owner;
+			ComponentIndexByOwner[owner] = TopEmptyIndex;
+			Components[TopEmptyIndex].Init();
 			
-			_topEmptyIndex++;
+			TopEmptyIndex++;
 		}
 
 		public void RemoveComponent(EntId owner)
@@ -88,23 +90,23 @@ namespace Core.Model
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 				return;
 
-			if (_topEmptyIndex <= 1)
+			if (TopEmptyIndex <= 1)
 			{
 				Components[index].ID = EntId.Invalid;
-				_topEmptyIndex--;
+				TopEmptyIndex--;
 				ComponentIndexByOwner.Remove(owner);
 				return;
 			}
 
 			
-			uint lastComponentIndex = _topEmptyIndex-1;
+			uint lastComponentIndex = TopEmptyIndex-1;
 			EntId topEntityID = Components[lastComponentIndex].ID;
 
 			ComponentIndexByOwner[topEntityID] = index;
 			Components[index] = Components[lastComponentIndex];
 
 			Components[lastComponentIndex].ID = EntId.Invalid;
-			_topEmptyIndex--;
+			TopEmptyIndex--;
 			ComponentIndexByOwner.Remove(owner);
 		}
 		
@@ -122,7 +124,7 @@ namespace Core.Model
 
 		public void RebuildWithMax(int maxNumber)
 		{
-			_topEmptyIndex = 0;
+			TopEmptyIndex = 0;
 			ComponentIndexByOwner.Clear();
 			
 			Components = new T[maxNumber];
@@ -164,7 +166,7 @@ namespace Core.Model
 		// public void ResetIterator()
 		// 	=> _iteratorIndex = -1;
 
-		public uint Count => _topEmptyIndex;
+		public uint Count => TopEmptyIndex;
 		public uint MaxCount => (uint) Components.Length;
 
 	}

@@ -46,7 +46,7 @@ namespace Core.Model.ModelSystems
 				return;
 			}
 				
-			((ComponentContainerImplementation<T>)container).RebuildWithMax(maxNumber);
+			((ComponentContainer<T>)container).RebuildWithMax(maxNumber);
 		}
 
 		
@@ -83,7 +83,7 @@ namespace Core.Model.ModelSystems
 			
 			foreach (var componentDataType in allComponentDataTypes)
 			{
-				var containerType = typeof(ComponentContainerImplementation<>).MakeGenericType(componentDataType);
+				var containerType = typeof(ComponentContainer<>).MakeGenericType(componentDataType);
 				object newComponentContainer = Activator.CreateInstance(containerType, maxNumber);
 				yield return (newComponentContainer, componentDataType);
 			}

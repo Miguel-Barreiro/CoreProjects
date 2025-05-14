@@ -81,11 +81,11 @@ namespace Core.Initialization
 			ViewEntitiesContainer viewEntitiesContainer = new ViewEntitiesContainer();
 			BindInstance(viewEntitiesContainer);
 
-			KineticEntityUpdateViewSystem kineticEntityUpdateViewSystem = new();
-			BindInstance(kineticEntityUpdateViewSystem);
-
-			PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
-			BindInstance(phisycsEntitiesUpdateViewSystem);
+			// KineticEntityUpdateViewSystem kineticEntityUpdateViewSystem = new();
+			// BindInstance(kineticEntityUpdateViewSystem);
+			//
+			// PhisycsEntitiesUpdateViewSystem phisycsEntitiesUpdateViewSystem = new();
+			// BindInstance(phisycsEntitiesUpdateViewSystem);
 			
 			TimeScaleSystemImplementation timeScaleSystemImplementation = new();
 			BindInstance<TimeScaleSystem>(timeScaleSystemImplementation);
