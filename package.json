@@ -1,6 +1,6 @@
 {
   "name": "com.miguel.core",
-  "version": "0.5.28",
+  "version": "0.5.29",
   "displayName": "Core Modules",
   "description": "This is a collection of core modules for Miguel's games",
   "unity" : "2022.3", 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Model;
+using Core.Model.ModelSystems;
 using Core.Utils.CachedDataStructures;
 using UnityEngine;
 
@@ -130,7 +131,7 @@ namespace Core.Events
 		}
 	}
 
-	public sealed class EntityEventQueuesContainer
+	public sealed class EntityEventQueuesContainer : IOnDestroyEntitySystem
 	{
 		private Dictionary<Type, BaseEntityEventQueueImplementation> _entityEventQueuesByEventType = new();
 
@@ -160,24 +161,13 @@ namespace Core.Events
 		{
 			foreach (KeyValuePair<Type,BaseEntityEventQueueImplementation> keyValuePair in _entityEventQueuesByEventType)
 				yield return keyValuePair;
-			
-			// return _entityEventQueuesByEventType;
-			// foreach ( in _entityEventQueuesByEventType)
-			// {
-			// }
 		}
 
 		internal void ClearAll()
 		{
 			_entityEventQueuesByEventType.Clear();
 		}
-
-		internal void RemoveEntity(EntId entId)
-		{
-			foreach (BaseEntityEventQueueImplementation entityEventQueue in _entityEventQueuesByEventType.Values)
-				entityEventQueue.RemoveEntity(entId);
-		}
-
+		
 		internal void ExecuteAllEntityEvents()
 		{
 			bool hasEvents = true;
@@ -208,6 +198,12 @@ namespace Core.Events
 			
 			return (EntityEventQueueImplementation<TEntityEvent>)entityEventQueue;
 		}
+
+		public void OnDestroyEntity(EntId destroyedEntityId) { 
+			foreach (BaseEntityEventQueueImplementation entityEventQueue in _entityEventQueuesByEventType.Values)
+				entityEventQueue.RemoveEntity(destroyedEntityId);
+		}
+		
 	}
 	
 	

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Model;
+using Core.Model.ModelSystems;
 using UnityEngine;
 using Zenject;
 
@@ -15,7 +16,7 @@ namespace Core.View
 		public void SetEntityViewParent(EntId entId, Transform newParent);
 	}
 
-	public sealed class ViewEntitiesContainer : IViewEntitiesContainer
+	public sealed class ViewEntitiesContainer : IViewEntitiesContainer, IOnDestroyEntitySystem
 	{
 		[Inject] private readonly GenericGameObjectPool genericGameObjectPool = null!;
 		
@@ -99,5 +100,9 @@ namespace Core.View
 			return entityViewAtributes;
 		}
 
+		public void OnDestroyEntity(EntId destroyedEntityId)
+		{
+			Destroy(destroyedEntityId);
+		}
 	}
 }

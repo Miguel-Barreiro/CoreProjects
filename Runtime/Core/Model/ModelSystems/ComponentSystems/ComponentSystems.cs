@@ -25,6 +25,16 @@ namespace Core.Model.ModelSystems
 	{
 		void UpdateComponents(ComponentContainer<T> componentsContainer, float deltaTime);
 	}
+
 	
-	
+	public interface IOnDestroyEntitySystem
+	{
+		void OnDestroyEntity(EntId destroyedEntityId);
+	}
+
+	public interface IOnCreateEntitySystem
+	{
+		void OnCreateEntity(EntId destroyedEntityId);
+	}
+
 }

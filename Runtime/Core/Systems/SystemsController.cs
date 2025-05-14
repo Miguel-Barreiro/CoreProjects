@@ -6,7 +6,6 @@ using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Model.ModelSystems.ComponentSystems;
 using Core.Model.Time;
-using Core.Utils.CachedDataStructures;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -38,6 +37,9 @@ namespace Core.Systems
         private readonly Dictionary<Type, List<EntId>> DestroyedEntitiesByComponentDataType = new Dictionary<Type, List<EntId>>();
         private readonly Dictionary<Type, List<EntId>> NewEntitiesByComponentDataType = new Dictionary<Type, List<EntId>>();
 
+        private readonly List<EntId> DestroyedEntities = new List<EntId>();
+        private readonly List<EntId> NewEntities = new List<EntId>();
+        
         
         public void Initialize()
         {
@@ -106,6 +108,9 @@ namespace Core.Systems
             
             ITimerSystem.Update(deltaTime*1000);
             
+            NewEntities.Clear();
+            DestroyedEntities.Clear();
+            
 #if !UNITY_EDITOR
             try
             {
@@ -119,6 +124,18 @@ namespace Core.Systems
 #endif
             
             ExecuteEventsAndUpdates();
+            
+            IEnumerable<IOnCreateEntitySystem> allOnCreateEntitySystems = systemsContainer.GetAllSystemsByInterface<IOnCreateEntitySystem>();
+            IEnumerable<IOnDestroyEntitySystem> allOnDestroyEntitySystem = systemsContainer.GetAllSystemsByInterface<IOnDestroyEntitySystem>();
+
+            foreach (IOnCreateEntitySystem system in allOnCreateEntitySystems)
+                foreach (EntId newEntityID in NewEntities)
+                    system.OnCreateEntity(newEntityID);
+            
+            foreach (IOnDestroyEntitySystem system in allOnDestroyEntitySystem)
+                foreach (EntId destroyedEntityID in DestroyedEntities)
+                    system.OnDestroyEntity(destroyedEntityID);
+            
             EntitiesContainer.ProcessAllFlushedEntities();
             
             void ExecuteFrameUpdateSystems()
@@ -167,7 +184,6 @@ namespace Core.Systems
                 IEnumerable<(Type componentDataType, ComponentSystemListenerGroup listenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
                 foreach ((Type componentDataType, ComponentSystemListenerGroup listenerGroup) in systemsByComponentType)
                 {
-
                     CallComponentUpdate(listenerGroup, componentDataType);
 
                     if (DestroyedEntitiesByComponentDataType.TryGetValue(componentDataType, out List<EntId> destroyedEntities))
@@ -181,8 +197,6 @@ namespace Core.Systems
                                 systemCache.Call(ARGUMENT_SINGLE);
                             foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
                                 systemCache.Call(ARGUMENT_SINGLE);
-                            
-                            EntityEventQueuesContainer.RemoveEntity(destroyedEntityID);
                         }
                     }
 
@@ -237,8 +251,6 @@ namespace Core.Systems
                                 systemCache.Call(ARGUMENT_SINGLE);
                             foreach (OnDestroyComponentSystemCache systemCache in listenerGroup.OnDestroyLatePriority)
                                 systemCache.Call(ARGUMENT_SINGLE);
-                            
-                            EntityEventQueuesContainer.RemoveEntity(destroyedEntityID);
                         }
                     }
 
@@ -259,7 +271,6 @@ namespace Core.Systems
             }
             
             
-            
             void GroupNewAndDestroyEntitiesByComponent()
             {
                 foreach (List<EntId> list in NewEntitiesByComponentDataType.Values)
@@ -275,6 +286,8 @@ namespace Core.Systems
                     IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
                     foreach (Type componentData in componentDatas)
                         DestroyedEntitiesByComponentDataType[componentData].Add(destroyedEntity.ID);
+                    
+                    DestroyedEntities.Add(destroyedEntity.ID);
                 }
                 foreach (Entity newEntity in EntitiesContainer.GetAllNewEntities())
                 {
@@ -283,9 +296,10 @@ namespace Core.Systems
                     IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
                     foreach (Type componentData in componentDatas)
                         NewEntitiesByComponentDataType[componentData].Add(newEntityID);
+                    
+                    NewEntities.Add(newEntityID);
                 }
-                    
-                    
+                
                 EntitiesContainer.FlushCurrentDestroyedEntities();
                 EntitiesContainer.FlushCurrentNewEntities();
             }
