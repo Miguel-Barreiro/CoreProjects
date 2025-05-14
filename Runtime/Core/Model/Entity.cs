@@ -30,7 +30,6 @@ namespace Core.Model
         }
         
         protected TSystem GetSystem<TSystem>() 
-            where TSystem : class, ISystem
         {
             return ObjectBuilder.GetInstance().Resolve<TSystem>();
         }
