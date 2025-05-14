@@ -19,6 +19,8 @@ namespace Core.Editor.Systems
         private Dictionary<(string, SystemGroup), bool> _groupFoldouts = new ();
         private Dictionary<object, bool> _systemFoldouts = new Dictionary<object, bool>();
         private Dictionary<Type, bool> _containerFoldouts = new Dictionary<Type, bool>();
+        private bool _showSystemsSection = true;
+        private bool _showContainersSection = true;
         
         private Vector2 _scrollPosition;
 
@@ -71,32 +73,55 @@ namespace Core.Editor.Systems
             DrawDefaultInspector();
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Systems Overview", EditorStyles.boldLabel);
-
-            SystemsManager manager = (SystemsManager)target;
-            if (manager.SystemsContainer == null)
+            
+            // Systems Section Foldout
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            string systemsFoldoutText = _showSystemsSection ? "▼ Systems Overview" : "► Systems Overview";
+            if (GUILayout.Button(systemsFoldoutText, INSTALLER_BUTTON_STYLE))
             {
-                EditorGUILayout.HelpBox("Systems Container is not initialized.", MessageType.Warning);
-                return;
+                _showSystemsSection = !_showSystemsSection;
             }
-
-            // Get all systems
-            using CachedList<Object> allSystems = ListCache<Object>.Get();
-            GetAllSystems(manager.SystemsContainer, allSystems);
             
-            if (allSystems.Count == 0)
+            if (_showSystemsSection)
             {
-                EditorGUILayout.HelpBox("No systems registered.", MessageType.Info);
-                return;
+                SystemsManager manager = (SystemsManager)target;
+                if (manager.SystemsContainer == null)
+                {
+                    EditorGUILayout.HelpBox("Systems Container is not initialized.", MessageType.Warning);
+                }
+                else
+                {
+                    // Get all systems
+                    using CachedList<Object> allSystems = ListCache<Object>.Get();
+                    GetAllSystems(manager.SystemsContainer, allSystems);
+                    
+                    if (allSystems.Count == 0)
+                    {
+                        EditorGUILayout.HelpBox("No systems registered.", MessageType.Info);
+                    }
+                    else
+                    {
+                        DrawSystemsByGroup(allSystems, manager.SystemsContainer);
+                    }
+                }
             }
-
-            // Begin scrollable area
-            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(400));
+            EditorGUILayout.EndVertical();
             
-            DrawSystemsByGroup(allSystems, manager.SystemsContainer);
-            DrawDataContainersInfo();
+            EditorGUILayout.Space(10);
             
-            EditorGUILayout.EndScrollView();
+            // Containers Section Foldout
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            string containersFoldoutText = _showContainersSection ? "▼ Data Containers Information" : "► Data Containers Information";
+            if (GUILayout.Button(containersFoldoutText, INSTALLER_BUTTON_STYLE))
+            {
+                _showContainersSection = !_showContainersSection;
+            }
+            
+            if (_showContainersSection)
+            {
+                DrawDataContainersInfo();
+            }
+            EditorGUILayout.EndVertical();
         }
 
         private void GetAllSystems(SystemsContainer container, List<Object> result)
@@ -109,9 +134,6 @@ namespace Core.Editor.Systems
         {
             var containersController = DataContainersControllerImplementation.GetInstance();
             var containers = containersController.GetAllComponentContainers();
-
-            EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("Data Containers Information", EditorStyles.boldLabel);
 
             foreach (var (container, componentType, containerType) in containers)
             {
@@ -128,6 +150,7 @@ namespace Core.Editor.Systems
                 
                 var count = (uint)countProperty.GetValue(container);
                 var maxCount = (uint)maxCountProperty.GetValue(container);
+                float fillPercentage = (float)count / maxCount;
 
                 // Create foldout header with basic info
                 EditorGUILayout.BeginHorizontal();
@@ -136,7 +159,32 @@ namespace Core.Editor.Systems
                 {
                     _containerFoldouts[componentType] = !_containerFoldouts[componentType];
                 }
-                EditorGUILayout.LabelField($"Usage: {count}/{maxCount} ({(float)count/maxCount:P0})", GUILayout.Width(150));
+                
+                // Calculate color based on fill percentage
+                Color barColor;
+                if (fillPercentage <= 0.5f)
+                    barColor = Color.green;
+                else if (fillPercentage <= 0.8f)
+                    barColor = Color.yellow;
+                else
+                    barColor = Color.red;
+
+                // Draw progress bar
+                Rect progressBarRect = GUILayoutUtility.GetRect(150, 20);
+                EditorGUI.DrawRect(progressBarRect, new Color(0.2f, 0.2f, 0.2f)); // Background
+                Rect fillRect = new Rect(progressBarRect.x, progressBarRect.y, progressBarRect.width * fillPercentage, progressBarRect.height);
+                EditorGUI.DrawRect(fillRect, barColor);
+                
+                // Draw text on top of the progress bar
+                // EditorGUILayout.LabelField($"Usage: {count}/{maxCount} ({(float)count/maxCount:P0})", GUILayout.Width(150));
+                // string percentageText = $"{count}/{maxCount} ({(fillPercentage:P0})";
+                string percentageText = $"Usage: {count}/{maxCount} ({fillPercentage:P0})";
+                
+                EditorGUI.LabelField(progressBarRect, percentageText, new GUIStyle(EditorStyles.label) { 
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = Color.white }
+                });
+                
                 EditorGUILayout.EndHorizontal();
 
                 if (_containerFoldouts[componentType])
