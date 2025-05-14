@@ -1,5 +1,7 @@
 ﻿using System;
+using Core.Initialization;
 using Core.Model.ModelSystems;
+using Core.Systems;
 
 namespace Core.Model
 {
@@ -25,6 +27,12 @@ namespace Core.Model
         {
             object componentContainer = DataContainersControllerImplementation.GetInstance().GetComponentContainer(typeof(TComponentData));
             return ref ((ComponentContainer<TComponentData>) componentContainer).GetComponent(ID);
+        }
+        
+        protected TSystem GetSystem<TSystem>() 
+            where TSystem : class, ISystem
+        {
+            return ObjectBuilder.GetInstance().Resolve<TSystem>();
         }
         
         public void Destroy()

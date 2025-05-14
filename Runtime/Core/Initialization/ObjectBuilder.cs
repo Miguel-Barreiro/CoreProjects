@@ -5,9 +5,21 @@ using Zenject;
 
 namespace Core.Initialization
 {
-    public class ObjectBuilder
+    public sealed class ObjectBuilder
     {
         [Inject] private DiContainer diContainer;
+
+        private ObjectBuilder() { }
+        
+        private static ObjectBuilder instance = null; 
+        public static ObjectBuilder GetInstance()
+        {
+            if(instance == null)
+                instance = new ObjectBuilder();
+
+            return instance;
+        }
+
 
         /// <summary>
         /// this will return all instances of the given type that are registered in the container ( T can be an interface or a class )
@@ -70,6 +82,10 @@ namespace Core.Initialization
         public GameObject Instantiate(GameObject prefab, Transform parent)
         {
             return diContainer.InstantiatePrefab(prefab, parent);
+        }
+
+        public T Resolve<T>() { 
+            return diContainer.Resolve<T>();
         }
     }
 }

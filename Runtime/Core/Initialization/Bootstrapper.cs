@@ -154,13 +154,14 @@ namespace Core.Initialization
 				            
 			if (!Container.HasBinding<ObjectBuilder>())
 			{
-				objectBuilder = new ObjectBuilder();
+				objectBuilder = ObjectBuilder.GetInstance();
 						
 				Container.BindInstance(objectBuilder);
 			}
 			else
 			{
-				objectBuilder = Container.Resolve<ObjectBuilder>();
+				objectBuilder = ObjectBuilder.GetInstance();
+				// objectBuilder = Container.Resolve<ObjectBuilder>();
 			}
 					
 			Container.Inject(objectBuilder);
