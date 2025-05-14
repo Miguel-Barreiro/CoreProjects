@@ -10,7 +10,7 @@ namespace Core.View
 	public interface IViewEntitiesContainer
 	{
 		public void Destroy(EntId entityID);
-		public GameObject? Spawn(GameObject entityPrefab, EntId entityID);
+		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID);
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
 		public void SetEntityViewParent(EntId entId, Transform newParent);
 	}
@@ -40,7 +40,7 @@ namespace Core.View
 			GameobjectsByEntityId.Remove(entityID);
 		}
 		
-		public GameObject? Spawn(GameObject entityPrefab, EntId entityID)
+		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID)
 		{
 			if (entityPrefab == null)
 			{
@@ -51,7 +51,7 @@ namespace Core.View
 			if (GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes) &&
 				entityViewAtributes.GameObject != null)
 			{
-				return entityViewAtributes.GameObject;
+				return entityViewAtributes;
 			}
 
 			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
@@ -63,7 +63,7 @@ namespace Core.View
 			if(entityView != null)
 				entityView.EntityID = entityID;
 
-			return newGameObject;
+			return entityViewAtributes;
 		}
 
 		public void SetEntityViewParent(EntId entId, Transform? newParent)
