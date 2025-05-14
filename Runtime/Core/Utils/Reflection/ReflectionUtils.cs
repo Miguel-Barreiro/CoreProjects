@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Core.Utils.CachedDataStructures;
-using Sirenix.Utilities;
 
 namespace Core.Utils.Reflection
 {
@@ -86,35 +85,35 @@ namespace Core.Utils.Reflection
         
         
         
-        public static Type GetFirstGenericArgumentTypeDefinition(this Type givenType, Type genericType)
-        {
-            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
-            {
-                Type[] genericArguments = givenType.GetGenericArguments();
-                if (genericArguments.Length > 0)
-                    return genericArguments[0];
-                else
-                    // If the generic type has no arguments, return null
-                    return null;
-            }
-
-
-            var interfaceTypes = givenType.GetInterfaces();
-            foreach (var it in interfaceTypes)
-            {
-                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
-                {
-                    Type[] genericArguments = it.GetGenericArguments();
-                    if (genericArguments.Length > 0)
-                        return genericArguments[0];
-                }
-            }
-
-            Type parentType = givenType.BaseType;
-            if (parentType == null) return null;
-            
-            return GetFirstGenericArgumentTypeDefinition(parentType, genericType);
-        }
+        // public static Type GetFirstGenericArgumentTypeDefinition(this Type givenType, Type genericType)
+        // {
+        //     if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
+        //     {
+        //         Type[] genericArguments = givenType.GetGenericArguments();
+        //         if (genericArguments.Length > 0)
+        //             return genericArguments[0];
+        //         else
+        //             // If the generic type has no arguments, return null
+        //             return null;
+        //     }
+        //
+        //
+        //     var interfaceTypes = givenType.GetInterfaces();
+        //     foreach (var it in interfaceTypes)
+        //     {
+        //         if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
+        //         {
+        //             Type[] genericArguments = it.GetGenericArguments();
+        //             if (genericArguments.Length > 0)
+        //                 return genericArguments[0];
+        //         }
+        //     }
+        //
+        //     Type parentType = givenType.BaseType;
+        //     if (parentType == null) return null;
+        //     
+        //     return GetFirstGenericArgumentTypeDefinition(parentType, genericType);
+        // }
         
 
         public static IEnumerable<Type> GetAllTypesOf<TTargetType>()
