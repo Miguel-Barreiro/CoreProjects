@@ -135,6 +135,10 @@ namespace Core.Editor.Systems
             var containersController = DataContainersControllerImplementation.GetInstance();
             var containers = containersController.GetAllComponentContainers();
 
+            const float PROGRESS_BAR_WIDTH = 200f;
+            const float PROGRESS_BAR_HEIGHT = 20f;
+            const float PROGRESS_BAR_PADDING = 10f;
+
             foreach (var (container, componentType, containerType) in containers)
             {
                 if (!_containerFoldouts.ContainsKey(componentType))
@@ -169,17 +173,27 @@ namespace Core.Editor.Systems
                 else
                     barColor = Color.red;
 
-                // Draw progress bar
-                Rect progressBarRect = GUILayoutUtility.GetRect(150, 20);
+                // Reserve space for the progress bar
+                GUILayout.Space(PROGRESS_BAR_WIDTH + PROGRESS_BAR_PADDING);
+                
+                // Get the last rect used by the layout system
+                Rect lastRect = GUILayoutUtility.GetLastRect();
+                
+                // Calculate the progress bar position
+                Rect progressBarRect = new Rect(
+                    lastRect.x + PROGRESS_BAR_PADDING,
+                    lastRect.y,
+                    PROGRESS_BAR_WIDTH,
+                    PROGRESS_BAR_HEIGHT
+                );
+
+                // Draw the progress bar
                 EditorGUI.DrawRect(progressBarRect, new Color(0.2f, 0.2f, 0.2f)); // Background
                 Rect fillRect = new Rect(progressBarRect.x, progressBarRect.y, progressBarRect.width * fillPercentage, progressBarRect.height);
                 EditorGUI.DrawRect(fillRect, barColor);
                 
                 // Draw text on top of the progress bar
-                // EditorGUILayout.LabelField($"Usage: {count}/{maxCount} ({(float)count/maxCount:P0})", GUILayout.Width(150));
-                // string percentageText = $"{count}/{maxCount} ({(fillPercentage:P0})";
                 string percentageText = $"Usage: {count}/{maxCount} ({fillPercentage:P0})";
-                
                 EditorGUI.LabelField(progressBarRect, percentageText, new GUIStyle(EditorStyles.label) { 
                     alignment = TextAnchor.MiddleCenter,
                     normal = { textColor = Color.white }

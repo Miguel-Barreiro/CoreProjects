@@ -20,9 +20,9 @@ namespace Core.Model
 		
 		// public void RebuildWithMax(int maxNumber);
 		
-		public bool MoveNext();
-		public ref T GetCurrent();
-		public void ResetIterator();
+		// public bool MoveNext();
+		// public ref T GetCurrent();
+		// public void ResetIterator();
 
 		public uint Count { get; }
 		
@@ -35,8 +35,8 @@ namespace Core.Model
 	public class ComponentContainerImplementation<T> : ComponentContainer<T>, IGenericComponentContainer
 		where T : struct, IComponentData
 	{
-		private T[] _components = null;
-		private int _iteratorIndex = 0;
+		public T[] Components = null;
+		// private int _iteratorIndex = 0;
 		
 		private uint _topEmptyIndex = 0;
 
@@ -53,7 +53,7 @@ namespace Core.Model
 		public ComponentContainerImplementation(uint maxNumber)
 		{
 			_topEmptyIndex = 0;
-			_components = new T[maxNumber];
+			Components = new T[maxNumber];
 			// for (uint i = 0; i < _components.Length; i++)
 			// {
 			// 	_components[i].ID = EntId.Invalid;
@@ -70,15 +70,15 @@ namespace Core.Model
 
 			
 			// int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
-			if (_topEmptyIndex >= _components.Length)
+			if (_topEmptyIndex >= Components.Length)
 			{
-				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{_topEmptyIndex}/{_components.Length}] ");
+				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{_topEmptyIndex}/{Components.Length}] ");
 				return;
 			}
 			
-			_components[_topEmptyIndex].ID = owner;
+			Components[_topEmptyIndex].ID = owner;
 			ComponentIndexByOwner[owner] = _topEmptyIndex;
-			_components[_topEmptyIndex].Init();
+			Components[_topEmptyIndex].Init();
 			
 			_topEmptyIndex++;
 		}
@@ -90,7 +90,7 @@ namespace Core.Model
 
 			if (_topEmptyIndex <= 1)
 			{
-				_components[index].ID = EntId.Invalid;
+				Components[index].ID = EntId.Invalid;
 				_topEmptyIndex--;
 				ComponentIndexByOwner.Remove(owner);
 				return;
@@ -98,12 +98,12 @@ namespace Core.Model
 
 			
 			uint lastComponentIndex = _topEmptyIndex-1;
-			EntId topEntityID = _components[lastComponentIndex].ID;
+			EntId topEntityID = Components[lastComponentIndex].ID;
 
 			ComponentIndexByOwner[topEntityID] = index;
-			_components[index] = _components[lastComponentIndex];
+			Components[index] = Components[lastComponentIndex];
 
-			_components[lastComponentIndex].ID = EntId.Invalid;
+			Components[lastComponentIndex].ID = EntId.Invalid;
 			_topEmptyIndex--;
 			ComponentIndexByOwner.Remove(owner);
 		}
@@ -116,7 +116,7 @@ namespace Core.Model
 				return ref Invalid;
 			}
 			
-			return ref _components[index];
+			return ref Components[index];
 		}
 		
 
@@ -125,7 +125,7 @@ namespace Core.Model
 			_topEmptyIndex = 0;
 			ComponentIndexByOwner.Clear();
 			
-			_components = new T[maxNumber];
+			Components = new T[maxNumber];
 			// for (int i = 0; i < _components.Length; i++)
 			// {
 			// 	_components[i].ID = EntId.Invalid;
@@ -133,39 +133,39 @@ namespace Core.Model
 		}
 
 
-
-		public bool MoveNext()
-		{ 
-			_iteratorIndex++;
-			if (_iteratorIndex >= _topEmptyIndex)
-				return false;
-
-			// _iteratorIndex++;
-			// ref T component = ref _components[_iteratorIndex];
-			// while ( component.ID == EntId.Invalid)
-			// {
-			// 	if (_iteratorIndex >= _components.Length)
-			// 		return false;
-			//
-			// 	component = ref _components[_iteratorIndex];
-			// }
-			return true;
-		}
-
-		
-		public ref T GetCurrent()
-		{
-			if (_iteratorIndex < 0 || _iteratorIndex >= _topEmptyIndex)
-				_iteratorIndex = 0;
-
-			return ref _components[_iteratorIndex];
-		}
-		
-		public void ResetIterator()
-			=> _iteratorIndex = -1;
+		//
+		// public bool MoveNext()
+		// { 
+		// 	_iteratorIndex++;
+		// 	if (_iteratorIndex >= _topEmptyIndex)
+		// 		return false;
+		//
+		// 	// _iteratorIndex++;
+		// 	// ref T component = ref _components[_iteratorIndex];
+		// 	// while ( component.ID == EntId.Invalid)
+		// 	// {
+		// 	// 	if (_iteratorIndex >= _components.Length)
+		// 	// 		return false;
+		// 	//
+		// 	// 	component = ref _components[_iteratorIndex];
+		// 	// }
+		// 	return true;
+		// }
+		//
+		//
+		// public ref T GetCurrent()
+		// {
+		// 	if (_iteratorIndex < 0 || _iteratorIndex >= _topEmptyIndex)
+		// 		_iteratorIndex = 0;
+		//
+		// 	return ref Components[_iteratorIndex];
+		// }
+		//
+		// public void ResetIterator()
+		// 	=> _iteratorIndex = -1;
 
 		public uint Count => _topEmptyIndex;
-		public uint MaxCount => (uint) _components.Length;
+		public uint MaxCount => (uint) Components.Length;
 
 	}
 
