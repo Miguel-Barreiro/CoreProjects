@@ -20,31 +20,6 @@ namespace Core.View
 
 		private readonly Dictionary<Type, object?> ComponentCache = new ();
 		
-		// public T? Get<T>() 
-		// 	where T : Component
-		// {
-		// 	if (GameObject == null) return default(T);
-		// 	
-		// 	Type componentType = typeof(T);
-		// 	if (ComponentCache.TryGetValue(componentType, out object? value))
-		// 		return value as T;
-		//
-		// 	T component = GameObject.GetComponent<T>();
-		// 	if (component == null)
-		// 	{
-		// 		component = GameObject.GetComponentInChildren<T>();
-		// 		if (component == null)
-		// 		{
-		// 			Debug.LogError($"did not find {componentType.Name} component in {GameObject.name}");
-		// 			return null;
-		// 		}
-		// 	}
-		// 	
-		// 	ComponentCache.Add(componentType, component);
-		// 	return component;
-		// }
-
-		
 		public T? Get<T>()
 		{
 			if (GameObject == null) return default(T);

@@ -57,8 +57,8 @@ namespace Core.View
 
 			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
 
-			EntityViewAtributes entityAttributes = GetOrCreateEntityAttributes(entityID);
-			entityAttributes.GameObject = newGameObject;
+			entityViewAtributes = GetOrCreateEntityAttributes(entityID);
+			entityViewAtributes.GameObject = newGameObject;
 
 			EntityView entityView = newGameObject.GetComponent<EntityView>();
 			if(entityView != null)
