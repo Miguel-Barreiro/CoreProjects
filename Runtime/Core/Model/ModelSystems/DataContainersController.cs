@@ -17,7 +17,7 @@ namespace Core.Model.ModelSystems
 		
 		private static DataContainersControllerImplementation? instance = null;
 
-		internal static DataContainersControllerImplementation GetInstance()
+		public static DataContainersControllerImplementation GetInstance()
 		{
 			if (instance == null)
 			{
@@ -53,8 +53,8 @@ namespace Core.Model.ModelSystems
 
 
 		#region Internal
-		
-		internal IEnumerable<(object container, Type componentType, Type containerType)> GetAllComponentContainers()
+
+		public IEnumerable<(object container, Type componentType, Type containerType)> GetAllComponentContainers()
 		{
 			foreach ((Type componentType, object container)  in ContainersByComponentType)
 			{

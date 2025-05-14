@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Object = System.Object;
 
 namespace Core.Editor.Systems
@@ -16,6 +18,7 @@ namespace Core.Editor.Systems
         private Dictionary<string, bool> _installerFoldouts = new Dictionary<string, bool>();
         private Dictionary<(string, SystemGroup), bool> _groupFoldouts = new ();
         private Dictionary<object, bool> _systemFoldouts = new Dictionary<object, bool>();
+        private Dictionary<Type, bool> _containerFoldouts = new Dictionary<Type, bool>();
         
         private Vector2 _scrollPosition;
 
@@ -91,7 +94,8 @@ namespace Core.Editor.Systems
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(400));
             
             DrawSystemsByGroup(allSystems, manager.SystemsContainer);
-
+            DrawDataContainersInfo();
+            
             EditorGUILayout.EndScrollView();
         }
 
@@ -100,6 +104,54 @@ namespace Core.Editor.Systems
             result.AddRange(container.GetAllSystems());
         }
 
+        
+        private void DrawDataContainersInfo()
+        {
+            var containersController = DataContainersControllerImplementation.GetInstance();
+            var containers = containersController.GetAllComponentContainers();
+
+            EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField("Data Containers Information", EditorStyles.boldLabel);
+
+            foreach (var (container, componentType, containerType) in containers)
+            {
+                if (!_containerFoldouts.ContainsKey(componentType))
+                {
+                    _containerFoldouts[componentType] = false;
+                }
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                
+                // Get the Count and MaxCount properties using reflection
+                var countProperty = containerType.GetProperty("Count");
+                var maxCountProperty = containerType.GetProperty("MaxCount");
+                
+                var count = (uint)countProperty.GetValue(container);
+                var maxCount = (uint)maxCountProperty.GetValue(container);
+
+                // Create foldout header with basic info
+                EditorGUILayout.BeginHorizontal();
+                string foldoutText = _containerFoldouts[componentType] ? $"▼ {componentType.Name}" : $"► {componentType.Name}";
+                if (GUILayout.Button(foldoutText, SYSTEM_BUTTON_STYLE, GUILayout.ExpandWidth(true)))
+                {
+                    _containerFoldouts[componentType] = !_containerFoldouts[componentType];
+                }
+                EditorGUILayout.LabelField($"Usage: {count}/{maxCount} ({(float)count/maxCount:P0})", GUILayout.Width(150));
+                EditorGUILayout.EndHorizontal();
+
+                if (_containerFoldouts[componentType])
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.LabelField($"Current Count: {count}");
+                    EditorGUILayout.LabelField($"Maximum Capacity: {maxCount}");
+                    EditorGUILayout.LabelField($"Full Type: {componentType.FullName}");
+                    EditorGUI.indentLevel--;
+                }
+                
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(2);
+            }
+        }
 
 
         private void DrawSystemsByGroup(List<object> allSystems, SystemsContainer managerSystemsContainer)

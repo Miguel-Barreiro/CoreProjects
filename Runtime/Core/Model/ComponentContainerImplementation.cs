@@ -25,6 +25,8 @@ namespace Core.Model
 		public void ResetIterator();
 
 		public uint Count { get; }
+		
+		public uint MaxCount  { get; }
 	}
 
 	
@@ -163,6 +165,8 @@ namespace Core.Model
 			=> _iteratorIndex = -1;
 
 		public uint Count => _topEmptyIndex;
+		public uint MaxCount => (uint) _components.Length;
+
 	}
 
 }
