@@ -36,18 +36,20 @@ namespace Core.Model.Time
         public void Update(float deltaTimeMs);
     }
 
-    public struct TimerComponentData : IComponentData
-    {
-        public EntId ID { get; set; }
-        public void Init() {}
-    }
-    
-    public interface ITimerComponent : Component<TimerComponentData> { }
+    // public struct TimerComponentData : IComponentData
+    // {
+    //     public EntId ID { get; set; }
+    //     public void Init() {}
+    // }
+    //
+    // public interface ITimerComponent : Component<TimerComponentData> { }
 
     public class TimerSystemImplementation : TimerSystemRo, 
                                              TimerSystem, 
                                              ITimerSystemImplementationInternal, 
-                                             OnDestroyComponent<TimerComponentData>
+                                             IOnDestroyEntitySystem
+                                             
+    // OnDestroyComponent<TimerComponentData>
                                              
     {
 
@@ -242,10 +244,10 @@ namespace Core.Model.Time
         
         
 
-        public void OnDestroyComponent(EntId destroyedComponentID)
+        public void OnDestroyEntity(EntId destroyedEntityId)
         {
-            if (TimerModel.Timers.ContainsKey(destroyedComponentID))
-                TimerModel.Timers.Remove(destroyedComponentID);
+            if (TimerModel.Timers.ContainsKey(destroyedEntityId))
+                TimerModel.Timers.Remove(destroyedEntityId);
         }
 
         

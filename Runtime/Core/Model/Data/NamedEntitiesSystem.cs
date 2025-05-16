@@ -7,18 +7,18 @@ using Zenject;
 namespace Core.Core.Model.Data
 {
 
-	public struct NamedComponentData : IComponentData
-	{
-		public string Name;
-		public EntId ID { get; set; }
-
-		public void Init()
-		{
-			Name = "";
-		}
-	}
-		
-	public interface NamedComponent : Component<NamedComponentData> { }
+	// public struct NamedComponentData : IComponentData
+	// {
+	// 	public string Name;
+	// 	public EntId ID { get; set; }
+	//
+	// 	public void Init()
+	// 	{
+	// 		Name = "";
+	// 	}
+	// }
+	// 	
+	// public interface NamedComponent : Component<NamedComponentData> { }
 
 	
 	public interface NamedEntitiesSystem : ISystem
@@ -33,7 +33,7 @@ namespace Core.Core.Model.Data
 		internal Dictionary<EntId, string> NamedEntitiesById = new ();
 	}
 
-	public sealed class NamedEntitiesSystemImplementation : OnDestroyComponent<NamedComponentData>, NamedEntitiesSystem
+	public sealed class NamedEntitiesSystemImplementation : IOnDestroyEntitySystem, NamedEntitiesSystem
 	{
 
 		[Inject] private readonly NamedEntitiesSystemModel NamedEntitiesSystemModel = null!;
@@ -50,12 +50,12 @@ namespace Core.Core.Model.Data
 		}
 
 
-		public void OnDestroyComponent(EntId destroyedComponentId)
+		public void OnDestroyEntity(EntId destroyedEntityId) 
 		{ 
-			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(destroyedComponentId, out string name))
+			if(NamedEntitiesSystemModel.NamedEntitiesById.TryGetValue(destroyedEntityId, out string name))
 			{
 				NamedEntitiesSystemModel.NamedEntitiesByName.Remove(name);
-				NamedEntitiesSystemModel.NamedEntitiesById.Remove(destroyedComponentId);
+				NamedEntitiesSystemModel.NamedEntitiesById.Remove(destroyedEntityId);
 			}
 		}
 

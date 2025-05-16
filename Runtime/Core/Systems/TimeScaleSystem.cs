@@ -14,16 +14,8 @@ namespace Core.Systems
 		public void ClearTimeScaleModifiers();
 	}
 
-	public struct TimeScalerEntityData : IComponentData
-	{
-		public EntId ID { get; set; }
-		public void Init() {}
-	}
-
-	public interface TimeScalerEntity : Component<TimeScalerEntityData> { }
-
-
-	public sealed class TimeScaleSystemImplementation : OnDestroyComponent<TimeScalerEntityData>,  TimeScaleSystem, IInitSystem
+	
+	public sealed class TimeScaleSystemImplementation : IOnDestroyEntitySystem,  TimeScaleSystem, IInitSystem
 	{
 		private TimeScaleSystemModel TimeScaleSystemModel;
 		
@@ -42,20 +34,17 @@ namespace Core.Systems
 				return;
 			}
 			
-			if(TimeScaleSystemModel.scalerByOwners.ContainsKey(ownerID))
-				TimeScaleSystemModel.scalerByOwners[ownerID] = percentage;
-			else
-				TimeScaleSystemModel.scalerByOwners.Add(ownerID, percentage);
+			TimeScaleSystemModel.scalerByOwners[ownerID] = percentage;
 			
 			UpdateCurrentScale();
 		}
 
 
-		public void OnDestroyComponent(EntId destroyedComponentID)
+		public void OnDestroyEntity(EntId destroyedEntityId) 
 		{
-			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedComponentID))
+			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedEntityId))
 			{
-				TimeScaleSystemModel.scalerByOwners.Remove(destroyedComponentID);
+				TimeScaleSystemModel.scalerByOwners.Remove(destroyedEntityId);
 			}
 
 			UpdateCurrentScale(); 

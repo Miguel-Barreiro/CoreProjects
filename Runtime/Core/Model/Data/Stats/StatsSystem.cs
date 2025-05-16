@@ -20,13 +20,13 @@ namespace Core.Model
 	}
 	
 	
-	public interface IStatsComponent : Component<StatsComponentData> { }
-
-	public struct StatsComponentData : IComponentData
-	{
-		public EntId ID { get; set; }
-		public void Init() { }
-	}
+	// public interface IStatsComponent : Component<StatsComponentData> { }
+	//
+	// public struct StatsComponentData : IComponentData
+	// {
+	// 	public EntId ID { get; set; }
+	// 	public void Init() { }
+	// }
 	
 
 	public interface StatsSystem : StatsSystemRo
@@ -61,7 +61,7 @@ namespace Core.Model
 
 
 	public class StatsSystemImplementation : StatsSystem, StatsSystemRo, IInitSystem, 
-											OnDestroyComponent<StatsComponentData>
+											IOnDestroyEntitySystem
 	{
 		private StatsModel _statsModel = null;
 		
@@ -71,10 +71,10 @@ namespace Core.Model
 				_statsModel = new StatsModel();
 		}
 
-		public void OnDestroyComponent(EntId destroyedComponentId)
+		public void OnDestroyEntity(EntId destroyedEntityId)
 		{
-			_statsModel.RemoveAllModifiersFrom(destroyedComponentId); 
-			_statsModel.RemoveAllStatsFrom(destroyedComponentId);
+			_statsModel.RemoveAllModifiersFrom(destroyedEntityId); 
+			_statsModel.RemoveAllStatsFrom(destroyedEntityId);
 			
 		}
 

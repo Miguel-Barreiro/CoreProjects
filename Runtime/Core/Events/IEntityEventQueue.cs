@@ -15,6 +15,13 @@ namespace Core.Events
 		{
 			return EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.Execute(entId);
 		}
+		
+		public static void AddEntityEventListener<TEntityEvent>(EntId targetEntId, 
+													IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
+			where TEntityEvent : EntityEvent<TEntityEvent>, new()
+		{
+			EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.AddEntityEventListener(targetEntId, callback);
+		}
 	}
 
 	public interface IEntityEventQueue <TEntityEvent>
