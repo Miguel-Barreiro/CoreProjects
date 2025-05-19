@@ -95,7 +95,6 @@ namespace Core.Systems
         }
         
         private static readonly object[] ARGUMENT_SINGLE = { null };
-        private static readonly object[] ARGUMENT_PAIR = { null, null };
 
 
         public void ExecuteFrame(float deltaTime)
@@ -217,16 +216,14 @@ namespace Core.Systems
                 
                 void CallComponentUpdate(ComponentSystemListenerGroup group, Type componentType)
                 {
-                    object componentContainer = DataContainersController.GetComponentContainer(componentType);
-                    ARGUMENT_PAIR[0] = componentContainer;
-                    ARGUMENT_PAIR[1] = deltaTime;
+                    ARGUMENT_SINGLE[0] = deltaTime;
 
                     foreach (UpdateComponentSystemCache systemCache in group.UpdateEarlierPriority)
-                        systemCache.Call(ARGUMENT_PAIR);
+                        systemCache.Call(ARGUMENT_SINGLE);
                     foreach (UpdateComponentSystemCache systemCache in group.UpdateDefaultPriority)
-                        systemCache.Call(ARGUMENT_PAIR);
+                        systemCache.Call(ARGUMENT_SINGLE);
                     foreach (UpdateComponentSystemCache systemCache in group.UpdateLatePriority)
-                        systemCache.Call(ARGUMENT_PAIR);
+                        systemCache.Call(ARGUMENT_SINGLE);
                 }
             }
             

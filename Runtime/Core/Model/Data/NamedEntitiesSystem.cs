@@ -6,20 +6,6 @@ using Zenject;
 
 namespace Core.Core.Model.Data
 {
-
-	// public struct NamedComponentData : IComponentData
-	// {
-	// 	public string Name;
-	// 	public EntId ID { get; set; }
-	//
-	// 	public void Init()
-	// 	{
-	// 		Name = "";
-	// 	}
-	// }
-	// 	
-	// public interface NamedComponent : Component<NamedComponentData> { }
-
 	
 	public interface NamedEntitiesSystem : ISystem
 	{

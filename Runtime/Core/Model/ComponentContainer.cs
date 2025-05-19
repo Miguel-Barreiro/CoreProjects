@@ -10,39 +10,30 @@ namespace Core.Model
 	{
 		public void SetupComponent(EntId owner);
 		public void RemoveComponent(EntId owner);
+		
+		public void RebuildWithMax(uint maxNumber);
 	}
+	
+	public interface ComponentContainer<T> : IGenericComponentContainer
+		where T : struct, IComponentData
+	{
+		
+		public ref T GetComponent(EntId owner);
 
-	// public interface ComponentContainer<T>
-	// 	where T : struct, IComponentData
-	// {
-	//
-	// 	public 
-	// 	
-	// 	public ref T GetComponent(EntId owner);
-	// 	
-	// 	// public void RebuildWithMax(int maxNumber);
-	// 	
-	// 	// public bool MoveNext();
-	// 	// public ref T GetCurrent();
-	// 	// public void ResetIterator();
-	//
-	// 	public uint Count { get; }
-	// 	
-	// 	public uint MaxCount  { get; }
-	// }
-
+		public uint Count { get; }
+		public uint MaxCount  { get; }
+	}
 	
 	
-	
-	public class ComponentContainer<T> : IGenericComponentContainer
+	public class BasicCompContainer<T> : IGenericComponentContainer, ComponentContainer<T>
 		where T : struct, IComponentData
 	{
 		public T[] Components = null;
-		// private int _iteratorIndex = 0;
+		public uint TopEmptyIndex => _topEmptyIndex;
 		
-		public uint TopEmptyIndex = 0;
 
 		private readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
+		private uint _topEmptyIndex = 0;
 		
 		/// This is a dummy component to return when the requested component is not found
 		/// do not override it
@@ -52,14 +43,10 @@ namespace Core.Model
 		};
 		
 		
-		public ComponentContainer(uint maxNumber)
+		public BasicCompContainer(uint maxNumber)
 		{
-			TopEmptyIndex = 0;
+			_topEmptyIndex = 0;
 			Components = new T[maxNumber];
-			// for (uint i = 0; i < _components.Length; i++)
-			// {
-			// 	_components[i].ID = EntId.Invalid;
-			// }
 		}
 		
 		public void SetupComponent(EntId owner)
@@ -69,20 +56,19 @@ namespace Core.Model
 				Debug.LogError($"Component({typeof(T)}) already exists for owner {owner}");
 				return;
 			}
-
 			
 			// int index = Array.FindIndex(_components, component => component.ID == EntId.Invalid);
-			if (TopEmptyIndex >= Components.Length)
+			if (_topEmptyIndex >= Components.Length)
 			{
-				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{TopEmptyIndex}/{Components.Length}] ");
+				Debug.LogError($"No available space for new component({typeof(T)}), FILLED[{_topEmptyIndex}/{Components.Length}] ");
 				return;
 			}
 			
-			Components[TopEmptyIndex].ID = owner;
-			ComponentIndexByOwner[owner] = TopEmptyIndex;
-			Components[TopEmptyIndex].Init();
+			Components[_topEmptyIndex].ID = owner;
+			ComponentIndexByOwner[owner] = _topEmptyIndex;
+			Components[_topEmptyIndex].Init();
 			
-			TopEmptyIndex++;
+			_topEmptyIndex++;
 		}
 
 		public void RemoveComponent(EntId owner)
@@ -90,26 +76,27 @@ namespace Core.Model
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 				return;
 
-			if (TopEmptyIndex <= 1)
+			if (_topEmptyIndex <= 1)
 			{
 				Components[index].ID = EntId.Invalid;
-				TopEmptyIndex--;
+				_topEmptyIndex--;
 				ComponentIndexByOwner.Remove(owner);
 				return;
 			}
 
 			
-			uint lastComponentIndex = TopEmptyIndex-1;
+			uint lastComponentIndex = _topEmptyIndex-1;
 			EntId topEntityID = Components[lastComponentIndex].ID;
 
 			ComponentIndexByOwner[topEntityID] = index;
 			Components[index] = Components[lastComponentIndex];
 
 			Components[lastComponentIndex].ID = EntId.Invalid;
-			TopEmptyIndex--;
+			_topEmptyIndex--;
 			ComponentIndexByOwner.Remove(owner);
 		}
-		
+
+
 		public ref T GetComponent(EntId owner)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
@@ -122,16 +109,12 @@ namespace Core.Model
 		}
 		
 
-		public void RebuildWithMax(int maxNumber)
+		public void RebuildWithMax(uint maxNumber)
 		{
-			TopEmptyIndex = 0;
+			_topEmptyIndex = 0;
 			ComponentIndexByOwner.Clear();
 			
 			Components = new T[maxNumber];
-			// for (int i = 0; i < _components.Length; i++)
-			// {
-			// 	_components[i].ID = EntId.Invalid;
-			// }
 		}
 
 
@@ -166,7 +149,7 @@ namespace Core.Model
 		// public void ResetIterator()
 		// 	=> _iteratorIndex = -1;
 
-		public uint Count => TopEmptyIndex;
+		public uint Count => _topEmptyIndex;
 		public uint MaxCount => (uint) Components.Length;
 
 	}

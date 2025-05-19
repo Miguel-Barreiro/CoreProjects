@@ -1,4 +1,5 @@
 using System;
+using Core.Model;
 
 namespace Core.Systems
 {
@@ -21,9 +22,10 @@ namespace Core.Systems
 	}
 	
 	[AttributeUsage(AttributeTargets.Struct)]
-	public class ComponentDataPropertiesAttribute : Attribute
+	public class ComponentDataAttribute : Attribute
 	{
 		public SystemPriority Priority { get; set; } = SystemPriority.Default;
+		public Type ContainerType { get; set; } = typeof(BasicCompContainer<>);
 	}
 	
 	

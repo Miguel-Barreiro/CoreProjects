@@ -357,18 +357,6 @@ namespace Core.Model
                 using CachedList<Type> result = ListCache<Type>.Get();
 
                 GetEntityComponentTypesRec(entityType, result);
-                // IEnumerable<Type> implementedInterfaces = entityType.GetImplementedInterfaces();
-                // foreach (Type implementedInterface in implementedInterfaces)
-                // {
-                //
-                //     bool isActualComponentType = implementedInterface.IsGenericType && 
-                //                                  implementedInterface.GetGenericTypeDefinition() == typeof(Component<>);
-                //     
-                //     if ( !isActualComponentType && 
-                //          implementedInterface.IsAssignableToGenericWithArgType(typeof(Component<>)) &&
-                //         !result.Contains(implementedInterface))
-                //         result.Add(implementedInterface);
-                // }
 
                 foreach (Type implementedComponent in result)
                 {

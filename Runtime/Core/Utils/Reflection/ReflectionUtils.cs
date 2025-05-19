@@ -31,6 +31,24 @@ namespace Core.Utils.Reflection
             }
         }
         
+        
+        
+        public static T GetAttributesOfType<T>(Type type) where T : Attribute
+        {
+            Attribute[] attributes = Attribute.GetCustomAttributes(type);
+
+            foreach (Attribute attribute in attributes)
+            {
+                if (attribute.GetType() == typeof(T))
+                {
+                    return attribute as T;
+                }
+            }
+
+            return default;
+        }
+        
+        
         public static bool IsTypeOf<T>(this Type type)
         {
             return typeof (T).IsAssignableFrom(type);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Model.ModelSystems.ComponentSystems;
 using Core.Systems;
+using Core.Utils.Reflection;
 using UnityEngine;
 
 namespace Core.Model.ModelSystems
@@ -38,13 +39,13 @@ namespace Core.Model.ModelSystems
 
         internal EntitySystemsContainer()
         {
-            foreach (var componentDataType in TypeCache.Get().GetAllComponentDataTypes())
+            foreach (Type componentDataType in TypeCache.Get().GetAllComponentDataTypes())
             {
                 SystemsCacheByComponentDataType.Add(componentDataType, new ComponentSystemListenerGroup());
     
-                Attribute[] attributes = Attribute.GetCustomAttributes(componentDataType);
-                ComponentDataPropertiesAttribute systemProperties = GetAttributesOfType<ComponentDataPropertiesAttribute>(attributes);
-                SystemPriority systemPriority = systemProperties?.Priority ?? SystemPriority.Default;
+                ComponentDataAttribute system = 
+                    ReflectionUtils.GetAttributesOfType<ComponentDataAttribute>(componentDataType);
+                SystemPriority systemPriority = system?.Priority ?? SystemPriority.Default;
 
                 List<Type> target = systemPriority switch
                 {
@@ -55,21 +56,6 @@ namespace Core.Model.ModelSystems
                 };
                 target.Add(componentDataType);
             }
-            
-            T GetAttributesOfType<T>(Attribute[] attributes) where T : Attribute
-            {
-                foreach (Attribute attribute in attributes)
-                {
-                    if (attribute.GetType() == typeof(T))
-                    {
-                        return attribute as T;
-                    }
-                }
-
-                return default;
-            }
-
-
         }
         
         

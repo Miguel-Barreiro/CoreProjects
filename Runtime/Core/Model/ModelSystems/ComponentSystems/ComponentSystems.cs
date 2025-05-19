@@ -23,7 +23,7 @@ namespace Core.Model.ModelSystems
 	public interface UpdateComponents<T> : IComponentSystem<T>
 		where T : struct, IComponentData
 	{
-		void UpdateComponents(ComponentContainer<T> componentsContainer, float deltaTime);
+		void UpdateComponents(float deltaTime);
 	}
 
 	
