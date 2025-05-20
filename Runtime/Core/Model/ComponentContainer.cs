@@ -118,37 +118,6 @@ namespace Core.Model
 		}
 
 
-		//
-		// public bool MoveNext()
-		// { 
-		// 	_iteratorIndex++;
-		// 	if (_iteratorIndex >= _topEmptyIndex)
-		// 		return false;
-		//
-		// 	// _iteratorIndex++;
-		// 	// ref T component = ref _components[_iteratorIndex];
-		// 	// while ( component.ID == EntId.Invalid)
-		// 	// {
-		// 	// 	if (_iteratorIndex >= _components.Length)
-		// 	// 		return false;
-		// 	//
-		// 	// 	component = ref _components[_iteratorIndex];
-		// 	// }
-		// 	return true;
-		// }
-		//
-		//
-		// public ref T GetCurrent()
-		// {
-		// 	if (_iteratorIndex < 0 || _iteratorIndex >= _topEmptyIndex)
-		// 		_iteratorIndex = 0;
-		//
-		// 	return ref Components[_iteratorIndex];
-		// }
-		//
-		// public void ResetIterator()
-		// 	=> _iteratorIndex = -1;
-
 		public uint Count => _topEmptyIndex;
 		public uint MaxCount => (uint) Components.Length;
 

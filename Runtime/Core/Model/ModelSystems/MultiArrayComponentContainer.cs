@@ -43,10 +43,11 @@ namespace Core.Model.ModelSystems
 				Debug.LogError($"No available space for new component(TestDD1ComponentData), FILLED[{pushBackArray.Count}] ");
 				return;
 			}
-			
-			pushBackArray[newIndex].ID = owner;
+
+			TComponentData[] componentDatas = pushBackArray.Items;
+			componentDatas[newIndex].ID = owner;
 			ComponentIndexByOwner[owner] = ComponentAttributes.New(newIndex, 0);
-			pushBackArray[newIndex].Init();
+			componentDatas[newIndex].Init();
 		}
 
 		public void RemoveComponent(EntId owner)
@@ -60,7 +61,8 @@ namespace Core.Model.ModelSystems
 			PushBackArray<TComponentData> pushBackArray = ComponentArrays[arrayType];
 			
 			pushBackArray.Remove(index, out uint changedIndex);
-			EntId changedEntityID = pushBackArray[changedIndex].ID;
+			ref TComponentData componentData = ref pushBackArray.Items[changedIndex];
+			EntId changedEntityID = componentData.ID;
 
 			ComponentIndexByOwner[changedEntityID].Index = changedIndex;
 			ComponentIndexByOwner.Remove(owner);
@@ -76,7 +78,7 @@ namespace Core.Model.ModelSystems
 			uint arrayType = attributes.ArrayType;
 			uint index = attributes.Index;
 			
-			return ref ComponentArrays[arrayType][index];
+			return ref ComponentArrays[arrayType].Items[index];
 		}
 		
 		
