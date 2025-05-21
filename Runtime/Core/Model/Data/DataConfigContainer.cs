@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Core.Model;
 using Core.Model.Data;
+using UnityEngine;
 
 namespace Core.Core.Model.Data
 {
@@ -18,24 +19,31 @@ namespace Core.Core.Model.Data
 		
 		public void AddDataTable(DataTable dataTable)
 		{
-			IEnumerable<DataConfig> dataTableConfigs = dataTable.GetDataConfigs();
-			foreach (DataConfig dataConfig in dataTableConfigs)
+			IEnumerable<(DataConfig, string name)> dataTableConfigs = dataTable.GetDataConfigs();
+			foreach ((DataConfig currentDataConfig, string name) in dataTableConfigs)
 			{
-				if (dataConfigs.ContainsKey(dataConfig.ID))
+				if (currentDataConfig == null)
+				{
+					Debug.LogError($"DataConfigContainer: DataConfig field({name}) is null for table {dataTable.name}"); 
+					continue;
+				}
+				
+				if (dataConfigs.ContainsKey(currentDataConfig.ID))
 					continue;
 				
-				dataConfigs.Add(dataConfig.ID, dataConfig);
+				dataConfigs.Add(currentDataConfig.ID, currentDataConfig);
 			}
 		}
 
 		public void RemoveDataTable(DataTable dataTable)
 		{
-			IEnumerable<DataConfig> dataTableConfigs = dataTable.GetDataConfigs();
-			foreach (DataConfig dataConfig in dataTableConfigs)
+			IEnumerable<(DataConfig, string name)> dataTableConfigs = dataTable.GetDataConfigs();
+			foreach ((DataConfig dataConfig, string _) in dataTableConfigs)
 			{
 				if (dataConfigs.ContainsKey(dataConfig.ID))
 					dataConfigs.Remove(dataConfig.ID);
 			}
+			
 		}
 
 		public DataConfig GetDataConfig(string id)

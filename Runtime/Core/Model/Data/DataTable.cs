@@ -12,7 +12,7 @@ namespace Core.Model.Data
 	public abstract class DataTable : ScriptableObject, IInitSystem, IDisposable
 	{
 		[Inject] private readonly DataConfigContainer DataConfigContainer = null!;
-		public IEnumerable<DataConfig> GetDataConfigs()
+		public IEnumerable<(DataConfig, string name)> GetDataConfigs()
 		{
 			Type selfType = this.GetType();
 			FieldInfo[] fields = selfType.GetFields(BindingFlags.Public |
@@ -23,10 +23,11 @@ namespace Core.Model.Data
 				if (field.FieldType.IsTypeOf<DataConfig>())
 				{
 					object value = field.GetValue(this);
-					yield return value as DataConfig;
+					yield return (value as DataConfig, field.Name);
 				}
 			}
 		}
+		
 
 		public void Initialize()
 		{
