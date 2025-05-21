@@ -101,7 +101,7 @@ namespace Core.Model
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 			{
-				Debug.LogError($"Component({typeof(T)}) not found for owner {owner}");
+				// Debug.LogError($"Component({typeof(T)}) not found for owner {owner}");
 				return ref Invalid;
 			}
 			
