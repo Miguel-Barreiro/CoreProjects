@@ -165,12 +165,6 @@ namespace Core.Model.Time
 
         public OperationResult<float> GetMillisecondsLeft(EntId entId, string timerId)
         {
-            float timerScaleF = 1f;
-            if(TimerModel.DefaultTimeScalerStat != null)
-            {
-                Fix timerScale = StatsSystem.GetStatValue(entId, TimerModel.DefaultTimeScalerStat);
-                timerScaleF = (float)timerScale;
-            }
             
             if (!TimerModel.Timers.TryGetValue(entId, out Dictionary<string, TimerModel.InternalTimer> timersById))
                 return OperationResult<float>.Failure($"timer not found for entity ([{entId}].<{timerId})>");
@@ -187,8 +181,6 @@ namespace Core.Model.Time
             {
                 timeLeftMs = Math.Max(0, internalTimer.CooldownAbsolute!.Value - internalTimer.timePassed);
             }
-            
-            timeLeftMs = timeLeftMs / timerScaleF;
             
             return OperationResult<float>.Success(timeLeftMs);
         }
