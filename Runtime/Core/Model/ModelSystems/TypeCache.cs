@@ -90,14 +90,16 @@ namespace Core.Model
                 }
             }
 
+            using CachedList<Type> componentToExclude = ListCache<Type>.Get();
             foreach (Type componentType in componentTypes)
             {
                 Type? componentDataType = GetComponentDataFromType(componentType);
                 if (componentDataType == null)
                 {
 #if UNITY_EDITOR
-                    Debug.LogError($"could not found componentData for {componentType}");
+                    Debug.LogWarning($"could not found componentData for {componentType} so it will be excluded");
 #endif                    
+                    componentToExclude.Add(componentType);
                     continue;
                 }
                 
@@ -108,9 +110,19 @@ namespace Core.Model
 #endif                    
                    continue;
                 }
+                
                 if (!componentDataTypeByComponentType.ContainsKey(componentType))
                     componentDataTypeByComponentType.Add(componentType, componentDataType);
+                
             }
+            
+            
+            foreach (Type type in componentToExclude)
+            {
+                componentTypes.Remove(type);
+                componentDataTypeByComponentType.Remove(type);
+            }
+
             
             
             Type? GetComponentDataFromType(Type componentType)
@@ -243,17 +255,6 @@ namespace Core.Model
             foreach (Type componentDataType in componentDataTypes)
                 yield return componentDataType;
             
-            
-            // if (!componentsByEntityType.TryGetValue(entityType, out List<Type> componentTypes))
-            // {
-            //     // Debug.LogError($"entityType {entityType} not found in cache");
-            //     yield break;
-            // }
-            //
-            // foreach (Type componentType in componentTypes)
-            // {
-            //     yield return componentDataTypeByComponentType[componentType];
-            // }
         }
 
         
