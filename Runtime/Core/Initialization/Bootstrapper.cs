@@ -104,13 +104,12 @@ namespace Core.Initialization
 				
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
-					installer.SetupConfigurations();
+					installer.InjectInstances();
 				}
 
-			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
-					installer.InjectInstances();
+					installer.SetupConfigurations();
 				}
 			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
