@@ -338,7 +338,7 @@ namespace Core.Model
                     if (!componentDataTypeByComponentType.TryGetValue(componentType, out Type componentDataType))
                     {
 #if UNITY_EDITOR
-                        Debug.LogError($"could not found componentData for {componentType}");
+                        Debug.LogWarning($"could not found componentData for {componentType}");
 #endif
                         continue;
                     }
