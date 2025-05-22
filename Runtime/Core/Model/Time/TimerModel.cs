@@ -9,7 +9,8 @@ namespace Core.Model.Time
 	{
 		[SerializeField]
 		internal Dictionary<EntId, Dictionary<string, InternalTimer>> Timers = new ();
-
+		
+		internal StatConfig DefaultTimeScalerStat = null;
 		
 		[Serializable]
 		internal sealed class InternalTimer

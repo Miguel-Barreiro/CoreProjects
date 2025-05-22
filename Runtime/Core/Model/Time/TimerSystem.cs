@@ -23,6 +23,8 @@ namespace Core.Model.Time
         public void SetTimer(EntId entityID, string id, float expirationMs, bool autoReset, bool isUnscaledTime);
         public void SetTimer(EntId entityID, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime);
         public void ResetTimer(EntId entityID, string id);
+
+        public void SetGlobalTimerScalerStat(StatConfig timeScalerStat);
     }
 
 	public interface TimerSystemRo
@@ -35,22 +37,11 @@ namespace Core.Model.Time
     {
         public void Update(float deltaTimeMs);
     }
-
-    // public struct TimerComponentData : IComponentData
-    // {
-    //     public EntId ID { get; set; }
-    //     public void Init() {}
-    // }
-    //
-    // public interface ITimerComponent : Component<TimerComponentData> { }
-
+    
     public class TimerSystemImplementation : TimerSystemRo, 
                                              TimerSystem, 
                                              ITimerSystemImplementationInternal, 
                                              IOnDestroyEntitySystem
-                                             
-    // OnDestroyComponent<TimerComponentData>
-                                             
     {
 
         [Inject] private readonly StatsSystem StatsSystem = null!;
@@ -59,8 +50,6 @@ namespace Core.Model.Time
         
         [NonSerialized]
         private Dictionary<EntId, Dictionary<string, List<Action<EntId>>>> OnFinishListeners = new ();
-        
-        
         
         #region Public
 
@@ -74,6 +63,12 @@ namespace Core.Model.Time
             internalTimer.timePassed = 0;
             internalTimer.Running = true;
         }
+
+        public void SetGlobalTimerScalerStat(StatConfig timeScalerStat)
+        {
+            TimerModel.DefaultTimeScalerStat = timeScalerStat;
+        }
+
 
         public void SetTimer(EntId entityID, string id, StatConfig expirationMsStat, bool autoReset, bool isUnscaledTime)
         {
@@ -170,6 +165,13 @@ namespace Core.Model.Time
 
         public OperationResult<float> GetMillisecondsLeft(EntId entId, string timerId)
         {
+            float timerScaleF = 1f;
+            if(TimerModel.DefaultTimeScalerStat != null)
+            {
+                Fix timerScale = StatsSystem.GetStatValue(entId, TimerModel.DefaultTimeScalerStat);
+                timerScaleF = (float)timerScale;
+            }
+            
             if (!TimerModel.Timers.TryGetValue(entId, out Dictionary<string, TimerModel.InternalTimer> timersById))
                 return OperationResult<float>.Failure($"timer not found for entity ([{entId}].<{timerId})>");
 
@@ -185,6 +187,8 @@ namespace Core.Model.Time
             {
                 timeLeftMs = Math.Max(0, internalTimer.CooldownAbsolute!.Value - internalTimer.timePassed);
             }
+            
+            timeLeftMs = timeLeftMs / timerScaleF;
             
             return OperationResult<float>.Success(timeLeftMs);
         }
@@ -202,15 +206,22 @@ namespace Core.Model.Time
         {
             foreach ((EntId entId, Dictionary<string, TimerModel.InternalTimer> internalTimers) in TimerModel.Timers)
             {
+                float timerScaleF = 1f;
+                if(TimerModel.DefaultTimeScalerStat != null)
+                {
+                    Fix timerScale = StatsSystem.GetStatValue(entId, TimerModel.DefaultTimeScalerStat);
+                    timerScaleF = (float)timerScale;
+                }
+
                 foreach ((string id, TimerModel.InternalTimer internalTimer) in internalTimers)
                 {
                     if (!internalTimer.Running)
                         continue;
 
                     if(internalTimer.IsUnscaledTime)
-                        internalTimer.timePassed += UnityEngine.Time.unscaledDeltaTime * 1000;
+                        internalTimer.timePassed += UnityEngine.Time.unscaledDeltaTime * 1000* timerScaleF;
                     else
-                        internalTimer.timePassed += deltaTime;
+                        internalTimer.timePassed += deltaTime * timerScaleF;
                     
                     
                     float totalCooldown;
