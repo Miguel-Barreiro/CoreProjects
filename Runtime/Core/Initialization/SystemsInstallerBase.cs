@@ -13,7 +13,8 @@ namespace Core.Initialization
 {
     
     public abstract class SystemsInstallerBase
-	{
+    {
+        public abstract void SetupConfigurations();
         protected abstract void InstallSystems();
         public abstract void ResetComponentContainers(DataContainersController dataController);
 
@@ -30,6 +31,11 @@ namespace Core.Initialization
         internal void UninstallSystems()
         {
             Clear();
+        }
+        
+        protected T GetSystem<T>()
+        {
+            return Container.Resolve<T>();
         }
 
         internal void InitializeInstances()

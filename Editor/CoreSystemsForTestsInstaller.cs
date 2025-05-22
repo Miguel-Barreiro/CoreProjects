@@ -16,7 +16,9 @@ namespace Core.Editor
 		private readonly UnitTest Test;
 
 		public CoreSystemsForTestsInstaller(UnitTest test, DiContainer container) : base(container) { Test = test; }
-		
+
+		public override void SetupConfigurations() {  }
+
 		protected override void InstallSystems()
 		{
 			base.InstallSystems();

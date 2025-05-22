@@ -101,6 +101,11 @@ namespace Core.Initialization
 						UpdateObjectBuilder(currentSceneInstaller);
 					}
 				}
+				
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
+				{
+					installer.SetupConfigurations();
+				}
 
 			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)

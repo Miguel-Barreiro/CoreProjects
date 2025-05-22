@@ -18,7 +18,9 @@ namespace Core.Initialization
 			RootCoreParent = rootCoreParent;
 			RootUIPrefab = rootUIPrefab;
 		}
-		
+
+		public override void SetupConfigurations() {  }
+
 		protected override void InstallSystems()
 		{
 			base.InstallSystems();
