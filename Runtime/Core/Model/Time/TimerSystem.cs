@@ -13,7 +13,7 @@ using Zenject;
 
 namespace Core.Model.Time
 {
-	public interface TimerSystem : TimerSystemRo
+	public interface TimerSystem : TimerSystemRo, ISystem
     {
         public void AddOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener);
         public void RemoveOnFinishListener(EntId entityID, string timerId, Action<EntId> onFinishListener);
@@ -33,7 +33,7 @@ namespace Core.Model.Time
         public OperationResult<float> GetMillisecondsLeft(EntId entId, string id);
     }
 
-    internal interface ITimerSystemImplementationInternal
+    internal interface ITimerSystemImplementationInternal : ISystem
     {
         public void Update(float deltaTimeMs);
     }

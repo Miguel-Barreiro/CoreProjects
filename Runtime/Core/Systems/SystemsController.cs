@@ -105,7 +105,8 @@ namespace Core.Systems
                 return;
             }
             
-            ITimerSystem.Update(deltaTime*1000);
+            if(ITimerSystem.Active)
+                ITimerSystem.Update(deltaTime*1000);
             
             NewEntities.Clear();
             DestroyedEntities.Clear();
