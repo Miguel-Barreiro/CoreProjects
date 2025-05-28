@@ -40,14 +40,17 @@ namespace Core.Systems
 		}
 
 
-		public void OnDestroyEntity(EntId destroyedEntityId) 
+		public void OnDestroyEntity(EntId destroyedEntityId)
 		{
+			bool needsUpdate = false;
 			if (TimeScaleSystemModel.scalerByOwners.ContainsKey(destroyedEntityId))
 			{
 				TimeScaleSystemModel.scalerByOwners.Remove(destroyedEntityId);
+				needsUpdate = true;
 			}
 
-			UpdateCurrentScale(); 
+			if(needsUpdate)
+				UpdateCurrentScale(); 
 		}
 
 
