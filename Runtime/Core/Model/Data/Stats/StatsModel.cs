@@ -45,6 +45,24 @@ namespace Core.Model.Data.Stats
 			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, maxValue);
 		}
 
+		
+		public Fix GetDepletedStatPercentage(EntId targetEntId, StatConfig stat)
+		{
+			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+			{
+				return Fix.One;
+			}
+
+			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
+			{
+				return Fix.One;
+			}
+
+			Stat statData = StatsById[statId];
+			return statData.DepletedValue / CalculateNonDepletedValue(statData);
+		}
+
+		
 		public Fix GetDepletedStatValue(EntId targetEntId, StatConfig stat)
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))

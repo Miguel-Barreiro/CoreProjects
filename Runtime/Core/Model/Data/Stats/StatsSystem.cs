@@ -42,6 +42,7 @@ namespace Core.Model
 		
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
 		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
+		public Fix GetStatDepletedPercentage(EntId targetEntId, StatConfig stat);
 		
 		public void AddPermanentModifier(EntId targetEntId, StatConfig stat, Fix value, StatModifierType type);
 		
@@ -106,6 +107,11 @@ namespace Core.Model
 		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat)
 		{
 			return _statsModel.GetDepletedStatValue(targetEntId, stat);
+		}
+
+		public Fix GetStatDepletedPercentage(EntId targetEntId, StatConfig stat)
+		{
+			return _statsModel.GetDepletedStatPercentage(targetEntId, stat);
 		}
 
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, Fix value, StatModifierType type)
