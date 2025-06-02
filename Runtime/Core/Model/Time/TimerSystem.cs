@@ -31,7 +31,9 @@ namespace Core.Model.Time
     {
         public bool HasTimer(EntId entId, string id);
         public OperationResult<float> GetMillisecondsLeft(EntId entId, string id);
+        public OperationResult<float> GetPercentageLeft(EntId entId, string id);
     }
+    
 
     internal interface ITimerSystemImplementationInternal : ISystem
     {
@@ -184,10 +186,31 @@ namespace Core.Model.Time
             
             return OperationResult<float>.Success(timeLeftMs);
         }
-        
-        
-        
-        
+
+        public OperationResult<float> GetPercentageLeft(EntId entId, string timerId)
+        {
+            if (!TimerModel.Timers.TryGetValue(entId, out Dictionary<string, TimerModel.InternalTimer> timersById))
+                return OperationResult<float>.Failure($"timer not found for entity ([{entId}].<{timerId})>");
+
+            if (!timersById.TryGetValue(timerId, out TimerModel.InternalTimer internalTimer))
+                return OperationResult<float>.Failure($"timer not found for entity ([{entId}].<{timerId})>");
+
+            float totalCooldown;
+            float timeLeftMs;
+            if (internalTimer.CooldownStat != null)
+            {
+                Fix totalCooldownFix = StatsSystem.GetStatValue(entId, internalTimer.CooldownStat);
+                totalCooldown = (float)totalCooldownFix;
+                timeLeftMs = Math.Max(0, totalCooldown - internalTimer.timePassed);
+                
+            } else
+            {
+                totalCooldown = internalTimer.CooldownAbsolute!.Value;
+                timeLeftMs = Math.Max(0, internalTimer.CooldownAbsolute!.Value - internalTimer.timePassed);
+            }
+            
+            return OperationResult<float>.Success(timeLeftMs/totalCooldown);
+        }
 
         #endregion
 
