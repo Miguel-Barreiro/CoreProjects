@@ -59,7 +59,12 @@ namespace Core.Model.Data.Stats
 			}
 
 			Stat statData = StatsById[statId];
-			return statData.DepletedValue / CalculateNonDepletedValue(statData);
+			Fix nonDepletedValue = CalculateNonDepletedValue(statData);
+			
+			if (nonDepletedValue <= 0)
+				return Fix.One;
+			
+			return statData.DepletedValue / nonDepletedValue;
 		}
 
 		

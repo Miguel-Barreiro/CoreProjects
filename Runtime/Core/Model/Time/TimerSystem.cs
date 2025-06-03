@@ -208,7 +208,10 @@ namespace Core.Model.Time
                 totalCooldown = internalTimer.CooldownAbsolute!.Value;
                 timeLeftMs = Math.Max(0, internalTimer.CooldownAbsolute!.Value - internalTimer.timePassed);
             }
-            
+
+            if (totalCooldown == 0)
+                return OperationResult<float>.Success(0);
+
             return OperationResult<float>.Success(timeLeftMs/totalCooldown);
         }
 
