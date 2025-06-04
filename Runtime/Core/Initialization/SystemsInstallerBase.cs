@@ -103,7 +103,16 @@ namespace Core.Initialization
             
             return viewInstance;
         }		
-		
+
+        protected GameObject InstantiatePrefab(GameObject prefab, Transform parent = null) 
+        {
+            GameObject viewInstance = GameObject.Instantiate(prefab, parent);
+            AddGameobject(viewInstance);
+            
+            return viewInstance;
+        }
+
+        
         protected GameObject InstantiatePrefabFromPool(GameObject prefab, Transform parent = null) 
         {
             GenericGameObjectPool genericGameObjectPool = Container.Resolve<GenericGameObjectPool>();
