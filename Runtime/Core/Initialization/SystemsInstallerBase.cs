@@ -4,6 +4,7 @@ using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
+using Core.View;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
@@ -94,17 +95,29 @@ namespace Core.Initialization
         
 #region System Installation
 
-        protected GameObject InstantiateAndBindPrefab<T>(T prefab, Transform parent = null) where T : MonoBehaviour
+        protected GameObject InstantiatePrefabAndBind<T>(T prefab, Transform parent = null) where T : MonoBehaviour
         {
-            GameObject logicInstance = GameObject.Instantiate(prefab.gameObject, parent);
-            BindComponentInHierarchy<T>(logicInstance);
-            return logicInstance;
+            GameObject viewInstance = GameObject.Instantiate(prefab.gameObject, parent);
+            BindComponentInHierarchy<T>(viewInstance);
+            AddGameobject(viewInstance);
+            
+            return viewInstance;
         }		
 		
-        protected GameObject InstantiatePrefab(GameObject prefab, Transform parent = null) 
+        protected GameObject InstantiatePrefabFromPool(GameObject prefab, Transform parent = null) 
         {
-            GameObject logicInstance = GameObject.Instantiate(prefab, parent);
-            return logicInstance;
+            GenericGameObjectPool genericGameObjectPool = Container.Resolve<GenericGameObjectPool>();
+            if (genericGameObjectPool == null)
+            {
+                Debug.LogError($"could not find GenericGameObjectPool in container, cannot instantiate prefab {prefab.name}");
+                return null;
+            }
+
+            // GameObject logicInstance = GameObject.Instantiate(prefab, parent);
+            GameObject viewInstance = genericGameObjectPool.GetGameObjectFromPrefab(prefab, parent);
+            AddGameobject(viewInstance);
+            
+            return viewInstance;
         }
 
         protected void BindInstance<T>(T instance)
@@ -174,9 +187,11 @@ namespace Core.Initialization
                 Debug.LogError($"ERROR: {typeof(T)} not found in {instance.name}");
                 return;
             }
+
+            RegisterDisposableIfNeeded(component);
             Container.BindInstance<T>(component);
             // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
-            AddSystem(component);
+            AddSystem<T>(component);
         }
 
         protected void BindComponentFromSelf<T>(GameObject instance)
@@ -184,14 +199,14 @@ namespace Core.Initialization
             T component = instance.GetComponent<T>();
             Container.BindInstance<T>(component);
             // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
-            AddSystem(component);
+            AddSystem<T>(component);
         }
 		
         protected void BindComponent<T>(T component) where T : MonoBehaviour
         {
             Container.BindInstance<T>(component);
             // Container.BindInterfacesAndSelfTo<T>().FromInstance(component).AsSingle();
-            AddSystem(component);
+            AddSystem<T>(component);
         }
         
         protected void ClearDisposablesIfNeeded<T>()
@@ -292,8 +307,15 @@ namespace Core.Initialization
         #endregion
 
         #region Flow
-        
-        
+
+        private void AddGameobject(GameObject viewObject)
+        {
+            if (!ownedGameObjectSystems.Contains(viewObject))
+            {
+                ownedGameObjectSystems.Add(viewObject);
+            }
+        }
+
         private void AddSystem<T>(T logicInstance)
         {
             if (logicInstance == null)

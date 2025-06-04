@@ -9,22 +9,6 @@ using UnityEngine;
 namespace Core.Model.ModelSystems
 {
 
-    // internal interface EntitySystemsContainer
-    // {
-    //
-    //     // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType);
-    //     // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority);
-    //     internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType();
-    //
-    //     internal void AddSystem(object system);
-    //     internal void RemoveComponentSystem(object system);
-    //     
-    // }
-    
-    
-
-
-
 
     public class EntitySystemsContainer
     {
@@ -62,75 +46,7 @@ namespace Core.Model.ModelSystems
         
         #region Public
         
-        // internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentType()
-        // {
-        //     foreach ((Type componentType, ComponentSystemListenerGroup group)  in systemsByComponentType)
-        //     {
-        //         yield return (componentType, group);
-        //     }
-        // }
         
-        
-        // internal IEnumerable<UpdateComponentSystemCache> GetComponentSystemsForUpdate(Type componentType, SystemPriority priority) {
-        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
-        //     {
-        //         List<UpdateComponentSystemCache> priorityList = priority switch
-        //         {
-        //             SystemPriority.Early => systems.UpdateEarlierPriority,
-        //             SystemPriority.Default => systems.UpdateDefaultPriority,
-        //             SystemPriority.Late => systems.UpdateLatePriority,
-        //             _ => systems.UpdateDefaultPriority
-        //         };
-        //         foreach (UpdateComponentSystemCache systemCache in priorityList)
-        //         {
-        //             yield return systemCache;
-        //         }
-        //     }
-        // }
-        //
-        // internal IEnumerable<OnDestroyComponentSystemCache> GetComponentSystemsForDestroyed(Type componentType, SystemPriority priority) {
-        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
-        //     {
-        //         List<OnDestroyComponentSystemCache> priorityList = priority switch
-        //         {
-        //             SystemPriority.Early => systems.OnDestroyEarlierPriority,
-        //             SystemPriority.Default => systems.OnDestroyDefaultPriority,
-        //             SystemPriority.Late => systems.OnDestroyLatePriority,
-        //             _ => systems.OnDestroyDefaultPriority
-        //         };
-        //         foreach (OnDestroyComponentSystemCache systemCache in priorityList)
-        //         {
-        //             yield return systemCache;
-        //         }
-        //     }
-        // }
-        //
-        // internal IEnumerable<OnCreateComponentSystemCache> GetComponentSystemsForCreated(Type componentType, SystemPriority priority) {
-        //     if (systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
-        //     {
-        //         List<OnCreateComponentSystemCache> priorityList = priority switch
-        //         {
-        //             SystemPriority.Early => systems.OnCreateEarlierPriority,
-        //             SystemPriority.Default => systems.OnCreateDefaultPriority,
-        //             SystemPriority.Late => systems.OnCreateLatePriority,
-        //             _ => systems.OnCreateDefaultPriority
-        //         };
-        //         foreach (OnCreateComponentSystemCache systemCache in priorityList)
-        //         {
-        //             yield return systemCache;
-        //         }
-        //     }
-        // }
-
-        // internal ComponentSystemListenerGroup GetAllComponentSystemsFor(Type componentType)
-        // {
-        //     if (!systemsCacheByComponentType.TryGetValue(componentType, out ComponentSystemListenerGroup systems))
-        //     {
-        //         Debug.LogError($"No systems found for component type {componentType}");
-        //         return null;
-        //     }
-        //     return systems;
-        // }
 
         internal IEnumerable<(Type, ComponentSystemListenerGroup)> GetAllComponentSystemsByComponentDataType()
         {
@@ -146,12 +62,6 @@ namespace Core.Model.ModelSystems
             {
                 yield return (componentData, SystemsCacheByComponentDataType[componentData]);
             }
-            //
-            // foreach (var kvp in SystemsCacheByComponentDataType)
-            // {
-            //     yield return kvp;
-            // }
-            // return SystemsCacheByComponentDataType.AsEnumerable();
         }
 
         internal void AddSystem(object system) 
@@ -173,15 +83,11 @@ namespace Core.Model.ModelSystems
 
         internal void RemoveComponentSystem(object system)
         {
-            Type systemType = system.GetType();
             if (!systems.Contains(system)) return;
 
-            IEnumerable<Type> components = ComponentUtils.GetAllComponentDataTypesFromSystem(systemType);
-            foreach (Type componentType in components)
-            {
-                ComponentSystemListenerGroup componentSystemListenerGroup = SystemsCacheByComponentDataType[componentType];
-                componentSystemListenerGroup.RemoveSystem(system);
-            }
+            foreach (ComponentSystemListenerGroup listenerGroup in SystemsCacheByComponentDataType.Values)
+                listenerGroup.RemoveSystem(system);
+
         }
 
         #endregion
@@ -216,9 +122,11 @@ namespace Core.Model.ModelSystems
             OnCreateEarlierPriority.RemoveAll(cache => cache.System == system );
             OnCreateDefaultPriority.RemoveAll(cache => cache.System == system );
             OnCreateLatePriority.RemoveAll(cache => cache.System == system );
+            
             OnDestroyEarlierPriority.RemoveAll(cache => cache.System == system );
             OnDestroyDefaultPriority.RemoveAll(cache => cache.System == system );
             OnDestroyLatePriority.RemoveAll(cache => cache.System == system );
+
             UpdateEarlierPriority.RemoveAll(cache => cache.System == system );
             UpdateDefaultPriority.RemoveAll(cache => cache.System == system );
             UpdateLatePriority.RemoveAll(cache => cache.System == system );

@@ -149,13 +149,18 @@ namespace Core.Systems
             }
         }
 
-        private void RemoveFromInterfaces<T>(T system, Type objectType)
+        private void RemoveFromInterfaces(object system, Type objectType)
         {
-            IEnumerable<Type> implementedInterfaces = objectType.GetImplementedInterfaces();
-            foreach (Type implementedInterface in implementedInterfaces)
+            foreach (HashSet<object> systems in systemsByInterface.Values)
             {
-                systemsByInterface[implementedInterface].Remove(system);
+                systems.Remove(system);
             }
+            
+            // IEnumerable<Type> implementedInterfaces = objectType.GetImplementedInterfaces();
+            // foreach (Type implementedInterface in implementedInterfaces)
+            // {
+            //     systemsByInterface[implementedInterface].Remove(system);
+            // }
         }
 
         #endregion
