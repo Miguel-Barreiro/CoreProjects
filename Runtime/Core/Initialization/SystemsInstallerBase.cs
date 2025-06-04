@@ -245,15 +245,24 @@ namespace Core.Initialization
                 foreach (Type type in types)
                     Container.Unbind(type);
             }
-            foreach (GameObject system in ownedGameObjectSystems)
+            
+            SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
+            IEnumerable<IOnUninstallSystem> allOnUninstallSystems = systemsContainer.GetAllSystemsByInterface<IOnUninstallSystem>();
+
+            foreach (IOnUninstallSystem onUninstallSystem in allOnUninstallSystems)
             {
-                GameObject.Destroy(system);
+                foreach (GameObject gameObjectSystem in ownedGameObjectSystems)
+                        onUninstallSystem.OnUninstall(gameObjectSystem);
+                
+                foreach (System.Object system in ownedSystemsTemp)
+                    onUninstallSystem.OnUninstall(system);
             }
             
+            foreach (GameObject system in ownedGameObjectSystems)
+                GameObject.Destroy(system);
+            
             foreach (System.Object system in ownedSystemsTemp)
-            {
                 RemoveSystem(system);
-            }
 
   
             ownedSystems.Clear();

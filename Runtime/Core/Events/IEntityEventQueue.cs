@@ -22,6 +22,13 @@ namespace Core.Events
 		{
 			EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.AddEntityEventListener(targetEntId, callback);
 		}
+		
+		public static void AddAllEntityEventListener<TEntityEvent>(IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
+			where TEntityEvent : EntityEvent<TEntityEvent>, new()
+		{
+			EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.AddAllEntitiesEventListener(callback);
+		}
+
 	}
 
 	public interface IEntityEventQueue <TEntityEvent>
@@ -42,14 +49,15 @@ namespace Core.Events
 		
 	}
 
-	public abstract class BaseEntityEventQueueImplementation
+	public abstract class BaseEntityEventQueueImplementation : IOnUninstallSystem
 	{
 		internal abstract void RemoveEntity(EntId entId);
 
 		internal abstract void ExecuteAllEvents();
 		
-		internal abstract int EventsCount();  
+		internal abstract int EventsCount();
 
+		public abstract void OnUninstall(object system);
 	}
 
 	public sealed class EntityEventQueueImplementation<TEntityEvent> : BaseEntityEventQueueImplementation, 
@@ -64,12 +72,21 @@ namespace Core.Events
 		
 		
 		internal override int EventsCount() => EntityEvents.Count;
+
 		
+		
+		public override void OnUninstall(object system)
+		{
+			AllEntityEventListeners.RemoveAll(listener => listener.Target == system);
+			foreach (List<IEntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners in EntityEventListeners.Values)
+				eventListeners.RemoveAll(listener => listener.Target == system);
+
+		}
+
 		internal override void RemoveEntity(EntId entId)
 		{
 			EntityEventListeners.Remove(entId);
 		}
-
 		
 		
 		public void AddEntityEventListener(EntId targetEntId, IEntityEventQueue<TEntityEvent>.EntityEventListener callback)

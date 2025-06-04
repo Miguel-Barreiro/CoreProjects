@@ -37,4 +37,10 @@ namespace Core.Model.ModelSystems
 		void OnCreateEntity(EntId destroyedEntityId);
 	}
 
+	
+	public interface IOnUninstallSystem
+	{
+		void OnUninstall(object system);
+	}
+	
 }
