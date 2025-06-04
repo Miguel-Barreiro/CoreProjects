@@ -233,6 +233,11 @@ namespace Core.Initialization
 
         protected void Clear()
         {
+            
+            foreach ( (Type _,List<IDisposable> disposables) in disposableBindedTypes)
+                foreach (IDisposable disposable in disposables)
+                    disposable.Dispose();
+            
             using CachedList<System.Object> ownedSystemsTemp = ListCache<System.Object>.Get();
             foreach ( (System.Object system, List<Type> types) in ownedSystems)
             {
@@ -249,6 +254,8 @@ namespace Core.Initialization
             {
                 RemoveSystem(system);
             }
+
+  
             ownedSystems.Clear();
             ownedGameObjectSystems.Clear();
         }
