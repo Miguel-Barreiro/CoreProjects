@@ -79,6 +79,8 @@ namespace Core.Model.ModelSystems
                 ComponentSystemListenerGroup componentSystemListenerGroup = SystemsCacheByComponentDataType[componentDataType];
                 componentSystemListenerGroup.AddSystem(system, componentDataType);
             }
+            
+            systems.Add(system);
         }
 
         internal void RemoveComponentSystem(object system)

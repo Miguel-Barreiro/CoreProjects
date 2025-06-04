@@ -103,7 +103,6 @@ namespace Core.Systems
         {
             Type systemType = system.GetType();
             RemoveFromInterfaces(system, systemType);
-            systems.Remove(system);
             
             SystemByInstallerName.Remove(system);
             
@@ -118,7 +117,9 @@ namespace Core.Systems
             {
                 eventListenerSystemsContainer.RemovePostEventListener(system);
             }
-
+            
+            //only at the end to avoid issues with checking if system is in systemsByInterface
+            systems.Remove(system);
         }
 
         
