@@ -35,7 +35,9 @@ namespace Core.Model
         public Fix MaxValue { get; }
         public Fix MinValue { get; }
 
-        public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue, EntId owner)
+        public readonly bool CanOverflow;
+        
+        public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue, EntId owner, bool canOverflow)
         {
             Id = id;
             Modifiers = new List<StatModId>[(int) StatModifierType.TOTAL];
@@ -50,6 +52,7 @@ namespace Core.Model
             PermanentModifiers[(int) StatModifierType.Percentage] = Fix.Zero;
 
             Owner = owner;
+            CanOverflow = canOverflow;
         }
         
         public void AddPermanentModifier(StatModifierType type, Fix value)

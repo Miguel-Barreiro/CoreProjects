@@ -18,6 +18,10 @@ namespace Core.Model.Stats
 		
 		[SerializeField][TextArea] private string description = "";
 		public string Description => description;
+		
+		[SerializeField] private bool canOverflow = false;
+		public bool CanOverflow => canOverflow;
+		
 
 	}
 }

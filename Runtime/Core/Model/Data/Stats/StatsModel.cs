@@ -41,8 +41,9 @@ namespace Core.Model.Data.Stats
 			Fix maxValue = CalculateNonDepletedValue(statData);
 			
 			Fix newDepletedValue = statData.DepletedValue + delta;
-			
-			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, maxValue);
+
+			UpdateDepletedAfterStatChange(statData, newDepletedValue);
+			// statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, maxValue);
 		}
 
 		
@@ -100,10 +101,12 @@ namespace Core.Model.Data.Stats
 
 			if(resetDepletedValue){
 				statData.DepletedValue = afterChange;
-			}else{
-				statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
+			}else
+			{
+				UpdateDepletedAfterStatChange(statData, newDepletedValue);
 			}
 		}
+
 
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
 		{
@@ -158,7 +161,8 @@ namespace Core.Model.Data.Stats
 
 			Fix depletedDelta = afterChange - beforeChange;
 			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
-			statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
+			UpdateDepletedAfterStatChange(statData, newDepletedValue);
+			// statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, afterChange);
 			
 			return newStatModID;
 		}
@@ -185,8 +189,9 @@ namespace Core.Model.Data.Stats
 
 				Fix depletedDelta = afterChange - beforeChange;
 				Fix newDepletedValue = targetStat.DepletedValue + depletedDelta;
-				targetStat.DepletedValue = FixMath.Clamp(newDepletedValue, targetStat.MinValue, afterChange);
-		    }
+				UpdateDepletedAfterStatChange(targetStat, newDepletedValue);
+				// targetStat.DepletedValue = FixMath.Clamp(newDepletedValue, targetStat.MinValue, afterChange);
+			}
 
 			// Remove from ModifiersByOwner
 			if (ModifiersByOwner.TryGetValue(modifier.Owner, out List<StatModId> ownerModifiers))
@@ -338,7 +343,7 @@ namespace Core.Model.Data.Stats
 			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
 			{
 				statId = NextStatId();
-				statData = new(statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue, owner);
+				statData = new(statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue, owner, stat.CanOverflow);
 				StatsById[statData.Id] = statData;
 				ownerStatsDict[stat] = statData.Id;
 			} else
@@ -349,6 +354,19 @@ namespace Core.Model.Data.Stats
 			return statData;
 		}
 		
+		private void UpdateDepletedAfterStatChange(Stat statData, Fix newDepletedValue)
+		{
+			if (!statData.CanOverflow)
+			{
+				Fix newStatValue = CalculateNonDepletedValue(statData);
+				Fix minValue = statData.MinValue;
+				statData.DepletedValue = FixMath.Clamp(newDepletedValue, minValue, newStatValue);
+			} else
+			{
+				statData.DepletedValue = newDepletedValue;
+			}
+		}
+
 
 		#endregion
 
@@ -380,7 +398,9 @@ namespace Core.Model.Data.Stats
 			
 			Fix depletedDelta = afterChange - beforeChange;
 			Fix newDepletedValue = statData.DepletedValue + depletedDelta;
-			statData.DepletedValue = FixMath.Clamp(newDepletedValue, statData.MinValue, afterChange);
+			
+			UpdateDepletedAfterStatChange(statData, newDepletedValue);
+			// statData.DepletedValue = FixMath.Clamp(newDepletedValue, statData.MinValue, afterChange);
 		}
 
 		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner)
@@ -411,7 +431,7 @@ namespace Core.Model.Data.Stats
 			}
 		}
 
-		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newDepletedValue)
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
 			{
@@ -424,8 +444,10 @@ namespace Core.Model.Data.Stats
 			}
 
 			Stat statData = StatsById[statId];
-			Fix maxValue = CalculateNonDepletedValue(statData);
-			statData.DepletedValue = FixMath.Clamp(newValue, stat.DefaultMinValue, maxValue);
+			// Fix maxValue = CalculateNonDepletedValue(statData);
+			
+			UpdateDepletedAfterStatChange(statData, newDepletedValue);
+			// statData.DepletedValue = FixMath.Clamp(newValue, stat.DefaultMinValue, maxValue);
 		}
 		
 		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat)
