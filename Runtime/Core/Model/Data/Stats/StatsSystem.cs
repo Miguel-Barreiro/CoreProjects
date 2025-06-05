@@ -50,6 +50,8 @@ namespace Core.Model
 		public Fix GetModifierValue(StatModId statModId);
 
 
+		public void RemoveAllModifiersFrom(EntId owner, EntId targetEntId, StatConfig stat);
+		
 		public void ChangeModifier(StatModId statModId, Fix newValue);
 		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner);
 		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId);
@@ -132,6 +134,11 @@ namespace Core.Model
 		public Fix GetModifierValue(StatModId statModId)
 		{
 			return _statsModel.GetModifierValue(statModId);
+		}
+
+		public void RemoveAllModifiersFrom(EntId owner, EntId targetEntId, StatConfig stat)
+		{
+			_statsModel.RemoveAllModifiersFrom(owner, targetEntId, stat);
 		}
 
 		public void ChangeModifier(StatModId statModId, Fix newValue)

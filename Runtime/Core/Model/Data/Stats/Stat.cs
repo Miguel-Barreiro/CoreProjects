@@ -9,7 +9,7 @@ namespace Core.Model
         public bool CacheDirty = true;
         public Fix CachedValue = 0;
         
-        public readonly StatId Id;
+        public readonly StatId ID;
         public readonly EntId Owner;
         
         private readonly List<StatModId>[] Modifiers;
@@ -39,7 +39,7 @@ namespace Core.Model
         
         public Stat(StatId id, Fix baseValue, Fix maxValue, Fix minValue, EntId owner, bool canOverflow)
         {
-            Id = id;
+            ID = id;
             Modifiers = new List<StatModId>[(int) StatModifierType.TOTAL];
             BaseValue = baseValue;
             MaxValue = maxValue;

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Core.Model.ModelSystems;
 using Core.Model.Stats;
+using Core.Utils.CachedDataStructures;
 using FixedPointy;
 using Debug = UnityEngine.Debug;
 
@@ -139,7 +139,7 @@ namespace Core.Model.Data.Stats
 		public StatModId AddModifier(EntId owner, EntId targetEntId, StatConfig stat, StatModifierType modifierType, Fix modifierValue)
 		{
 			Stat statData = GetOrCreateStat(targetEntId, stat);
-			StatId statId = statData.Id;
+			StatId statId = statData.ID;
 
 			StatModId newStatModID = NextModId();
 			StatModifier modifier = new StatModifier(newStatModID, modifierType, modifierValue, owner, statId);
@@ -239,7 +239,7 @@ namespace Core.Model.Data.Stats
             {
 				Stat stat = StatsById[statId];
 				
-				StatsById.Remove(stat.Id);
+				StatsById.Remove(stat.ID);
 				
 				// Remove all modifiers affecting each stat
 				IEnumerable<StatModId> modIds = stat.GetModifiers();
@@ -345,8 +345,8 @@ namespace Core.Model.Data.Stats
 			{
 				statId = NextStatId();
 				statData = new(statId, stat.DefaultBaseValue, stat.DefaultMaxValue, stat.DefaultMinValue, owner, stat.CanOverflow);
-				StatsById[statData.Id] = statData;
-				ownerStatsDict[stat] = statData.Id;
+				StatsById[statData.ID] = statData;
+				ownerStatsDict[stat] = statData.ID;
 			} else
 			{
 				statData = StatsById[statId];
@@ -495,6 +495,33 @@ namespace Core.Model.Data.Stats
 			statData.DepletedValue = stat.DefaultMinValue;
 		}
 
+		public void RemoveAllModifiersFrom(EntId owner, EntId targetEntId, StatConfig targetStat)
+		{
+			if (!ModifiersByOwner.TryGetValue(owner, out List<StatModId> ownerModifiers))
+				return;
+
+			if(!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
+				return;
+
+			if(!ownerStatsDict.TryGetValue(targetStat, out StatId targetStatId))
+				return;
+			
+			using CachedList<StatModId> modifiers = ListCache<StatModId>.Get();
+			modifiers.AddRange(ownerModifiers);
+			
+			foreach (StatModId modId in modifiers){
+				StatModifier modifier = ModifiersById[modId];
+				Stat targetStatData = StatsById[modifier.TargetStatId];
+				if (targetStatData == null)
+					continue;
+				
+				if (targetStatData.Owner == targetEntId && targetStatData.ID == targetStatId)
+					RemoveModifier(modId);
+			}
+
+			
+			
+		}
 	}
 
 
