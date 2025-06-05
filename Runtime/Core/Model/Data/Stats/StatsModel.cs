@@ -22,28 +22,29 @@ namespace Core.Model.Data.Stats
 		private uint _statModIdGenerator = 0;
 
 		
-		public void ModifyDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
+		public Fix ModifyDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
 			{
 #if UNITY_EDITOR
 				Debug.Log($"StatsModel.ModifyDepletedValue: entity({targetEntId}) not found"); 
 #endif
-				return;
+				return stat.DefaultBaseValue;
 			}
 
 			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
 			{
-				return;
+				return stat.DefaultBaseValue;
 			}
 
 			Stat statData = StatsById[statId];
-			Fix maxValue = CalculateNonDepletedValue(statData);
+			// Fix maxValue = CalculateNonDepletedValue(statData);
 			
 			Fix newDepletedValue = statData.DepletedValue + delta;
 
 			UpdateDepletedAfterStatChange(statData, newDepletedValue);
 			// statData.DepletedValue = FixMath.Clamp(newDepletedValue, stat.DefaultMinValue, maxValue);
+			return statData.DepletedValue;
 		}
 
 		
@@ -431,16 +432,16 @@ namespace Core.Model.Data.Stats
 			}
 		}
 
-		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newDepletedValue)
+		public Fix SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newDepletedValue)
 		{
 			if (!StatsByOwnerAndType.TryGetValue(targetEntId, out Dictionary<StatConfig, StatId> ownerStatsDict))
 			{
-				return;
+				return stat.DefaultBaseValue;
 			}
 
 			if (!ownerStatsDict.TryGetValue(stat, out StatId statId))
 			{
-				return;
+				return stat.DefaultBaseValue;
 			}
 
 			Stat statData = StatsById[statId];
@@ -448,6 +449,7 @@ namespace Core.Model.Data.Stats
 			
 			UpdateDepletedAfterStatChange(statData, newDepletedValue);
 			// statData.DepletedValue = FixMath.Clamp(newValue, stat.DefaultMinValue, maxValue);
+			return statData.DepletedValue;
 		}
 		
 		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat)

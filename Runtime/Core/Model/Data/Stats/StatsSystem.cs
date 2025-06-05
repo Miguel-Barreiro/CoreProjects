@@ -33,9 +33,9 @@ namespace Core.Model
 	{
 
 		public void SetBaseValue(EntId targetEntId, StatConfig stat, Fix newValue, bool resetDepletedValue = false);
-		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta);
+		public Fix ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta);
 
-		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue);
+		public Fix SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue);
 		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat);
 		public void ResetDepletedValueToMin(EntId targetEntId, StatConfig stat);
 		
@@ -94,9 +94,9 @@ namespace Core.Model
 			_statsModel.SetBaseValue(targetEntId, stat, newValue, resetDepletedValue);
 		}
 
-		public void ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
+		public Fix ChangeDepletedValue(EntId targetEntId, StatConfig stat, Fix delta)
 		{
-			_statsModel.ModifyDepletedValue(targetEntId, stat, delta);
+			return _statsModel.ModifyDepletedValue(targetEntId, stat, delta);
 		}
 
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat)
@@ -149,9 +149,9 @@ namespace Core.Model
 			return _statsModel.GetModifiersFromOwnerToTarget(owner, targetEntId);
 		}
 
-		public void SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
+		public Fix SetDepletedValue(EntId targetEntId, StatConfig stat, Fix newValue)
 		{
-			_statsModel.SetDepletedValue(targetEntId, stat, newValue);
+			return _statsModel.SetDepletedValue(targetEntId, stat, newValue);
 		}
 
 		public void ResetDepletedValueToMax(EntId targetEntId, StatConfig stat)
