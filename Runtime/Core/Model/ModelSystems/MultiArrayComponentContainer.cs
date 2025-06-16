@@ -23,8 +23,8 @@ namespace Core.Model.ModelSystems
 		{
 			ID = EntId.Invalid
 		};
-		
-		public MultiArrayComponentContainer(uint maxNumber)
+
+		protected MultiArrayComponentContainer(uint maxNumber)
 		{
 			RebuildWithMax(maxNumber);
 		}
@@ -62,7 +62,7 @@ namespace Core.Model.ModelSystems
 		}
 
 		
-		public void SetupComponent(EntId owner)
+		public virtual void SetupComponent(EntId owner)
 		{
 			if (ComponentIndexByOwner.ContainsKey(owner))
 			{
@@ -83,7 +83,7 @@ namespace Core.Model.ModelSystems
 			componentDatas[newIndex].Init();
 		}
 
-		public void RemoveComponent(EntId owner)
+		public virtual void RemoveComponent(EntId owner)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out ComponentAttributes attributes))
 				return;
@@ -112,7 +112,7 @@ namespace Core.Model.ModelSystems
 		
 		
 		
-		public void RebuildWithMax(uint maxNumber)
+		public virtual void RebuildWithMax(uint maxNumber)
 		{
 			ComponentIndexByOwner.Clear();
 			ComponentArrays = new PushBackArray<TComponentData>[ComponentArrayCount];
