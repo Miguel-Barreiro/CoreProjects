@@ -42,16 +42,16 @@ namespace Core.Model.ModelSystems
 			
 			TComponentData componentData = GetComponent(target);
 			
-			PushBackArray<TComponentData> pushBackArray = ComponentArrays[arrayType];
-			RemoveFromArray(index, pushBackArray);
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
+			RemoveFromArray(index, ref pushBackArray);
 			
-			PushBackArray<TComponentData> newPushBackArray = ComponentArrays[newArrayIndex];
+			ref PushBackArray<TComponentData> newPushBackArray = ref ComponentArrays[newArrayIndex];
 			newPushBackArray.Add(componentData, out uint newIndex);
 			attributes.Index = newIndex;
 			attributes.ArrayType = newArrayIndex;
 		}
 		
-		protected void RemoveFromArray(uint index, PushBackArray<TComponentData> pushBackArray)
+		protected void RemoveFromArray(uint index, ref PushBackArray<TComponentData> pushBackArray)
 		{
 			pushBackArray.Remove(index, out uint changedIndex);
 			
@@ -70,7 +70,7 @@ namespace Core.Model.ModelSystems
 				return;
 			}
 
-			PushBackArray<TComponentData> pushBackArray = ComponentArrays[0];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[0];
 			if (!pushBackArray.SetupNew(out uint newIndex))
 			{
 				Debug.LogError($"No available space for new component(TestDD1ComponentData), FILLED[{pushBackArray.Count}] ");
@@ -91,9 +91,9 @@ namespace Core.Model.ModelSystems
 			uint arrayType = attributes.ArrayType;
 			uint index = attributes.Index;
 
-			PushBackArray<TComponentData> pushBackArray = ComponentArrays[arrayType];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
 			
-			RemoveFromArray(index, pushBackArray);
+			RemoveFromArray(index, ref pushBackArray);
 			ComponentIndexByOwner.Remove(owner);
 		}
 		
@@ -106,8 +106,9 @@ namespace Core.Model.ModelSystems
 			}
 			uint arrayType = attributes.ArrayType;
 			uint index = attributes.Index;
-			
-			return ref ComponentArrays[arrayType].Items[index];
+
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
+			return ref pushBackArray.Items[index];
 		}
 		
 		
