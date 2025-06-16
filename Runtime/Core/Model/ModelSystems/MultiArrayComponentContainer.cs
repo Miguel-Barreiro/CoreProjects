@@ -9,7 +9,7 @@ namespace Core.Model.ModelSystems
 	public abstract class MultiArrayComponentContainer<TComponentData>  : ComponentContainer<TComponentData>
 		where TComponentData : struct, IComponentData
 	{
-		protected abstract uint ComponentArrayCount { get; }
+		protected abstract int ComponentArrayCount { get; }
 		
 		// the index 0 is the main array
 		public PushBackArray<TComponentData>[] ComponentArrays;
@@ -28,6 +28,39 @@ namespace Core.Model.ModelSystems
 		{
 			RebuildWithMax(maxNumber);
 		}
+
+		protected void SwitchToArray(EntId target, uint newArrayIndex)
+		{
+			if (!ComponentIndexByOwner.TryGetValue(target, out ComponentAttributes attributes))
+				return;
+			
+			uint arrayType = attributes.ArrayType;
+			uint index = attributes.Index;
+
+			if(attributes.ArrayType == newArrayIndex)
+				return;
+			
+			TComponentData componentData = GetComponent(target);
+			
+			PushBackArray<TComponentData> pushBackArray = ComponentArrays[arrayType];
+			RemoveFromArray(index, pushBackArray);
+			
+			PushBackArray<TComponentData> newPushBackArray = ComponentArrays[newArrayIndex];
+			newPushBackArray.Add(componentData, out uint newIndex);
+			attributes.Index = newIndex;
+			attributes.ArrayType = newArrayIndex;
+		}
+		
+		protected void RemoveFromArray(uint index, PushBackArray<TComponentData> pushBackArray)
+		{
+			pushBackArray.Remove(index, out uint changedIndex);
+			
+			ref TComponentData componentData = ref pushBackArray.Items[changedIndex];
+			EntId changedEntityID = componentData.ID;
+
+			ComponentIndexByOwner[changedEntityID].Index = changedIndex;
+		}
+
 		
 		public void SetupComponent(EntId owner)
 		{
@@ -60,11 +93,7 @@ namespace Core.Model.ModelSystems
 
 			PushBackArray<TComponentData> pushBackArray = ComponentArrays[arrayType];
 			
-			pushBackArray.Remove(index, out uint changedIndex);
-			ref TComponentData componentData = ref pushBackArray.Items[changedIndex];
-			EntId changedEntityID = componentData.ID;
-
-			ComponentIndexByOwner[changedEntityID].Index = changedIndex;
+			RemoveFromArray(index, pushBackArray);
 			ComponentIndexByOwner.Remove(owner);
 		}
 		
