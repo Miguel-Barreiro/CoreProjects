@@ -230,6 +230,8 @@ namespace Core.Model.Time
                     Fix timerScale = StatsSystem.GetStatValue(entId, TimerModel.DefaultTimeScalerStat);
                     timerScaleF = (float)timerScale;
                 }
+                
+                float internalTimerTimePassed = UnityEngine.Time.unscaledDeltaTime * 1000f * timerScaleF;
 
                 foreach ((string id, TimerModel.InternalTimer internalTimer) in internalTimers)
                 {
@@ -237,8 +239,9 @@ namespace Core.Model.Time
                         continue;
 
                     if(internalTimer.IsUnscaledTime)
-                        internalTimer.timePassed += UnityEngine.Time.unscaledDeltaTime * 1000* timerScaleF;
-                    else
+                    {
+                        internalTimer.timePassed += internalTimerTimePassed;
+                    } else
                         internalTimer.timePassed += deltaTime * timerScaleF;
                     
                     
