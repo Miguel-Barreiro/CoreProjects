@@ -15,6 +15,7 @@ namespace Core.Model.Time
 		[Serializable]
 		internal sealed class InternalTimer
 		{
+			internal EntId EntityID;
 			internal string Id;
 
 			internal float? CooldownAbsolute = null;
@@ -28,7 +29,7 @@ namespace Core.Model.Time
 			internal bool isAutoReset = false;
 			internal bool IsUnscaledTime = true;
 			
-			public InternalTimer(float timeMs, string id, bool autoReset, bool isUnscaledTime)
+			public InternalTimer(float timeMs, EntId entityID,  string id, bool autoReset, bool isUnscaledTime)
 			{
 				Id = id;
 				CooldownStat = null;
@@ -37,13 +38,14 @@ namespace Core.Model.Time
 				isAutoReset = autoReset;
 			}
             
-			public InternalTimer(StatConfig cooldownStat, string id, bool autoReset, bool isUnscaledTime)
+			public InternalTimer(StatConfig cooldownStat, EntId entityID, string id, bool autoReset, bool isUnscaledTime)
 			{
 				Id = id;
 				CooldownAbsolute = null;
 				CooldownStat = cooldownStat;
 				IsUnscaledTime = isUnscaledTime;
 				isAutoReset = autoReset;
+				entityID = entityID;
 			}
 
 		}

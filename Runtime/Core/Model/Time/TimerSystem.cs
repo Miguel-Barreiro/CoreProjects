@@ -77,7 +77,7 @@ namespace Core.Model.Time
             Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(id, out TimerModel.InternalTimer internalTimer))
             {
-                internalTimer = new TimerModel.InternalTimer(expirationMsStat, id, autoReset, isUnscaledTime);
+                internalTimer = new TimerModel.InternalTimer(expirationMsStat, entityID, id, autoReset, isUnscaledTime);
                 timersById[id] = internalTimer;
                 return;
             }
@@ -95,7 +95,7 @@ namespace Core.Model.Time
             Dictionary<string, TimerModel.InternalTimer> timersById = GetOrCreateEntityTimers(entityID);
             if (!timersById.TryGetValue(id, out TimerModel.InternalTimer internalTimer))
             {
-                internalTimer = new TimerModel.InternalTimer(expirationMs, id, autoReset, isUnscaledTime);
+                internalTimer = new TimerModel.InternalTimer(expirationMs, entityID, id, autoReset, isUnscaledTime);
                 timersById[id] = internalTimer;
                 return;
             }
@@ -222,8 +222,18 @@ namespace Core.Model.Time
 
         public void Update(float deltaTime)
         {
-            foreach ((EntId entId, Dictionary<string, TimerModel.InternalTimer> internalTimers) in TimerModel.Timers)
+            using CachedList<Dictionary<string, TimerModel.InternalTimer>> timers = ListCache<Dictionary<string, TimerModel.InternalTimer>>.Get();
+            timers.AddRange(TimerModel.Timers.Values);
+            
+            foreach (Dictionary<string, TimerModel.InternalTimer> internalTimers in timers)
             {
+                if(timers.Count == 0)
+                    continue;
+                
+                EntId entId = GetEntityIdForTimers(internalTimers.Values);
+                if (entId == EntId.Invalid)
+                    continue;
+                
                 float timerScaleF = 1f;
                 if(TimerModel.DefaultTimeScalerStat != null)
                 {
@@ -271,6 +281,13 @@ namespace Core.Model.Time
                             onFinishListener.Invoke(entId);
                     }
                 }
+            }
+
+            EntId GetEntityIdForTimers(Dictionary<string, TimerModel.InternalTimer>.ValueCollection internalTimersValues)
+            {
+                foreach (TimerModel.InternalTimer timersValue in internalTimersValues)
+                    return timersValue.EntityID;
+                return EntId.Invalid;
             }
         }
         
