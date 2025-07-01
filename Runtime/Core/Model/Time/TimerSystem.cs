@@ -227,7 +227,7 @@ namespace Core.Model.Time
             
             foreach (Dictionary<string, TimerModel.InternalTimer> internalTimers in timers)
             {
-                if(timers.Count == 0)
+                if(internalTimers.Count == 0)
                     continue;
                 
                 EntId entId = GetEntityIdForTimers(internalTimers.Values);
@@ -243,7 +243,7 @@ namespace Core.Model.Time
                 
                 float internalTimerTimePassed = UnityEngine.Time.unscaledDeltaTime * 1000f * timerScaleF;
 
-                foreach ((string id, TimerModel.InternalTimer internalTimer) in internalTimers)
+                foreach (TimerModel.InternalTimer internalTimer in internalTimers.Values)
                 {
                     if (!internalTimer.Running)
                         continue;
@@ -287,6 +287,7 @@ namespace Core.Model.Time
             {
                 foreach (TimerModel.InternalTimer timersValue in internalTimersValues)
                     return timersValue.EntityID;
+                
                 return EntId.Invalid;
             }
         }

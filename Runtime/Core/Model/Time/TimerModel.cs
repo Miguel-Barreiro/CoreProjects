@@ -36,6 +36,7 @@ namespace Core.Model.Time
 				CooldownAbsolute = timeMs;
 				IsUnscaledTime = isUnscaledTime;
 				isAutoReset = autoReset;
+				EntityID = entityID;
 			}
             
 			public InternalTimer(StatConfig cooldownStat, EntId entityID, string id, bool autoReset, bool isUnscaledTime)
@@ -45,7 +46,7 @@ namespace Core.Model.Time
 				CooldownStat = cooldownStat;
 				IsUnscaledTime = isUnscaledTime;
 				isAutoReset = autoReset;
-				entityID = entityID;
+				EntityID = entityID;
 			}
 
 		}
