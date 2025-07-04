@@ -243,7 +243,10 @@ namespace Core.Model.Time
                 
                 float internalTimerTimePassed = UnityEngine.Time.unscaledDeltaTime * 1000f * timerScaleF;
 
-                foreach (TimerModel.InternalTimer internalTimer in internalTimers.Values)
+                using CachedList<TimerModel.InternalTimer> internalTimersTemp = ListCache<TimerModel.InternalTimer>.Get();
+                internalTimersTemp.AddRange(internalTimers.Values);
+                
+                foreach (TimerModel.InternalTimer internalTimer in internalTimersTemp)
                 {
                     if (!internalTimer.Running)
                         continue;
