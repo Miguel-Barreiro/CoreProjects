@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Model.Stats;
@@ -521,6 +522,68 @@ namespace Core.Model.Data.Stats
 
 			
 			
+		}
+
+		public void CopyStats(EntId sourceEntityId, EntId targetEntityId)
+		{
+			// Check if source entity has any stats
+			if (!StatsByOwnerAndType.TryGetValue(sourceEntityId, out Dictionary<StatConfig, StatId> sourceStatsDict))
+			{
+				return; // Source entity has no stats to copy
+			}
+
+			// Copy each stat from source to target
+			foreach ( (StatConfig statConfig, StatId sourceStatId) in sourceStatsDict)
+			{
+				// StatConfig statConfig = statConfigAndId.Key;
+				// StatId sourceStatId = statConfigAndId.Value;
+				Stat sourceStat = StatsById[sourceStatId];
+
+				// Create or get the target stat
+				Stat targetStat = GetOrCreateStat(targetEntityId, statConfig);
+
+				// Copy base value and depleted value
+				targetStat.BaseValue = sourceStat.BaseValue;
+				targetStat.DepletedValue = sourceStat.DepletedValue;
+
+				// Copy permanent modifiers
+				for (int i = 0; i < (int)StatModifierType.TOTAL; i++)
+				{
+					StatModifierType type = (StatModifierType)i;
+					Fix permanentValue = sourceStat.GetPermanentModifier(type);
+					if (permanentValue != Fix.Zero)
+						targetStat.AddPermanentModifier(type, permanentValue);
+				}
+
+				IEnumerable<StatModId> statModIds = sourceStat.GetModifiers();
+				foreach (StatModId sourceModId in statModIds)
+				{
+					StatModifier sourceModifier = ModifiersById[sourceModId];
+						
+					// Create new modifier for target with same owner and value
+					StatModId newModId = NextModId();
+
+					StatModifier newModifier = new StatModifier(newModId, sourceModifier.Type, 
+																sourceModifier.Value, sourceModifier.Owner, 
+																targetStat.ID);
+
+					// Add to ModifiersById
+					ModifiersById[newModId] = newModifier;
+
+					// Add to ModifiersByOwner
+					if (!ModifiersByOwner.TryGetValue(sourceModifier.Owner, out List<StatModId> ownerModifierList))
+					{
+						ownerModifierList = new List<StatModId>();
+						ModifiersByOwner[sourceModifier.Owner] = ownerModifierList;
+					}
+					ownerModifierList.Add(newModId);
+
+					// Add to target stat
+					targetStat.AddModifier(newModifier);
+					
+				}
+				
+			}
 		}
 	}
 

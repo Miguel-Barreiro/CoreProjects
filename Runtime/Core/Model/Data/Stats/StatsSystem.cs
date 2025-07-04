@@ -59,6 +59,8 @@ namespace Core.Model
 		public void RemoveModifier(StatModId statModId);
 
 		public void Reset();
+
+		void CopyStats(EntId sourceEntityId, EntId targetEntityId);
 	}
 	
 
@@ -169,6 +171,11 @@ namespace Core.Model
 		public void ResetDepletedValueToMin(EntId targetEntId, StatConfig stat)
 		{
 			_statsModel.ResetDepletedValueToMin(targetEntId, stat);
+		}
+
+		public void CopyStats(EntId sourceEntityId, EntId targetEntityId)
+		{
+			_statsModel.CopyStats(sourceEntityId, targetEntityId);
 		}
 
 	}
