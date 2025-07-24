@@ -29,6 +29,13 @@ namespace Core.Events
 			EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.AddAllEntitiesEventListener(callback);
 		}
 
+		
+		public static void RemoveEntityEventListener<TEntityEvent>(EntId targetEntID, IEntityEventQueue<TEntityEvent>.EntityEventListener callback)
+			where TEntityEvent : EntityEvent<TEntityEvent>, new()
+		{
+			EntityEventQueuesContainer.Get().GetQueue<TEntityEvent>()?.RemoveEntityEventListener(targetEntID, callback);
+		}
+
 	}
 
 	public interface IEntityEventQueue <TEntityEvent>
