@@ -36,6 +36,16 @@ namespace Core.Initialization
             BuildTimerSystem();
             BuildStatsSystem();
 
+            BuildModelSystems();
+        }
+        
+        private void BuildModelSystems()
+        {
+            EntityHierarchyModel entityHierarchyModel = new EntityHierarchyModel();
+            BindInstance(entityHierarchyModel);
+			
+            EntityHierarchySystemImplementation entityHierarchySystemImplementation = new EntityHierarchySystemImplementation();
+            BindInstance<IEntityHierarchySystem>(entityHierarchySystemImplementation);
         }
 
         private void BuildEntityEventManagers()

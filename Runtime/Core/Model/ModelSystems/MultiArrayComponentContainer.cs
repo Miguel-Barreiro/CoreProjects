@@ -127,7 +127,6 @@ namespace Core.Model.ModelSystems
 
 		
 		
-		
 		private class ComponentAttributes
 		{
 			private static readonly StaticMemoryPool<ComponentAttributes> Pool =

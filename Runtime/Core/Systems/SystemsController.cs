@@ -125,16 +125,6 @@ namespace Core.Systems
             
             ExecuteEventsAndUpdates();
             
-            IEnumerable<IOnCreateEntitySystem> allOnCreateEntitySystems = systemsContainer.GetAllSystemsByInterface<IOnCreateEntitySystem>();
-            IEnumerable<IOnDestroyEntitySystem> allOnDestroyEntitySystem = systemsContainer.GetAllSystemsByInterface<IOnDestroyEntitySystem>();
-
-            foreach (IOnCreateEntitySystem system in allOnCreateEntitySystems)
-                foreach (EntId newEntityID in NewEntities)
-                    system.OnCreateEntity(newEntityID);
-            
-            foreach (IOnDestroyEntitySystem system in allOnDestroyEntitySystem)
-                foreach (EntId destroyedEntityID in DestroyedEntities)
-                    system.OnDestroyEntity(destroyedEntityID);
             
             EntitiesContainer.ProcessAllFlushedEntities();
             
@@ -156,17 +146,22 @@ namespace Core.Systems
                 EntityEventQueuesContainer.ExecuteAllEntityEvents();
                 
                 bool hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
+                EntitiesContainer.FlushEntities();
+                
                 int loopGard = 0;
                 while ( loopGard < 10 && 
                         (eventQueue.EventsCount > 0 || hasEntitiesToProcess))
                 {
-                    if(hasEntitiesToProcess)
+                     if(hasEntitiesToProcess)
                         ProcessDestroyAndCreateEntitiesEvents();
     
                     if(eventQueue.EventsCount > 0)
                         ProcessGlobalEvents();
                     
-                    hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
+                    hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || 
+                                           EntitiesContainer.destroyedEntitiesCount > 0;
+                    EntitiesContainer.FlushEntities();
+                    
                     loopGard++;
                 }
                 
@@ -178,7 +173,7 @@ namespace Core.Systems
             void ProcessAllEntitiesEvents()
             {
                 GroupNewAndDestroyEntitiesByComponent();
-                
+
                 // then we call the systems by component type
                 
                 IEnumerable<(Type componentDataType, ComponentSystemListenerGroup listenerGroup)> systemsByComponentType = systemsContainer.GetAllEntitySystemsByComponentDataType();
@@ -215,6 +210,12 @@ namespace Core.Systems
                     }
                 }
                 
+                ProcessGlobalCreateAndDestroyedEntityEvents();
+                NewEntities.Clear();
+                DestroyedEntities.Clear();
+                NewEntitiesByComponentDataType.Clear();
+                DestroyedEntitiesByComponentDataType.Clear();
+
                 void CallComponentUpdate(ComponentSystemListenerGroup group, Type componentType)
                 {
                     ARGUMENT_SINGLE[0] = deltaTime;
@@ -266,6 +267,13 @@ namespace Core.Systems
                         }
                     }
                 }
+                
+                ProcessGlobalCreateAndDestroyedEntityEvents();
+                NewEntities.Clear();
+                DestroyedEntities.Clear();
+                
+                NewEntitiesByComponentDataType.Clear();
+                DestroyedEntitiesByComponentDataType.Clear();
             }
             
             
@@ -278,10 +286,13 @@ namespace Core.Systems
                     list.Clear();
                     
                 //first we optimize by grouping by component type
-                foreach (Entity destroyedEntity in EntitiesContainer.GetAllDestroyedEntities())
+                TypeCache typeCache = TypeCache.Get();
+
+                IEnumerable<Entity> allDestroyedEntities = EntitiesContainer.GetAllDestroyedEntities();
+                foreach (Entity destroyedEntity in allDestroyedEntities)
                 {
                     Type entityType = destroyedEntity.GetType();
-                    IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
+                    IEnumerable<Type> componentDatas = typeCache.GetComponentDatasOfEntityType(entityType);
                     foreach (Type componentData in componentDatas)
                         DestroyedEntitiesByComponentDataType[componentData].Add(destroyedEntity.ID);
                     
@@ -291,22 +302,34 @@ namespace Core.Systems
                 {
                     EntId newEntityID = newEntity.ID;
                     Type entityType = newEntity.GetType();
-                    IEnumerable<Type> componentDatas = TypeCache.Get().GetComponentDatasOfEntityType(entityType);
+                    IEnumerable<Type> componentDatas = typeCache.GetComponentDatasOfEntityType(entityType);
                     foreach (Type componentData in componentDatas)
                         NewEntitiesByComponentDataType[componentData].Add(newEntityID);
                     
                     NewEntities.Add(newEntityID);
                 }
                 
-                EntitiesContainer.FlushCurrentDestroyedEntities();
-                EntitiesContainer.FlushCurrentNewEntities();
             }
 
             #endregion
         }
-        
-        
-        
+
+        private void ProcessGlobalCreateAndDestroyedEntityEvents()
+        {
+            IEnumerable<IOnCreateEntitySystem> allOnCreateEntitySystems = systemsContainer.GetAllSystemsByInterface<IOnCreateEntitySystem>();
+            IEnumerable<IOnDestroyEntitySystem> allOnDestroyEntitySystem = systemsContainer.GetAllSystemsByInterface<IOnDestroyEntitySystem>();
+
+            foreach (IOnCreateEntitySystem system in allOnCreateEntitySystems)
+                foreach (EntId newEntityID in NewEntities)
+                    system.OnCreateEntity(newEntityID);
+            
+            foreach (IOnDestroyEntitySystem system in allOnDestroyEntitySystem)
+                foreach (EntId destroyedEntityID in DestroyedEntities)
+                    system.OnDestroyEntity(destroyedEntityID);
+
+        }
+
+
         private readonly List<BaseEvent> EventsToProcessList = new List<BaseEvent>();
         private void ProcessGlobalEvents()
         {
