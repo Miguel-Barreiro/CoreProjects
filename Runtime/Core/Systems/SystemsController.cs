@@ -133,7 +133,7 @@ namespace Core.Systems
                 IEnumerable<IUpdateSystem> allSystemsByInterface = systemsContainer.GetAllSystemsByInterface<IUpdateSystem>();
                 foreach (IUpdateSystem system in allSystemsByInterface)
                 {
-                    if (system.Active)
+                    if (system.Active) 
                         system.UpdateSystem(deltaTime);
                 }
             }
@@ -155,14 +155,14 @@ namespace Core.Systems
                      if(hasEntitiesToProcess)
                         ProcessDestroyAndCreateEntitiesEvents();
     
-                    if(eventQueue.EventsCount > 0)
-                        ProcessGlobalEvents();
+                     if(eventQueue.EventsCount > 0)
+                         ProcessGlobalEvents();
                     
-                    hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || 
-                                           EntitiesContainer.destroyedEntitiesCount > 0;
-                    EntitiesContainer.FlushEntities();
+                     hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || 
+                                            EntitiesContainer.destroyedEntitiesCount > 0;
+                     EntitiesContainer.FlushEntities();
                     
-                    loopGard++;
+                     loopGard++;
                 }
                 
             }
