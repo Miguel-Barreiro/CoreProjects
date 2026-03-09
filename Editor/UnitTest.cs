@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Core.Initialization;
 using Core.Model.ModelSystems;
 using Core.Systems;
@@ -32,7 +33,7 @@ namespace Core.Editor
 		}
 
 		[OneTimeSetUp]
-		public async void OneTimeSetUp()
+		public async Task OneTimeSetUp()
 		{
 			container = new DiContainer();
 
