@@ -213,8 +213,14 @@ namespace Core.Systems
                 ProcessGlobalCreateAndDestroyedEntityEvents();
                 NewEntities.Clear();
                 DestroyedEntities.Clear();
-                NewEntitiesByComponentDataType.Clear();
-                DestroyedEntitiesByComponentDataType.Clear();
+                
+                
+                
+                foreach (List<EntId> list in NewEntitiesByComponentDataType.Values)
+                    list.Clear();
+
+                foreach (List<EntId> list in DestroyedEntitiesByComponentDataType.Values)
+                    list.Clear();
 
                 void CallComponentUpdate(ComponentSystemListenerGroup group, Type componentType)
                 {
@@ -272,8 +278,11 @@ namespace Core.Systems
                 NewEntities.Clear();
                 DestroyedEntities.Clear();
                 
-                NewEntitiesByComponentDataType.Clear();
-                DestroyedEntitiesByComponentDataType.Clear();
+                foreach (List<EntId> list in NewEntitiesByComponentDataType.Values)
+                    list.Clear();
+
+                foreach (List<EntId> list in DestroyedEntitiesByComponentDataType.Values)
+                    list.Clear();
             }
             
             
