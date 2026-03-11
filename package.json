@@ -6,7 +6,8 @@
   "unity" : "2022.3", 
   "dependencies": {
     "com.cysharp.unitask" : "2.5.4", 
-    "com.unity.nuget.newtonsoft-json" : "3.2.1 "
+    "com.unity.nuget.newtonsoft-json" : "3.2.1 ", 
+    "github.com/Miguel-Barreiro/xNode" : "1.8.2"
   },
   "testables": [ "com.Core.TestsBase.Editor" ], 
   "author": {

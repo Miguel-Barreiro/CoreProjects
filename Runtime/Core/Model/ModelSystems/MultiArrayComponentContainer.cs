@@ -6,15 +6,26 @@ using UnityEngine;
 
 namespace Core.Model.ModelSystems
 {
-	public abstract class MultiArrayComponentContainer<TComponentData>  : ComponentContainer<TComponentData>
+	
+	public abstract class MultiArrayComponentContainer<TComponentData> : 
+			BaseMultiArrayComponentContainer<TComponentData, DefaultComponentAttributes>
 		where TComponentData : struct, IComponentData
 	{
+		protected MultiArrayComponentContainer(uint maxNumber) : base(maxNumber) { }
+	}
+
+	public abstract class BaseMultiArrayComponentContainer<TComponentData, TComponentAttribute>  : ComponentContainer<TComponentData>
+		where TComponentData : struct, IComponentData
+		where TComponentAttribute : BaseComponentAttributes<TComponentAttribute>, new()
+	{
+		
+
 		protected abstract int ComponentArrayCount { get; }
 		
 		// the index 0 is the main array
 		public PushBackArray<TComponentData>[] ComponentArrays;
 		
-		private readonly Dictionary<EntId, ComponentAttributes> ComponentIndexByOwner = new Dictionary<EntId, ComponentAttributes>();
+		private readonly Dictionary<EntId, TComponentAttribute> ComponentIndexByOwner = new Dictionary<EntId, TComponentAttribute>();
 		
 		
 		/// This is a dummy component to return when the requested component is not found
@@ -24,14 +35,14 @@ namespace Core.Model.ModelSystems
 			ID = EntId.Invalid
 		};
 
-		protected MultiArrayComponentContainer(uint maxNumber)
+		protected BaseMultiArrayComponentContainer(uint maxNumber)
 		{
 			RebuildWithMax(maxNumber);
 		}
 
 		protected void SwitchToArray(EntId target, uint newArrayIndex)
 		{
-			if (!ComponentIndexByOwner.TryGetValue(target, out ComponentAttributes attributes))
+			if (!ComponentIndexByOwner.TryGetValue(target, out TComponentAttribute attributes))
 				return;
 			
 			uint arrayType = attributes.ArrayType;
@@ -79,13 +90,13 @@ namespace Core.Model.ModelSystems
 
 			TComponentData[] componentDatas = pushBackArray.Items;
 			componentDatas[newIndex].ID = owner;
-			ComponentIndexByOwner[owner] = ComponentAttributes.New(newIndex, 0);
+			ComponentIndexByOwner[owner] = NewComponentAttribute(newIndex, 0);
 			componentDatas[newIndex].Init();
 		}
 
 		public virtual void RemoveComponent(EntId owner)
 		{
-			if (!ComponentIndexByOwner.TryGetValue(owner, out ComponentAttributes attributes))
+			if (!ComponentIndexByOwner.TryGetValue(owner, out TComponentAttribute attributes))
 				return;
 			
 			uint arrayType = attributes.ArrayType;
@@ -99,7 +110,7 @@ namespace Core.Model.ModelSystems
 		
 		public ref TComponentData GetComponent(EntId owner)
 		{
-			if (!ComponentIndexByOwner.TryGetValue(owner, out ComponentAttributes attributes))
+			if (!ComponentIndexByOwner.TryGetValue(owner, out TComponentAttribute attributes))
 			{
 				Debug.LogError($"Component({typeof(TComponentData)}) not found for owner {owner}");
 				return ref Invalid;
@@ -125,29 +136,40 @@ namespace Core.Model.ModelSystems
 		public uint Count => ComponentArrays[0].Count;
 		public uint MaxCount => ComponentArrays[0].MaxCount;
 
-		
-		
-		private class ComponentAttributes
+
+
+
+		#region ComponentAttribute Pool
+
+		private static readonly StaticMemoryPool<TComponentAttribute> Pool =
+			new StaticMemoryPool<TComponentAttribute>(OnSpawned, OnDespawned);
+
+		private static void OnDespawned(TComponentAttribute obj) { }
+		private static void OnSpawned(TComponentAttribute obj) { }
+
+		public static TComponentAttribute NewComponentAttribute(uint index, uint arrayType)
 		{
-			private static readonly StaticMemoryPool<ComponentAttributes> Pool =
-				new StaticMemoryPool<ComponentAttributes>(OnSpawned, OnDespawned);
-
-			private static void OnDespawned(ComponentAttributes obj) { }
-			private static void OnSpawned(ComponentAttributes obj) {}
-
-			public uint Index;
-			public uint ArrayType;
-			public static ComponentAttributes New(uint index, uint arrayType)
-			{
-				ComponentAttributes attributes = Pool.Spawn();
+			TComponentAttribute attributes = Pool.Spawn();
 				
-				attributes.Index = index;
-				attributes.ArrayType = arrayType;
+			attributes.Index = index;
+			attributes.ArrayType = arrayType;
 
-				return attributes;
-			}
-
-			public ComponentAttributes() {}
+			return attributes;
 		}
+		
+		#endregion
+		
 	}
+	
+	
+	public abstract class BaseComponentAttributes<TComponentAttribute>
+		where TComponentAttribute : BaseComponentAttributes<TComponentAttribute>, new()
+	{
+		public uint Index;
+		public uint ArrayType;
+	}
+
+	public sealed class DefaultComponentAttributes : BaseComponentAttributes<DefaultComponentAttributes> { }
+
+	
 }
