@@ -3,6 +3,7 @@ using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.View;
 using Core.View.UI;
+using Core.VSEngine;
 using Core.Zenject.Source.Main;
 using UnityEngine;
 
@@ -36,6 +37,17 @@ namespace Core.Initialization
 			SetSystemsControllerForRuntime();
 
 			BuildDataContainer();
+			
+			BuildVSEngine();
+		}
+
+		private void BuildVSEngine()
+		{
+			VSBasicEngine vsSimpleEngine = new VSBasicEngine();
+			BindInstance(vsSimpleEngine);
+			
+			VSNodeEventSystem  newSystem  = new VSNodeEventSystem ();
+			BindInstance(newSystem );
 		}
 
 		public override void ResetComponentContainers(DataContainersController dataContainersController) {  }

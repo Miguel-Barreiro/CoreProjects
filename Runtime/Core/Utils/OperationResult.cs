@@ -1,8 +1,9 @@
 using System;
+using Core.Zenject.Source.Factories.Pooling.Static;
 
 namespace Core.Utils
 {
-    public class OperationResult<T>
+    public class OperationResult<T> : IDisposable 
     {
         public bool IsSuccess { get; private set; }
         public bool IsFailure => !IsSuccess;
@@ -16,25 +17,55 @@ namespace Core.Utils
             Result = result;
         }
 
+        public OperationResult() { }
+
         public static OperationResult<T> Success(T result)
         {
-            return new OperationResult<T>(true, null, result);
+            OperationResult<T> operationResult = Pool.Spawn();
+            operationResult.IsSuccess = true;
+            operationResult.Exception = null;
+            operationResult.Result = result;
+            return operationResult;
         }
 
         public static OperationResult<T> Failure(Exception e)
         {
-            return new OperationResult<T>(false, e, default(T));
+            OperationResult<T> operationResult = Pool.Spawn();
+            operationResult.Exception = e;
+            operationResult.Result = default(T);
+            operationResult.IsSuccess = false;
+            return operationResult;
         }
         
         public static OperationResult<T> Failure(string message)
         {
-            return new OperationResult<T>(false, new OperationException(message), default(T));
+            OperationResult<T> operationResult = Pool.Spawn();
+            operationResult.Exception = new OperationException(message);
+            operationResult.Result = default(T);
+            operationResult.IsSuccess = false;
+            return operationResult;
         }
+        
+        protected static readonly Exception DefaultException = new OperationException("[DEFAULT]An error occurred during the operation.");
+        protected static readonly StaticMemoryPool<OperationResult<T>> Pool =
+            new StaticMemoryPool<OperationResult<T>>(OnSpawned, OnDespawned);
+
+        private static void OnDespawned(OperationResult<T> obj)
+        {
+            obj.Exception = DefaultException;
+        }
+
+        private static void OnSpawned(OperationResult<T> obj) { }
+        public void Dispose()
+        {
+            Pool.Despawn(this as OperationResult<T>);
+        }
+        
         
     }
     
     
-    public class OperationResult
+    public class OperationResult : IDisposable
     {
         public bool IsSuccess { get; private set; }
         public bool IsFailure => !IsSuccess;
@@ -49,18 +80,44 @@ namespace Core.Utils
             Exception = e;
         }
 
+        public OperationResult()
+        {
+            
+        }
+
         public static OperationResult Success() => SuccessInstance;
 
         public static OperationResult Failure(Exception e)
         {
-            return new OperationResult(false, e);
+            OperationResult operationResult = Pool.Spawn();
+            operationResult.Exception = e;
+            operationResult.IsSuccess = false;
+            return operationResult;
         }
         
         public static OperationResult Failure(string message)
         {
-            return new OperationResult(false, new OperationException(message));
+            OperationResult operationResult = Pool.Spawn();
+            operationResult.Exception = new OperationException(message);
+            operationResult.IsSuccess = false;
+            return operationResult;
         }
+
         
+        protected static readonly Exception DefaultException = new OperationException("[DEFAULT]An error occurred during the operation.");
+        protected static readonly StaticMemoryPool<OperationResult> Pool =
+            new StaticMemoryPool<OperationResult>(OnSpawned, OnDespawned);
+
+        private static void OnSpawned(OperationResult obj) { }
+        private static void OnDespawned(OperationResult obj)
+        {
+            obj.Exception = DefaultException;
+        }
+
+        public void Dispose()
+        {
+            Pool.Despawn(this as OperationResult);
+        }
     }
     
     public class OperationException : Exception
