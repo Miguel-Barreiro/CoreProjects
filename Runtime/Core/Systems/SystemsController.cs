@@ -6,6 +6,7 @@ using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Model.ModelSystems.ComponentSystems;
 using Core.Model.Time;
+using Core.VSEngine.Systems;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -26,6 +27,9 @@ namespace Core.Systems
         [Inject] private readonly ITimerSystemImplementationInternal ITimerSystem = null!;
         [Inject] private readonly DataContainersControllerImplementation DataContainersController = null!;
         [Inject] private readonly EntityEventQueuesContainer EntityEventQueuesContainer = null!;
+        [Inject] private readonly VSEventListenersSystem VSEventListenersSystem = null!;
+
+
 
         public event Action OnEndFrame;
         
@@ -352,8 +356,12 @@ namespace Core.Systems
                 try
                 {
 #endif  
+                
+                    VSEventListenersSystem.ExecutePreEvent(currentEvent);
                     currentEvent.CallPreListenerSystemsInternal();
+                    VSEventListenersSystem.ExecuteEvent(currentEvent);
                     currentEvent.Execute();
+                    VSEventListenersSystem.ExecutePostEvent(currentEvent);
                     currentEvent.CallPostListenerSystemsInternal();
                     currentEvent.Dispose();
                     

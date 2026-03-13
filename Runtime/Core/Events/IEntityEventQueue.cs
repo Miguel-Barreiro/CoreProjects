@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Utils.CachedDataStructures;
+using Core.VSEngine.Systems;
 using UnityEngine;
+using Zenject;
 
 namespace Core.Events
 {
@@ -76,7 +78,9 @@ namespace Core.Events
 		private readonly List<IEntityEventQueue<TEntityEvent>.EntityEventListener> AllEntityEventListeners = new();
 		private readonly Dictionary<EntId, List<IEntityEventQueue<TEntityEvent>.EntityEventListener>> EntityEventListeners = new();
 		private readonly List<TEntityEvent> EntityEvents = new();
-		
+
+		[Inject] private readonly VSEventListenersSystem VSEventListenersSystem = null!;
+
 		
 		internal override int EventsCount() => EntityEvents.Count;
 
@@ -146,6 +150,8 @@ namespace Core.Events
 			
 			foreach (TEntityEvent entityEvent in toProcess)
 			{
+				VSEventListenersSystem.ExecutePreEntityEvent(entityEvent);
+				
 				if (EntityEventListeners.TryGetValue(entityEvent.EntityID, 
 													out List<IEntityEventQueue<TEntityEvent>.EntityEventListener> eventListeners))
 				{
@@ -155,6 +161,9 @@ namespace Core.Events
 
 				foreach (IEntityEventQueue<TEntityEvent>.EntityEventListener eventListener in AllEntityEventListeners)
 					eventListener.Invoke(entityEvent);
+				
+				VSEventListenersSystem.ExecuteEntityEvent(entityEvent);
+				VSEventListenersSystem.ExecutePostEntityEvent(entityEvent);
 				
 				entityEvent.Dispose();
 			}
@@ -193,6 +202,8 @@ namespace Core.Events
 			foreach (KeyValuePair<Type,BaseEntityEventQueueImplementation> keyValuePair in _entityEventQueuesByEventType)
 				yield return keyValuePair;
 		}
+		
+		BaseEntityEventQueueImplementation
 
 		internal void ClearAll()
 		{
