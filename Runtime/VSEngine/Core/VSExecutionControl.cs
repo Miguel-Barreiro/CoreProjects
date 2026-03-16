@@ -2,10 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Core.Events;
+using Core.Model;
 using Core.Utils;
 using Core.VSEngine.NestedVisualScripting;
+using Core.Zenject.Source.Factories.Pooling.Static;
 using Core.Zenject.Source.Internal;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VSEngine.Core.NestedVisualScripting;
 using XNode;
 
@@ -20,7 +24,10 @@ namespace Core.VSEngine
         public OperationResult<object> ResolveValue(string portName, Node origin);
         public OperationResult<object> ResolveMultiValue(string portName, int index, Node origin);
         public OperationResult<object> ResolveDynamicValue(string portName, Node origin);
-        public VSEventBase Event { get; }
+        // public VSEventBase Event { get; }
+        public IBaseEvent? CoreEvent { get; }
+        public BaseEntityEvent? CoreEntityEvent { get; }
+        public EntId OwnerId { get; }
 
         public List<T> GetCachedList<T>();
     }
@@ -28,15 +35,23 @@ namespace Core.VSEngine
     
     public class VSExecutionControl: IVSExecutionControl
     {
-        private VSEngineCore vsEngine;
-        private VSEventBase vsEvent;
+        private VSBaseEngine _vsBaseEngine;
+        // private VSEventBase vsEvent;
+
+        private BaseEvent? coreEvent;
+        private BaseEntityEvent? coreEntityEvent;
+        private EntId ownerId;
+
+        public IBaseEvent CoreEvent => coreEvent != null? coreEvent : coreEntityEvent;
+        public BaseEntityEvent? CoreEntityEvent => coreEntityEvent;
+        public EntId OwnerId => ownerId;
 
         private readonly Stack<ScriptExecution> nestedScriptExecutionStack = new();
         
         public ExecutableNode? CurrentNode => CurrentScriptExecution?.CurrentNode; 
         public ScriptExecution? CurrentScriptExecution => nestedScriptExecutionStack.Count == 0? null : nestedScriptExecutionStack.Peek();
         
-        public VSEventBase Event => vsEvent;
+        // public VSEventBase Event => vsEvent;
         public List<T> GetCachedList<T>()
         {
             //TODO: implement pooling
@@ -44,15 +59,52 @@ namespace Core.VSEngine
         }
 
 
-        public void Start(VSEngineCore vsEngine, VSEventBase vsEvent, ExecutableNode? startNode)
+        public void StartWithEvent(VSBaseEngine vsBaseEngine, BaseEvent vsEvent, ExecutableNode? startNode, EntId ownerId)
         {
-            this.vsEngine = vsEngine;
-            this.vsEvent = vsEvent;
-            
+            this._vsBaseEngine = vsBaseEngine;
+            this.coreEvent = vsEvent;
+            this.coreEntityEvent = null;
+            this.ownerId = ownerId;
+
             nestedScriptExecutionStack.Clear();
-            
             nestedScriptExecutionStack.Push(new ScriptExecution(startNode.graph as ActionGraph, startNode, null));
         }
+
+        public void StartWithEntityEvent(VSBaseEngine vsBaseEngine, BaseEntityEvent vsEvent, ExecutableNode startNode, EntId ownerId)
+        {
+            this._vsBaseEngine = vsBaseEngine;
+            this.coreEvent = null;
+            this.coreEntityEvent = vsEvent;
+            this.ownerId = ownerId;
+
+            nestedScriptExecutionStack.Clear();
+            nestedScriptExecutionStack.Push(new ScriptExecution(startNode.graph as ActionGraph, startNode, null));
+        }
+
+        
+        // public void Start(VSEngineCore vsEngine, BaseEvent coreEvent, EntId ownerId, ExecutableNode? startNode)
+        // {
+        //     this.vsEngine = vsEngine;
+        //     this.coreEvent = coreEvent;
+        //     this.coreEntityEvent = null;
+        //     this.ownerId = ownerId;
+        //     // this.vsEvent = null!;
+        //
+        //     nestedScriptExecutionStack.Clear();
+        //     nestedScriptExecutionStack.Push(new ScriptExecution(startNode.graph as ActionGraph, startNode, null));
+        // }
+        //
+        // public void Start(VSEngineCore vsEngine, BaseEntityEvent coreEntityEvent, EntId ownerId, ExecutableNode? startNode)
+        // {
+        //     this.vsEngine = vsEngine;
+        //     this.coreEntityEvent = coreEntityEvent;
+        //     this.coreEvent = null;
+        //     this.ownerId = ownerId;
+        //     // this.vsEvent = null!;
+        //
+        //     nestedScriptExecutionStack.Clear();
+        //     nestedScriptExecutionStack.Push(new ScriptExecution(startNode.graph as ActionGraph, startNode, null));
+        // }
         
 
         public void ExecuteCurrentNode()
@@ -69,7 +121,7 @@ namespace Core.VSEngine
 
             if (!currentScriptExecution.IsInjected(currentNode))
             {
-                vsEngine.InjectDependencies(currentNode, this);
+                _vsBaseEngine.InjectDependencies(currentNode, this);
                 currentScriptExecution.SetInjected(currentNode);
             }
 
@@ -98,7 +150,7 @@ namespace Core.VSEngine
 
             if (startNode == null)
             {
-                Debug.LogError($"No start node found in {actionGraph.name} for event {Event.GetType().Name}");
+                Debug.LogError($"No start node found in {actionGraph.name} for event {GetEventName()}");
                 return;
             }
 
@@ -114,7 +166,14 @@ namespace Core.VSEngine
             }
             
         }
-        
+
+        private string? GetEventName()
+        {
+            if(CoreEvent == null)
+                return CoreEntityEvent?.GetType().Name;
+            return CoreEvent.GetType().Name;
+        }
+
         private void PopScript()
         {
             if (nestedScriptExecutionStack.Count == 0)
@@ -278,10 +337,36 @@ namespace Core.VSEngine
             ScriptExecution currentScriptExecution = nestedScriptExecutionStack.Peek();
             if (!currentScriptExecution.IsInjected(node))
             {
-                vsEngine.InjectDependencies(node, this);
+                _vsBaseEngine.InjectDependencies(node, this);
                 currentScriptExecution.SetInjected(node);
             }
         }
+
+        
+        
+        protected static readonly StaticMemoryPool<VSExecutionControl> Pool =
+            new StaticMemoryPool<VSExecutionControl>(OnSpawned, OnDespawned);
+
+        protected virtual void OnSpawned() { }
+        protected virtual void OnDespawned() { }
+
+        public static VSExecutionControl NEW() { return Pool.Spawn(); }
+
+        private static void OnDespawned(VSExecutionControl obj) { (obj as VSExecutionControl)?.OnDespawned(); }
+
+        private static void OnSpawned(VSExecutionControl? control)
+        {
+            if (control != null)
+            {
+                control.ownerId = EntId.Invalid;
+                control.coreEntityEvent = null;
+                control.coreEvent = null;
+                control._vsBaseEngine = null;
+            }
+        }
+
+        public void Dispose() { Pool.Despawn(this as VSExecutionControl); }
+
 
     }
 }

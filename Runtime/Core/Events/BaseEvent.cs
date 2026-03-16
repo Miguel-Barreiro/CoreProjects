@@ -1,21 +1,42 @@
 using System;
 using System.Collections.Generic;
 using Core.Systems;
+using Core.VSEngine.Systems;
 using Core.Zenject.Source.Factories.Pooling.Static;
+using UnityEngine;
 using Zenject;
 
 namespace Core.Events
 {
-	public abstract class BaseEvent : IDisposable
+
+	public interface IBaseEvent
 	{
 		public abstract void Execute();
 		public abstract void Dispose();
+
+		public bool IsPropagating { get; }
+		public void StopPropagation();
 		
-		// public EventOrder Order { get; }
-		// protected BaseEvent(EventOrder eventOrder)
-		// {
-		// 	this.Order = eventOrder;
-		// }
+		public abstract void CallPreListenerSystemsInternal();
+		public abstract void CallPostListenerSystemsInternal();
+
+	}
+
+	public abstract class BaseEvent : IBaseEvent,  IDisposable
+	{
+		public abstract void Execute();
+		public abstract void Dispose();
+
+
+		private bool isPropagating = true;
+		public bool IsPropagating => isPropagating;
+        
+        
+		public void StopPropagation()
+		{
+			Debug.Log($"VS: Stopped propagation on event {this.GetType().Name}");
+			isPropagating = false;
+		}
 
 		protected BaseEvent() { }
 
@@ -26,7 +47,7 @@ namespace Core.Events
 	public abstract class Event<TEvent> : BaseEvent, IDisposable 
 		where TEvent : Event<TEvent>, new() 
 	{
-
+		
 		[Inject] private readonly SystemsContainer SystemsContainer = null!; 
 		
 		internal static readonly StaticMemoryPool<TEvent> Pool =
@@ -58,6 +79,7 @@ namespace Core.Events
 			{
 				listenerSystem.CallOnEvent(this);
 			}
+
 		}
 		
 		public override void CallPostListenerSystemsInternal()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Events;
 using UnityEngine;
 using VSEngine.Core;
 
@@ -13,7 +14,6 @@ namespace Core.VSEngine
 
         public bool IsPropagating => isPropagating;
         
-        public abstract VSEventData EventData { get; }
         
         public void StopPropagation()
         {
@@ -24,36 +24,31 @@ namespace Core.VSEngine
 
     [Serializable]
     public abstract class VSEvent<T> : VSEventBase
-        where T : VSEventData
+        where T : VSEvent<T>, new()
     {
         [SerializeField]
         public readonly T VSEventData;
-        public override VSEventData EventData => VSEventData;
+        public T EventData => VSEventData;
         
-        protected VSEvent(T vsEventData)
-        {
-            VSEventData = vsEventData;
-        }
-
     }
 
 
-    public abstract class VSEventData
-    {
-        [VSField]
-        public List<Tag> Tags = new List<Tag>();
-
-        public void AddTag(Tag tag)
-        {
-            if (!Tags.Contains(tag))
-            {
-                Tags.Add(tag);
-            }
-        }
-        
-        public bool ContainsTag(Tag tag)
-        {
-            return Tags.Contains(tag);
-        }
-    }
+    // public abstract class VSEventData
+    // {
+    //     [VSField]
+    //     public List<Tag> Tags = new List<Tag>();
+    //
+    //     public void AddTag(Tag tag)
+    //     {
+    //         if (!Tags.Contains(tag))
+    //         {
+    //             Tags.Add(tag);
+    //         }
+    //     }
+    //     
+    //     public bool ContainsTag(Tag tag)
+    //     {
+    //         return Tags.Contains(tag);
+    //     }
+    // }
 }

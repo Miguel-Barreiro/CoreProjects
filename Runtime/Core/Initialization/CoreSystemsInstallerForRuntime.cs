@@ -4,6 +4,7 @@ using Core.Systems;
 using Core.View;
 using Core.View.UI;
 using Core.VSEngine;
+using Core.VSEngine.Systems;
 using Core.Zenject.Source.Main;
 using UnityEngine;
 
@@ -43,10 +44,11 @@ namespace Core.Initialization
 
 		private void BuildVSEngine()
 		{
-			VSBasicEngine vsSimpleEngine = new VSBasicEngine();
-			BindInstance(vsSimpleEngine);
+			VSEngineCore vsSimpleEngine = new VSEngineCore();
+			BindInstance<VSEngineCore>(vsSimpleEngine);
+			BindInstance<VSBaseEngine>(vsSimpleEngine);
 			
-			VSNodeEventSystem  newSystem  = new VSNodeEventSystem ();
+			VSEventListenersSystem  newSystem  = new VSEventListenersSystem ();
 			BindInstance(newSystem );
 		}
 

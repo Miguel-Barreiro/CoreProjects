@@ -100,8 +100,8 @@ namespace Core.VSEngine.NestedVisualScripting
                 dynamicPortsByName.Add(port.fieldName, port);
             }
 
-            OutputVSNode? outputsNode = VSEngineCore.GetOutputNode(script);
-            InputVSNode? inputsNode = VSEngineCore.GetInputNode(script);
+            OutputVSNode? outputsNode = VSBaseEngine.GetOutputNode(script);
+            InputVSNode? inputsNode = VSBaseEngine.GetInputNode(script);
 
             if (inputsNode != null) {
                 foreach (SerializedTypeParameter parameter in inputsNode.InputTypes) {

@@ -38,7 +38,7 @@ namespace Core.VSEngine
         {
             if (!OutputNodeCache.ContainsKey(this))
             {
-                OutputNodeCache.Add(this, VSEngineCore.GetOutputNode(this)); 
+                OutputNodeCache.Add(this, VSBaseEngine.GetOutputNode(this)); 
             }
             return OutputNodeCache[this];
         }
@@ -47,7 +47,7 @@ namespace Core.VSEngine
         {
             if (!InputNodeCache.ContainsKey(this))
             {
-                InputNodeCache.Add(this, VSEngineCore.GetInputNode(this)); 
+                InputNodeCache.Add(this, VSBaseEngine.GetInputNode(this)); 
             }
             return InputNodeCache[this];
         }
@@ -56,7 +56,7 @@ namespace Core.VSEngine
         {
             if (!StartNodeCache.ContainsKey(this))
             {
-                StartNodeCache.Add(this, VSEngineCore.GetStartNode(this)); 
+                StartNodeCache.Add(this, VSBaseEngine.GetStartNode(this)); 
             }
             return StartNodeCache[this];
         }

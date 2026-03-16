@@ -203,7 +203,6 @@ namespace Core.Events
 				yield return keyValuePair;
 		}
 		
-		BaseEntityEventQueueImplementation
 
 		internal void ClearAll()
 		{

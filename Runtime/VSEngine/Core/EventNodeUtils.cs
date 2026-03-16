@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Core.Events;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Core.VSEngine
     {
 
         internal static void FillFieldPorts(MemberInfo[] memberInfos, 
-            Dictionary<string, VSFieldPort> result, FieldOrigin origin, bool isInput)
+            Dictionary<string, VSFieldPort> result, bool isInput)
         {
             foreach (MemberInfo memberInfo in memberInfos)
             {
@@ -31,7 +32,6 @@ namespace Core.VSEngine
                         result.Add(memberInfo.Name, new VSFieldPort()
                         {
                             isInput = isInput,
-                            origin = origin, 
                             FieldName = memberInfo.Name, 
                             FieldType = memberInfo.GetUnderlyingType()
                         });
@@ -42,7 +42,6 @@ namespace Core.VSEngine
                         result.Add(memberInfo.Name, new VSFieldPort()
                         {
                             isInput = isInput,
-                            origin = origin, 
                             FieldName = memberInfo.Name, 
                             FieldType = memberInfo.GetUnderlyingType()
                         });
@@ -54,28 +53,7 @@ namespace Core.VSEngine
                 }
             }
         }
-        
-        internal static void CreateFieldPorts<T>(List<VSFieldPort> vsFieldPorts, bool isInput)
-            where T : VSEventBase
-        {
-            Type eventType = typeof(T);
-            Type? eventDataType = GetEventDataType<T>();
-            if (eventDataType == null)
-            {
-                Debug.LogError($"the event type given({typeof(T).Name}) is not an VSEvent ");
-                return;
-            }
 
-            FieldInfo[] eventFields = eventType.GetFields();
-            FieldInfo[] eventDataFields = eventDataType.GetFields();
-            
-            Dictionary<string, VSFieldPort> fieldsByName = new();
-            FillFieldPorts(eventFields, fieldsByName, FieldOrigin.Event, isInput);
-            FillFieldPorts(eventDataFields, fieldsByName, FieldOrigin.EventData, isInput);
-            
-            vsFieldPorts.Clear();
-            vsFieldPorts.AddRange(fieldsByName.Values);
-        }
         internal static void AddDynamicPorts(VSNodeBase node, List<VSFieldPort> fieldPorts)
         {
             foreach (VSFieldPort fieldPort in fieldPorts)
@@ -119,99 +97,22 @@ namespace Core.VSEngine
             }
         }
         
-        internal static OperationResult<object> Read<T>(string fieldName, Dictionary<string, VSFieldPort> fieldPortsCache, T vsEvent)
-            where T : VSEventBase
+        internal static void Write(VSNodeBase node, List<VSFieldPort> fieldPorts, IBaseEvent vsEvent, Type eventType)
         {
-            Type eventType = typeof(T);
-            Type? eventDataType = GetEventDataType<T>();
-            if (eventDataType == null)
-            {
-                string message = $"the event type given({typeof(T).Name}) is not an VSEvent ";
-                Debug.LogWarning(message);
-                return OperationResult<object>.Failure(message);
-            }
-
-            VSFieldPort fieldPort = fieldPortsCache[fieldName];
             
-            if (fieldPort.origin == FieldOrigin.Event)
+            foreach (VSFieldPort fieldPort in fieldPorts)
             {
+                
+                OperationResult<object> operationResult = node.ResolveDynamic(fieldPort.FieldName);
+
+                if (operationResult.IsFailure)
+                {
+                    // Debug.LogWarning(operationResult.Exception.Message);
+                    continue;
+                }
+
                 FieldInfo fieldInfo = eventType.GetField(fieldPort.FieldName);
-                return OperationResult<object>.Success(fieldInfo.GetValue(vsEvent));
-            }
-
-            if (fieldPort.origin == FieldOrigin.EventData)
-            {
-                FieldInfo fieldInfo = eventDataType.GetField(fieldPort.FieldName);
-                return OperationResult<object>.Success(fieldInfo.GetValue(vsEvent.EventData));
-            }
-            
-            return OperationResult<object>.Failure("no field port found for " + fieldName);
-        }
-        
-        internal static object? Read<T>(string fieldName, List<VSFieldPort> fieldPorts, T vsEvent)
-            where T : VSEventBase
-        {
-            Type eventType = typeof(T);
-            Type? eventDataType = GetEventDataType<T>();
-            if (eventDataType == null)
-            {
-                Debug.LogWarning($"the event type given({typeof(T).Name}) is not an VSEvent ");
-                return null;
-            }
-
-            
-            foreach (VSFieldPort fieldPort in fieldPorts)
-            {
-                if (fieldPort.FieldName == fieldName)
-                {
-                    if (fieldPort.origin == FieldOrigin.Event)
-                    {
-                        FieldInfo fieldInfo = eventType.GetField(fieldPort.FieldName);
-                        return fieldInfo.GetValue(vsEvent);
-                    }
-
-                    if (fieldPort.origin == FieldOrigin.EventData)
-                    {
-                        FieldInfo fieldInfo = eventDataType.GetField(fieldPort.FieldName);
-                        return fieldInfo.GetValue(vsEvent.EventData);
-                    }
-                }
-            }
-            return null;   
-        }
-        
-        internal static void Write<T>(VSNodeBase node, List<VSFieldPort> fieldPorts, T vsEvent)
-            where T : VSEventBase
-        {
-            Type eventType = typeof(T);
-            Type? eventDataType = GetEventDataType<T>();
-            if (eventDataType == null)
-            {
-                Debug.LogWarning($"the event type given({typeof(T).Name}) is not an VSEvent ");
-                return;
-            }
-            
-            foreach (VSFieldPort fieldPort in fieldPorts)
-            {
-                object? fieldNewValue = node.ResolveDynamic(fieldPort.FieldName);
-
-                if (fieldPort.origin == FieldOrigin.Event)
-                {
-                    FieldInfo fieldInfo = eventType.GetField(fieldPort.FieldName);
-                    if (fieldNewValue != null)
-                    {
-                        fieldInfo.SetValue(vsEvent, fieldNewValue);
-                    }
-                }
-
-                if (fieldPort.origin == FieldOrigin.EventData)
-                {
-                    FieldInfo fieldInfo = eventDataType.GetField(fieldPort.FieldName);
-                    if (fieldNewValue != null)
-                    {
-                        fieldInfo.SetValue(vsEvent.EventData, fieldNewValue);
-                    }
-                }
+                fieldInfo.SetValue(vsEvent, operationResult.Result);
             }
         }
         
@@ -230,24 +131,45 @@ namespace Core.VSEngine
             return false;
         }
 
-        private static Type? GetEventDataType<T>()
-            where T : VSEventBase
+        // Non-generic helpers for Core Event<T> / EntityEvent<T> types.
+        // Scans all public instance fields for [VSField] — no VSEvent<T> wrapper assumption.
+        internal static void CreateFieldPorts(Type eventType, List<VSFieldPort> vsFieldPorts, bool isInput)
         {
-            Type type = typeof(T);
-            if (NodeUtils.IsOfGenericType( type, typeof(VSEvent<>), out var concreteType))
-            {
-                Type[] genericArguments = concreteType!.GetGenericArguments();
-                return genericArguments[0];
-            }
+            FieldInfo[] fields = eventType.GetFields(
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            Dictionary<string, VSFieldPort> fieldsByName = new();
+            FillFieldPorts(fields, fieldsByName, isInput);
+            vsFieldPorts.Clear();
+            vsFieldPorts.AddRange(fieldsByName.Values);
+        }
 
-            return null;
+        // Reads a field value from a plain object using the cached FieldName on the port.
+        internal static OperationResult<object> ReadFromObject(
+            string portName, Dictionary<string, VSFieldPort> cache, object eventObj)
+        {
+            if (!cache.TryGetValue(portName, out VSFieldPort fieldPort))
+                return OperationResult<object>.Failure($"No field cached for '{portName}'");
+
+            FieldInfo? fieldInfo = eventObj.GetType().GetField(
+                fieldPort.FieldName,
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+
+            if (fieldInfo == null)
+                return OperationResult<object>.Failure(
+                    $"Field '{fieldPort.FieldName}' not found on {eventObj.GetType().Name}");
+
+            return OperationResult<object>.Success(fieldInfo.GetValue(eventObj));
         }
     }
-    
-    public enum FieldOrigin
+
+    public enum VSEventTiming { Pre, Default, Post }
+
+    public enum VSEntityListenTarget
     {
-        Event, 
-        EventData,
+        Owner,    // fires only when ev.EntityID == owner (the graph owner)
+        Parent,   // not yet implemented — reserved
+        All,      // fires for every entity's event
+        Dynamic,  // fires when ev.EntityID matches the value of the "Target" input port
     }
         
     [Serializable]
@@ -255,8 +177,6 @@ namespace Core.VSEngine
     {
         [SerializeField]
         public bool isInput;
-        [SerializeField]
-        public FieldOrigin origin;
         [SerializeField]
         public string FieldName;
         [SerializeField]

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using Core.Events;
 using Core.Utils;
 using UnityEngine;
 using XNode;
@@ -164,7 +165,7 @@ namespace Core.VSEngine
         //     }
         // }
         
-        public object? ResolveDynamic(string portName)
+        public OperationResult<object> ResolveDynamic(string portName)
         {
             return ExecutionControl.ResolveDynamicValue(portName, this);
         }
@@ -248,10 +249,14 @@ namespace Core.VSEngine
             return GetPort($"{portName} {index}");
         }
         
-        protected TEvent? GetEvent<TEvent>() where TEvent : VSEventBase
-        {
-            return ExecutionControl.Event as TEvent;
-        }
+        // protected TEvent? GetEvent<TEvent>() where TEvent : VSEventBase
+        // {
+        //     return ExecutionControl.Event as TEvent;
+        // }
+
+        protected IBaseEvent? GetCoreEvent() => ExecutionControl.CoreEvent ?? ExecutionControl.CoreEntityEvent;
+
+        protected BaseEntityEvent? GetCoreEntityEvent() => ExecutionControl.CoreEntityEvent;
 
         private static readonly Stack<ExecutableNode> utilReorderPorts = new Stack<ExecutableNode>();
         protected void MultipleContinue(string multiplePortName)

@@ -285,14 +285,17 @@ namespace Core.Model
             foreach (Type potentialEventType in allEventTypes)
             {
                 if (potentialEventType.IsGenericType)
-                {
-                    continue;
-                }
+                    continue; 
+                
                 eventTypes.Add(potentialEventType);
             }
             
+            // IEnumerable<Type> allEventTypes = ReflectionUtils.GetAllTypesOf<BaseEvent>();
             foreach (Type eventType in eventTypes)
             {
+                if ( eventType != typeof(BaseEvent) &&
+                     eventType != typeof(BaseEntityEvent) &&
+                     !EventAttributesByType.ContainsKey(eventType))
                 EventAttributesByType.Add(eventType, new EventAttributes(eventType));
             }
             
@@ -301,11 +304,11 @@ namespace Core.Model
             foreach (Type potentialEntityEventType in allEntityEventTypes)
             {
                 if (potentialEntityEventType.IsGenericType)
-                {
                     continue;
-                }
+
                 entityEventTypes.Add(potentialEntityEventType);
             }
+            
         }
 
         
@@ -399,6 +402,7 @@ namespace Core.Model
                 EventType = eventType;
                 
                 Type genericEventListenerType = typeof(IEventListener<>);
+                Debug.Log($"::: {eventType}");
                 EventListenerType = genericEventListenerType.MakeGenericType(new []{eventType});
                 
                 Type genericPostEventListenerType = typeof(IPostEventListener<>);

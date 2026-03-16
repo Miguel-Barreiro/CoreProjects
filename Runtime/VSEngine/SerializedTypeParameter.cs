@@ -2,26 +2,30 @@ using System;
 using System.Collections.Generic;
 using Core.Utils;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Core.VSEngine {
     /// <summary>
-    /// Serializable struct for types, used primarily in subscripting
+    /// Serializable struct for types, used primarily in subscripting.
+    /// Use the inspector dropdown to select a type — edit via <see cref="SerializedTypeDrawer"/>.
     /// </summary>
     [Serializable]
-    public struct SerializedType 
+    public struct SerializedType
     {
+        /// <summary>Display name of the selected type.</summary>
         public string TypeName;
 
         /// <summary>
-        /// We need an assembly qualified type name in order to convert from <see cref="string"/> to <see cref="Type"/>
+        /// Assembly-qualified name used to resolve the <see cref="Type"/> at runtime.
         /// </summary>
         public string AssemblyQualifiedName;
 
-        public SerializedType(Type type) 
+        public SerializedType(Type type)
         {
             TypeName = type.Name;
             AssemblyQualifiedName = type.AssemblyQualifiedName;
         }
+        
     }
 
     /// <summary>
@@ -30,8 +34,8 @@ namespace Core.VSEngine {
     [Serializable]
     public struct SerializedTypeParameter
     {
-        [ShowInInspector]
-        public Type Type;
+        [ShowInInspector] public Type Type;
+
         public SerializedType SerializedType;
         public string ParameterName;
 
@@ -51,7 +55,8 @@ namespace Core.VSEngine {
 
         public static Type GetParsedType(string assemblyQualifiedName)
         {
-           return Type.GetType(assemblyQualifiedName);
+            if (string.IsNullOrEmpty(assemblyQualifiedName)) return null;
+            return Type.GetType(assemblyQualifiedName);
         }
 
         public static string GeneratePrettyTypeName(Type type)
@@ -69,7 +74,7 @@ namespace Core.VSEngine {
         }
 
         public static bool IsValid(this SerializedType serializedType) {
-            return serializedType.TypeName.Trim().Length != 0;
+            return !string.IsNullOrWhiteSpace(serializedType.AssemblyQualifiedName);
         }
 
         public static bool IsValid(this SerializedTypeParameter parameter) {

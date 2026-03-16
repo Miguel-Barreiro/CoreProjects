@@ -10,8 +10,9 @@ using XNode;
 
 namespace Core.VSEngine
 {
-    [Node.NodeTint("#194d33")]
-    [Node.CreateNodeMenu("Miguel/events/EventListenNode")]
+    [Node.NodeTint("#215C32")]
+    [Node.NodeWidth(200)]
+    [Node.CreateNodeMenu("Core/events/Event Listen Node")]
     [Serializable]
     public class EventListenNode : BaseEventListenNode, IValueNode
     {
@@ -25,7 +26,7 @@ namespace Core.VSEngine
 
         public OperationResult<object> GetValue(string portName)
         {
-            BaseEvent? ev = GetCoreEvent();
+            IBaseEvent? ev = GetCoreEvent();
             if (ev == null)
                 return OperationResult<object>.Failure($"No BaseEvent found in {name}");
 

@@ -10,8 +10,9 @@ using XNode;
 
 namespace Core.VSEngine
 {
-    [Node.NodeTint("#1a3352")]
-    [Node.CreateNodeMenu("Miguel/events/EntityEventListenNode")]
+    [Node.NodeTint("#215C32")]
+    [Node.NodeWidth(300)]
+    [Node.CreateNodeMenu("Core/events/EventEntityListenNode")]
     [Serializable]
     public class EntityEventListenNode : BaseEventListenNode, IValueNode
     {
