@@ -17,7 +17,7 @@ namespace Core.VSEngine
         private bool active = true;
         public bool IsActive => active;
         
-        [FormerlySerializedAs("exit")][Output(ShowBackingValue.Never, ConnectionType.Override, TypeConstraint.Strict), SerializeField]
+        [Output(ShowBackingValue.Never, ConnectionType.Override, TypeConstraint.Strict), SerializeField]
         private Control? Continue = null;
 
 
@@ -28,19 +28,19 @@ namespace Core.VSEngine
         }
 
         // public virtual void Register(WorldEngineGlobal engineGlobal, Type eventType, EntId ownerId)
-        public virtual void Register(Type eventType, EntId ownerId)
-        {
-            if (!this.IsActive)
-            {
-                return;
-            }
-
-            VSEventListenersSystem.AddListener(ownerId, eventType, this);
-            
-            // WorldState worldState = engineGlobal.WorldState;
-            // EventListenersDb listenersDb = worldState.GetEventListenersDb();
-            // listenersDb.AddListener(ownerId, eventType, this);
-        }
+        // public virtual void Register(Type eventType, EntId ownerId)
+        // {
+        //     if (!this.IsActive)
+        //     {
+        //         return;
+        //     }
+        //
+        //     VSEventListenersSystem.AddListener(ownerId, eventType, this);
+        //     
+        //     // WorldState worldState = engineGlobal.WorldState;
+        //     // EventListenersDb listenersDb = worldState.GetEventListenersDb();
+        //     // listenersDb.AddListener(ownerId, eventType, this);
+        // }
 
         public virtual void DeRegister(Type eventType, EntId ownerId)
         {

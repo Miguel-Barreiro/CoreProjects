@@ -1,11 +1,12 @@
 using System;
+using Core.Events;
 using FixedPointy;
 
 namespace Core.VSEngine.Events
 {
     
     [Serializable]
-    public sealed class TestingEvent : VSEvent<TestingEventData>
+    public sealed class TestingEvent : VSEvent<TestingEvent>
     {
         //Testing if it will override from data
         [VSField]
@@ -14,6 +15,9 @@ namespace Core.VSEngine.Events
         [VSField(IsWritable = true, IsReadable = true)]
         public Fix NewValue = 42;
 
-        public TestingEvent(TestingEventData vsEventData) : base(vsEventData) { }
+        public TestingEvent()
+        {
+        }
+
     }
 }
