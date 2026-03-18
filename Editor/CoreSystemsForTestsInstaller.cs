@@ -33,6 +33,7 @@ namespace Core.Editor
 		{
 			if (Container.HasBinding<VSEventListenersSystem>()) return;
 			BindInstance<VSBaseEngine>(new VSEngineCore());
+			BindInstance(new VSEventListenersEntity());
 			BindInstance(new VSEventListenersSystem());
 		}
 

@@ -47,9 +47,9 @@ namespace Core.Initialization
 			VSEngineCore vsSimpleEngine = new VSEngineCore();
 			BindInstance<VSEngineCore>(vsSimpleEngine);
 			BindInstance<VSBaseEngine>(vsSimpleEngine);
-			
-			VSEventListenersSystem  newSystem  = new VSEventListenersSystem ();
-			BindInstance(newSystem );
+
+			BindInstance(new VSEventListenersEntity());
+			BindInstance(new VSEventListenersSystem());
 		}
 
 		public override void ResetComponentContainers(DataContainersController dataContainersController) {  }
