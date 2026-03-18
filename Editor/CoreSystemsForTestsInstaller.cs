@@ -1,6 +1,8 @@
 using Core.Initialization;
 using Core.Model.ModelSystems;
 using Core.Systems;
+using Core.VSEngine;
+using Core.VSEngine.Systems;
 using Core.Zenject.Source.Main;
 
 namespace Core.Editor
@@ -23,7 +25,15 @@ namespace Core.Editor
 		{
 			base.InstallSystems();
 			Test.AddUserSystems(this);
+			BuildFallbackVSEngine();
 			SetSystemsControllerForTests();
+		}
+
+		private void BuildFallbackVSEngine()
+		{
+			if (Container.HasBinding<VSEventListenersSystem>()) return;
+			BindInstance<VSBaseEngine>(new VSEngineCore());
+			BindInstance(new VSEventListenersSystem());
 		}
 
 		public override void ResetComponentContainers(DataContainersController dataContainersController)

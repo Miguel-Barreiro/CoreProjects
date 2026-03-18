@@ -28,10 +28,13 @@ namespace Core.VSEngine
         public Type? EventType => SerializedTypeUtils.GetParsedType(selectedEventType);
 
         // For Dynamic mode: read the target EntId from the connected "Target" input port.
+        // Returns EntId.Invalid when no Target port is connected.
         public OperationResult<EntId> GetDynamicTargetEntity()
         {
-            OperationResult<EntId> operationResult = Resolve<EntId>(TARGET_ENTITY_INPUT_NAME);
-            return operationResult;
+            NodePort? targetPort = GetInputPort(TARGET_ENTITY_INPUT_NAME);
+            if (targetPort == null || !targetPort.IsConnected)
+                return OperationResult<EntId>.Success(EntId.Invalid);
+            return Resolve<EntId>(TARGET_ENTITY_INPUT_NAME);
         }
 
         public OperationResult<object> GetValue(string portName)
