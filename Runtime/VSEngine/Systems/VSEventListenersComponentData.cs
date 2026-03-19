@@ -31,6 +31,19 @@ namespace Core.VSEngine.Systems
 
         public void Init()
         {
+            preGlobal.Clear();
+            defaultGlobal.Clear();
+            postGlobal.Clear();
+
+            preOwner.Clear(); defaultOwner.Clear(); postOwner.Clear();
+            preAll.Clear(); defaultAll.Clear(); postAll.Clear();
+            preDynamic.Clear(); defaultDynamic.Clear(); postDynamic.Clear();
+
+            ownerIndex.Clear();
+        }
+
+        public void Reset()
+        {
             preGlobal     = new();
             defaultGlobal = new();
             postGlobal    = new();

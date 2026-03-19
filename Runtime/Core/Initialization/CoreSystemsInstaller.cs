@@ -41,11 +41,10 @@ namespace Core.Initialization
         
         private void BuildModelSystems()
         {
-            EntityHierarchyModel entityHierarchyModel = new EntityHierarchyModel();
-            BindInstance(entityHierarchyModel);
 			
             EntityHierarchySystemImplementation entityHierarchySystemImplementation = new EntityHierarchySystemImplementation();
             BindInstance<IEntityHierarchySystem>(entityHierarchySystemImplementation);
+            BindInstance<EntityHierarchySystemImplementation>(entityHierarchySystemImplementation);
         }
 
         private void BuildEntityEventManagers()

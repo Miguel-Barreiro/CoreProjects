@@ -5,6 +5,12 @@ namespace Core.Model.ModelSystems
 		public EntId ID { get; set; }
 
 		public void Init();
+		
+		public virtual void Reset()
+		{
+			ID = EntId.Invalid;
+		}
+
 	}
 
 	public struct MockComponentData : IComponentData

@@ -47,6 +47,8 @@ namespace Core.Model
 		{
 			_topEmptyIndex = 0;
 			Components = new T[maxNumber];
+			for (int i = 0; i < maxNumber; i++)
+				Components[i].Reset();
 		}
 		
 		public void SetupComponent(EntId owner)
@@ -115,6 +117,8 @@ namespace Core.Model
 			ComponentIndexByOwner.Clear();
 			
 			Components = new T[maxNumber];
+			for (int i = 0; i < maxNumber; i++)
+				Components[i].Reset();
 		}
 
 
