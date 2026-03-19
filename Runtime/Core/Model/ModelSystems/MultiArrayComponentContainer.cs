@@ -131,7 +131,12 @@ namespace Core.Model.ModelSystems
 			for (int i = 0; i < ComponentArrayCount; i++)
 				ComponentArrays[i] = new PushBackArray<TComponentData>(maxNumber);
 		}
-		
+
+		public void SetupInvalid()
+		{
+			Invalid.Reset();
+		}
+
 		// the index 0 is the main array
 		public uint Count => ComponentArrays[0].Count;
 		public uint MaxCount => ComponentArrays[0].MaxCount;

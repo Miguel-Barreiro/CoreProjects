@@ -12,6 +12,8 @@ namespace Core.Model
 		public void RemoveComponent(EntId owner);
 		
 		public void RebuildWithMax(uint maxNumber);
+		
+		public void SetupInvalid();
 	}
 	
 	public interface ComponentContainer<T> : IGenericComponentContainer
@@ -34,12 +36,12 @@ namespace Core.Model
 
 		private readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
 		private uint _topEmptyIndex = 0;
-		
+
 		/// This is a dummy component to return when the requested component is not found
 		/// do not override it
 		public T Invalid = new T()
 		{
-			ID = EntId.Invalid
+			ID = EntId.Invalid,
 		};
 		
 		
@@ -98,6 +100,11 @@ namespace Core.Model
 			ComponentIndexByOwner.Remove(owner);
 		}
 
+
+		public void SetupInvalid()
+		{
+			Invalid.Reset();
+		}
 
 		public ref T GetComponent(EntId owner)
 		{

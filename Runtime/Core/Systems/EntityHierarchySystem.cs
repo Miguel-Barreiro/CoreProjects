@@ -126,19 +126,31 @@ namespace Core.Systems
 
 		public void OnDestroyComponent(EntId destroyedComponentId)
 		{
-			ref HierarchyData destroyedHierarchyData = ref HierarchyContainer.GetComponent(destroyedComponentId);
-			
-			EntId parentId = destroyedHierarchyData.ParentID;
-			if (parentId != EntId.Invalid)
-				RemoveChild(parentId, destroyedComponentId);
-
-			foreach (EntId childId in destroyedHierarchyData.ChildsID)
 			{
-				ref HierarchyData childHierarchyData = ref HierarchyContainer.GetComponent(childId);
-				childHierarchyData.ParentID = EntId.Invalid;
-				EntitiesContainer.DestroyEntity(childId);
+				ref HierarchyData destroyedHierarchyData = ref HierarchyContainer.GetComponent(destroyedComponentId);
+				
+				EntId parentId = destroyedHierarchyData.ParentID;
+				if (parentId != EntId.Invalid)
+					RemoveChild(parentId, destroyedComponentId);
+
+				DestroyChildrenRecursive(destroyedComponentId);
+			}
+			void DestroyChildrenRecursive(EntId parentID)
+			{
+				ref HierarchyData destroyedHierarchyData = ref HierarchyContainer.GetComponent(parentID);
+				foreach (EntId childId in destroyedHierarchyData.ChildsID)
+				{
+					ref HierarchyData childHierarchyData = ref HierarchyContainer.GetComponent(childId);
+					childHierarchyData.ParentID = EntId.Invalid;
+					EntitiesContainer.DestroyEntity(childId);
+					
+					DestroyChildrenRecursive(childId);
+				}
+
 			}
 		}
+		
+		
 
 		public bool Active { get; set; } = true;
 		public SystemGroup Group { get; } = CoreSystemGroups.CoreSystemGroup;

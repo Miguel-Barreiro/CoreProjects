@@ -33,6 +33,8 @@ namespace Core.Model.ModelSystems
 			foreach ((object container, Type type) in CreateAllComponentContainers(20))
 			{
 				ContainersByComponentDataType[type] = container;
+				if (ContainersByComponentDataType[type] is IGenericComponentContainer genericComponentContainer)
+					genericComponentContainer.SetupInvalid();
 			}
 		}
 		
