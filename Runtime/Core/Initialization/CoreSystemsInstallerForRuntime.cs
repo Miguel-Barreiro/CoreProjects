@@ -1,4 +1,5 @@
 using Core.Core.Model.Data;
+using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.View;
@@ -50,6 +51,9 @@ namespace Core.Initialization
 
 			BindInstance(new VSEventListenersEntity());
 			BindInstance(new VSEventListenersSystem());
+
+			VSAbilitySystem vsAbilitySystem = new VSAbilitySystem();
+			BindInstance<VSAbilitySystem>(vsAbilitySystem);
 		}
 
 		public override void ResetComponentContainers(DataContainersController dataContainersController) {  }

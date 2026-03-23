@@ -21,7 +21,11 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Zenject-usage.dll",
-        "Sirenix.OdinInspector.Editor.dll"
+        "Sirenix.OdinInspector.Editor.dll",
+        "Sirenix.Reflection.Editor.dll",
+        "Sirenix.Utilities.Editor.dll",
+        "Sirenix.OdinInspector.Attributes.dll",
+        "Sirenix.Utilities.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

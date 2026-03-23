@@ -1,6 +1,8 @@
+using System;
 using Core.Model.Data;
 using FixedPointy;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Core.Model.Stats
 {
@@ -23,5 +25,27 @@ namespace Core.Model.Stats
 		public bool CanOverflow => canOverflow;
 		
 
+	}
+
+	
+	public enum OverrideType
+	{
+		Override = 0,
+		Additive = 1,
+		Multiplicative = 2
+	}
+
+	
+	[Serializable]
+	public class StatOverride
+	{
+		[SerializeField] private StatConfig _statConfig;
+		public StatConfig StatConfig => _statConfig;
+
+		[SerializeField] private float _value;
+		public float Value => _value;
+
+		[SerializeField] private OverrideType _overrideType;
+		public OverrideType OverrideType => _overrideType;
 	}
 }
