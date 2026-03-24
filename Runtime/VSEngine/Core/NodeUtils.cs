@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Core.VSEngine.SharedNodes;
+using Core.VSEngine.Nodes;
 using XNode;
 
 namespace Core.VSEngine

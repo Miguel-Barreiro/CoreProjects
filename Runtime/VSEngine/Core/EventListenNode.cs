@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Model;
 using Core.Utils;
+using Core.VSEngine.Nodes;
 using UnityEngine;
 using XNode;
 
@@ -12,7 +13,7 @@ namespace Core.VSEngine
 {
     [Node.NodeTint("#215C32")]
     [Node.NodeWidth(200)]
-    [Node.CreateNodeMenu("Core/events/Event Listen Node")]
+    [Node.CreateNodeMenu(MenuNames.EVENTS_MENU+"/[Listen] Event", order = 2)]
     [Serializable]
     public class EventListenNode : BaseEventListenNode, IValueNode
     {
