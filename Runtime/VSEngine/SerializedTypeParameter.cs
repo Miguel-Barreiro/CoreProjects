@@ -10,7 +10,7 @@ namespace Core.VSEngine {
     /// Use the inspector dropdown to select a type — edit via <see cref="SerializedTypeDrawer"/>.
     /// </summary>
     [Serializable]
-    public struct SerializedType
+    public class SerializedType
     {
         /// <summary>Display name of the selected type.</summary>
         public string TypeName;
@@ -19,6 +19,13 @@ namespace Core.VSEngine {
         /// Assembly-qualified name used to resolve the <see cref="Type"/> at runtime.
         /// </summary>
         public string AssemblyQualifiedName;
+
+        public SerializedType()
+        {
+            Type type = typeof(object);
+            TypeName = type.Name;
+            AssemblyQualifiedName = type.AssemblyQualifiedName;
+        }
 
         public SerializedType(Type type)
         {

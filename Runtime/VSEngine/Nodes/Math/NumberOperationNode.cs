@@ -5,8 +5,9 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.Math
 {
-    [Node.CreateNodeMenu(MenuNames.MATH_MENU+"/Operator", order = 2)]
-    // [CreateNodeMenu("Math/Basic Math Operator")]
+    [CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Operator", order = 2)]
+    [NodeTint(VSNodeMenuNames.MATH_NODES_TINT)]
+
     public class NumberOperationNode : ValueOnlyNode
     {
         [SerializeField]

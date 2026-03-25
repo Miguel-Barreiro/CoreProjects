@@ -5,8 +5,8 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.TestNodes
 {
-	[Node.CreateNodeMenu(MenuNames.TEST_MENU+"/" + MenuNames.UNIT_TEST_MENU +"/Assert", order = 2)]
-	[Node.NodeTint("#3d4254")]
+	[Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU+"/" + VSNodeMenuNames.UNIT_TEST_MENU +"/Assert", order = 2)]
+	[Node.NodeTint(VSNodeMenuNames.DEBUG_NODES_TINT)]
 	public class UnitTestAssertNode : BasicFlowNode {
 
 		[SerializeField]

@@ -9,8 +9,8 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.Scripting
 {
-    [Node.CreateNodeMenu(MenuNames.FLOW_MENU+"/" + MenuNames.NESTED_MENU +"/Out", order = 2)]
-    [Node.NodeTint("#3d4254")]
+    [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/Out", order = 2)]
+    [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
     [NodeWidth(600)]
     public class OutputsNode : Node
     {

@@ -258,17 +258,21 @@ namespace Core.Initialization
         protected void Clear()
         {
             
-            foreach ( (Type _,List<IDisposable> disposables) in disposableBindedTypes)
-                foreach (IDisposable disposable in disposables)
-                    disposable.Dispose();
             
             using CachedList<System.Object> ownedSystemsTemp = ListCache<System.Object>.Get();
             foreach ( (System.Object system, List<Type> types) in ownedSystems)
             {
                 ownedSystemsTemp.Add(system);
+                if (system is IOnDestroySystem  onDestroySystem)
+                    onDestroySystem.OnDestroy();
+
                 foreach (Type type in types)
                     Container.Unbind(type);
             }
+            
+            foreach ( (Type _,List<IDisposable> disposables) in disposableBindedTypes)
+                foreach (IDisposable disposable in disposables)
+                    disposable.Dispose();
             
             SystemsContainer systemsContainer = Container.Resolve<SystemsContainer>();
             IEnumerable<IOnUninstallSystem> allOnUninstallSystems = systemsContainer.GetAllSystemsByInterface<IOnUninstallSystem>();

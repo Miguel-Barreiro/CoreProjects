@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if ODIN_INSPECTOR
+using Core.VSEngine.Nodes.Events;
 using Sirenix.OdinInspector.Editor;
 #endif
 
@@ -21,7 +22,7 @@ namespace Core.Editor.VSEngine
     /// ODIN_INSPECTOR is defined). A plain [CustomPropertyDrawer] would corrupt
     /// XNode's GUILayout state.
     /// </summary>
-    public class SerializedTypeDrawer : OdinValueDrawer<SerializedType>
+    public class EventSerializedTypeDrawer : OdinValueDrawer<EventSerializedType>
     {
         private const string NoneLabel = "(None)";
 
@@ -37,16 +38,16 @@ namespace Core.Editor.VSEngine
             if (EditorGUI.DropdownButton(rect, new GUIContent(displayLabel), FocusType.Keyboard))
             {
                 string capturedAqn = current.AssemblyQualifiedName;
-                IPropertyValueEntry<SerializedType> entry = this.ValueEntry;
+                IPropertyValueEntry<EventSerializedType> entry = this.ValueEntry;
 
                 var menu = new GenericMenu();
                 menu.AddItem(new GUIContent(NoneLabel), string.IsNullOrEmpty(capturedAqn), () =>
                 {
-                    entry.SmartValue = new SerializedType();
+                    entry.SmartValue = new EventSerializedType();
                 });
                 menu.AddSeparator("");
 
-                foreach ((string pretty, string qualifiedName) in SerializedTypeOptions.GetTypeOptions())
+                foreach ((string pretty, string qualifiedName) in EventSerializedTypeOptions.GetTypeOptions())
                 {
                     bool   selected = capturedAqn == qualifiedName;
                     string p = pretty;
@@ -54,7 +55,7 @@ namespace Core.Editor.VSEngine
                     menu.AddItem(new GUIContent(p), selected, () =>
                     {
                         Type t = Type.GetType(q);
-                        entry.SmartValue = t != null ? new SerializedType(t) : new SerializedType();
+                        entry.SmartValue = t != null ? new EventSerializedType(t) : new EventSerializedType();
                     });
                 }
 
@@ -68,15 +69,15 @@ namespace Core.Editor.VSEngine
     /// <summary>
     /// Fallback Unity IMGUI drawer used when Odin Inspector is not present.
     /// </summary>
-    [CustomPropertyDrawer(typeof(SerializedType))]
-    public class SerializedTypeDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(EventSerializedType))]
+    public class EventSerializedTypeDrawer : PropertyDrawer
     {
         private const string NoneLabel = "(None)";
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            SerializedProperty typeName = property.FindPropertyRelative(nameof(SerializedType.TypeName));
-            SerializedProperty aqn      = property.FindPropertyRelative(nameof(SerializedType.AssemblyQualifiedName));
+            SerializedProperty typeName = property.FindPropertyRelative(nameof(EventSerializedType.TypeName));
+            SerializedProperty aqn      = property.FindPropertyRelative(nameof(EventSerializedType.AssemblyQualifiedName));
 
             string currentLabel = string.IsNullOrEmpty(typeName.stringValue) ? NoneLabel : typeName.stringValue;
 
@@ -130,7 +131,7 @@ namespace Core.Editor.VSEngine
 #endif
 
     // Shared type cache — used by both drawer variants
-    internal static class SerializedTypeOptions
+    internal static class EventSerializedTypeOptions
     {
         private static List<(string pretty, string aqn)> _cache;
 
@@ -140,7 +141,7 @@ namespace Core.Editor.VSEngine
 
             _cache = new List<(string, string)>();
 
-            foreach (Type t in ReflectionUtils.GetAllTypesOf<object>())
+            foreach (Type t in ReflectionUtils.GetAllTypesOf<BaseEntityEvent>())
             {
                 if (t.IsAbstract || t.IsGenericType || t.AssemblyQualifiedName == null) continue;
                 _cache.Add((SerializedTypeUtils.GeneratePrettyTypeName(t), t.AssemblyQualifiedName));

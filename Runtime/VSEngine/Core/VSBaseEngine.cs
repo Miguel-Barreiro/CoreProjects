@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Model;
 using Core.VSEngine.NestedVisualScripting;
+using Core.VSEngine.Nodes.Events;
 using UnityEngine;
 using UnityEngine.UIElements;
 using XNode;

@@ -30,7 +30,7 @@ namespace Core.Systems
         [Inject] private readonly VSEventListenersSystem VSEventListenersSystem = null!;
 
 
-
+        public event Action OnStartFrame;
         public event Action OnEndFrame;
         
         private bool running = false;
@@ -89,6 +89,9 @@ namespace Core.Systems
                 {
                     await UniTask.DelayFrame(1, PlayerLoopTiming.EarlyUpdate);
                     float deltaTime = Time.deltaTime;
+                    
+                    OnStartFrame?.Invoke();
+                    
                     if (!paused)
                         ExecuteFrame(deltaTime);
   

@@ -7,8 +7,8 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.TestNodes
 {
-    [Node.CreateNodeMenu(MenuNames.TEST_MENU+"/Debug Log Node", order = 2)]
-    [Node.NodeTint("#452438")]
+    [Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU+"/Debug Log Node", order = 2)]
+    [Node.NodeTint(VSNodeMenuNames.DEBUG_NODES_TINT)]
     public class DebugLogNode : BasicFlowNode
     {
         [SerializeField]

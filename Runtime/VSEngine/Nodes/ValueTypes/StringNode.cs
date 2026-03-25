@@ -1,13 +1,15 @@
 using Core.Utils;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Core.VSEngine.Nodes
 {
     [NodeWidth(300)]
-    [CreateNodeMenu(MenuNames.MATH_MENU+"/"+ MenuNames.VALUES_MENU +"/String", order = 2)]
-    public class StringValueNode : ValueOnlyNode
+    [CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/"+ VSNodeMenuNames.VALUES_MENU +"/String", order = 2)]
+    [NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
+    public class StringNode : ValueOnlyNode
     {
-        [Output(ShowBackingValue.Always), SerializeField]
+        [Output(ShowBackingValue.Always), SerializeField, HideLabel]
         [TextArea(3, 10)]
         private string value;
         

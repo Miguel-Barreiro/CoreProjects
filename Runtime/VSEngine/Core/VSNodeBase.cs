@@ -49,7 +49,18 @@ namespace Core.VSEngine
         }
         
 #endif
-        
+
+        protected OperationResult<object> INVALID_INPUT(string portName)
+        {
+            return OperationResult<object>.Failure($"{portName} is not valid: in node {name} in graph {graph.name}");
+        }
+
+        protected OperationResult<object> INVALID_EXECUTION(string message)
+        {
+            return OperationResult<object>.Failure($"invalid execution in node {name} in graph {graph.name} with message: {message}");
+        }
+
+
         // public virtual IJsonSavableAsset? GetChildAsset(long childFileId)
         // {
         //     return null;

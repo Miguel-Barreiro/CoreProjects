@@ -5,6 +5,7 @@ using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Utils;
 using Core.VSEngine;
+using Core.VSEngine.Nodes.Events;
 using UnityEngine;
 using Zenject;
 

@@ -7,8 +7,8 @@ using XNode;
 namespace Core.VSEngine.Nodes.Scripting {
 
     
-    [Node.CreateNodeMenu(MenuNames.FLOW_MENU+"/" + MenuNames.NESTED_MENU +"/Script ", order = 2)]
-    [Node.NodeTint("#3d4254")]
+    [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/Script ", order = 2)]
+    [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
     [NodeWidth(600)]
     public sealed class ScriptNode : Node
     {
@@ -29,11 +29,7 @@ namespace Core.VSEngine.Nodes.Scripting {
         [SerializeField]
         private ActionGraph? script = null;
         public ActionGraph? Script => script;
-
-        [Input(ShowBackingValue.Always, ConnectionType.Override)]
-        [SerializeField]
-        private IEntryNode? entryNode = null;
-
+        
         private OutputsNode? outputsNode = null;
         private InputsNode? inputsNode = null;
 
@@ -62,24 +58,7 @@ namespace Core.VSEngine.Nodes.Scripting {
         {
             nodePort.ValueType = parameter.SerializedType.GetParsedType();
         }
-
-        /// <summary>
-        /// Look for a node in the subscript implementing <see cref="IEntryNode"/>
-        /// </summary>
-        private IEntryNode? GetEntryNode() {
-            if (script == null) {
-                return null;
-            }
-
-            foreach (Node node in script.nodes) {
-                if (node is IEntryNode entryNode) {
-                    return entryNode;
-                }
-            }
-
-            return null;
-        }
-
+        
         private void OnValidate()
         {
             if (script == null) {
@@ -100,8 +79,6 @@ namespace Core.VSEngine.Nodes.Scripting {
             foreach (NodePort port in dynamicPorts) {
                 dynamicPortsByName.Add(port.fieldName, port);
             }
-            
-            entryNode = GetEntryNode();
             
             foreach (Node node in script.nodes) 
             {
