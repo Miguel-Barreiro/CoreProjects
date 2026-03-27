@@ -6,15 +6,12 @@ using UnityEngine.Serialization;
 
 namespace Core.VSEngine.Nodes
 {
-    [CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/"+ VSNodeMenuNames.VALUES_MENU +"/Number", order = 2)]
+    [CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/Number", order = VSNodeMenuNames.IMPORTANT)]
     [NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
     [NodeWidth(100)]
-    public class NumberNode : ValueOnlyNode 
+    public class NumberNode : SimpleValueNode<Fix> 
     {
         [SerializeField, HideLabel] private float ValueFloat;
-
-        [Output(ShowBackingValue.Never, ConnectionType.Multiple, TypeConstraint.Strict), SerializeField]
-        private Fix value;
         
         public override OperationResult<object> GetValue(string portName)
         {

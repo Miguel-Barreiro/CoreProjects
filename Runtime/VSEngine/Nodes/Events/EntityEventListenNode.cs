@@ -12,7 +12,7 @@ namespace Core.VSEngine.Nodes.Events
 {
     [Node.NodeTint(VSNodeMenuNames.LISTEN_NODES_TINT)]
     [Node.NodeWidth(300)]
-    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Listen] Entity Event", order = 2)]
+    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Listen] Entity Event", order = VSNodeMenuNames.IMPORTANT)]
     [Serializable]
     public class EntityEventListenNode : BaseEventListenNode, IValueNode
     {

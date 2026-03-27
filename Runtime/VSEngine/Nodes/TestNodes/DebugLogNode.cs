@@ -7,7 +7,7 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.TestNodes
 {
-    [Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU+"/Debug Log Node", order = 2)]
+    [Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU+"/Debug Log Node", order = VSNodeMenuNames.IMPORTANT)]
     [Node.NodeTint(VSNodeMenuNames.DEBUG_NODES_TINT)]
     public class DebugLogNode : BasicFlowNode
     {

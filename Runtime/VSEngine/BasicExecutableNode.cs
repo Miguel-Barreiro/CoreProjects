@@ -1,5 +1,6 @@
 using Core.VSEngine;
 using UnityEngine;
+using UnityEngine.Serialization;
 using XNode;
 
 namespace VSEngine
@@ -8,6 +9,6 @@ namespace VSEngine
     {
         [Node.Input(Node.ShowBackingValue.Never, Node.ConnectionType.Multiple)]
         [SerializeField]
-        private Control? enter = null;
+        private Control? Enter = null;
     }
 }

@@ -50,16 +50,32 @@ namespace Core.VSEngine
         
 #endif
 
-        protected OperationResult<object> INVALID_INPUT(string portName)
+        protected OperationResult<T> INVALID_INPUT<T>(string portName)
         {
-            return OperationResult<object>.Failure($"{portName} is not valid: in node {name} in graph {graph.name}");
+            return OperationResult<T>.Failure($"{portName} is not valid: in node {name} in graph {graph.name}");
         }
 
-        protected OperationResult<object> INVALID_EXECUTION(string message)
+        protected OperationResult<T> INVALID_INPUT_NAME_CALLED<T>(string portName)
         {
-            return OperationResult<object>.Failure($"invalid execution in node {name} in graph {graph.name} with message: {message}");
+            return OperationResult<T>.Failure($"{portName} given is not valid: in node {name} in graph {graph.name}");
         }
 
+        
+        protected OperationResult<T> INVALID_EXECUTION<T>(string message)
+        {
+            return OperationResult<T>.Failure($"invalid execution in node {name} in graph {graph.name} with message: {message}");
+        }
+
+        protected OperationResult<T> INVALID_EXECUTION_MESSAGE<T>(string message)
+        {
+            return OperationResult<T>.Failure($"{message} in node {name} in graph {graph.name} with message: {message}");
+        }
+        
+        protected OperationResult<T> SUCCESS_RETURN<T>(T value)
+        {
+            return OperationResult<T>.Success(value);
+        }
+        
 
         // public virtual IJsonSavableAsset? GetChildAsset(long childFileId)
         // {
@@ -140,9 +156,8 @@ namespace Core.VSEngine
         protected bool Check(bool condition, string errorMessage)
         {
             if (condition)
-            {
                 Debug.LogError($"{errorMessage} in {this.name} in graph { graph.name}");
-            }
+
             return condition;
         }
         

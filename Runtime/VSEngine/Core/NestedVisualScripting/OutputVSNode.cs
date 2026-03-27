@@ -5,14 +5,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
+using Core.VSEngine.Nodes;
 using UnityEngine;
 using XNode;
 
 namespace Core.VSEngine.NestedVisualScripting
 {
-    [CreateNodeMenu("Nested/Output")]
+    
+    
+    [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/"+ VSNodeMenuNames.NESTED_TITLE+ "Output", order = VSNodeMenuNames.LOW)]
+    [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
     [NodeWidth(600)]
-    [NodeTint("#471919")]
     public class OutputVSNode : ValueOnlyNode
     {
         [Input(ShowBackingValue.Always, ConnectionType.Override)]

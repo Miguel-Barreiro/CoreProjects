@@ -5,7 +5,7 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.Math
 {
-    [CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Operator", order = 2)]
+    [CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Operator", order = VSNodeMenuNames.IMPORTANT)]
     [NodeTint(VSNodeMenuNames.MATH_NODES_TINT)]
 
     public class NumberOperationNode : ValueOnlyNode

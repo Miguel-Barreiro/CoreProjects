@@ -5,17 +5,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Core.Utils;
 using Core.Utils.CachedDataStructures;
+using Core.VSEngine.Nodes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using XNode;
 
 namespace Core.VSEngine.NestedVisualScripting
 {
     
-    [CreateNodeMenu("Nested/Input", order = 2)]
+    [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/"+ VSNodeMenuNames.NESTED_TITLE+ "In", order = VSNodeMenuNames.LOW)]
+    [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
     [NodeWidth(600)]
-    [NodeTint("#394734")]
     public class InputVSNode : ValueOnlyNode
     {
+        [Header("[NOT WORKING ATM]")]
         [Input(ShowBackingValue.Always, ConnectionType.Override)]
         [SerializeField]
         private List<SerializedTypeParameter> inputTypes = new();

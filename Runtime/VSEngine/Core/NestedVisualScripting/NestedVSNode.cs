@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using Core.Utils;
+using Core.VSEngine.Nodes;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using VSEngine;
 using VSEngine.Core.NestedVisualScripting;
@@ -9,9 +11,9 @@ using XNode;
 
 namespace Core.VSEngine.NestedVisualScripting
 {
-    [Node.CreateNodeMenu("Nested/Execute Script Node", order = 2)]
-    [Node.NodeWidth(300)]
-    [Node.NodeTint("#7055A1")]
+    [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/"+ VSNodeMenuNames.NESTED_TITLE+ "Script", order = VSNodeMenuNames.LOW)]
+    [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
+    [NodeWidth(600)]
     public sealed class NestedVSNode : BasicFlowNode, IValueNode, ICacheOutputValues
     {
         // We use these suffixes so that inputs/outputs can have the same name
@@ -19,6 +21,7 @@ namespace Core.VSEngine.NestedVisualScripting
         private const string INPUT_PARAMETER_SUFFIX = " [I]";
         private const string OUTPUT_PARAMETER_SUFFIX = " [O]";
         
+        [Header("[NOT WORKING ATM]")]
         [Node.Input(Node.ShowBackingValue.Always, Node.ConnectionType.Override)]
         [SerializeField]
         private ActionGraph? script = null;

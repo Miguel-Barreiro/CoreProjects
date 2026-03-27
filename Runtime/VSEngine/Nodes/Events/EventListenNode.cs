@@ -13,7 +13,7 @@ using XNode;
 namespace Core.VSEngine
 {
     [Node.NodeWidth(200)]
-    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Listen] Event", order = 2)]
+    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Listen] Event", order = VSNodeMenuNames.IMPORTANT)]
     [Node.NodeTint(VSNodeMenuNames.LISTEN_NODES_TINT)]
     [Serializable]
     public class EventListenNode : BaseEventListenNode, IValueNode

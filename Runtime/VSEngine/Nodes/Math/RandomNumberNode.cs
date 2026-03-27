@@ -7,7 +7,7 @@ using Zenject;
 namespace Core.VSEngine.Nodes.Math
 {
 
-	[CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Random Number", order = 2)]
+	[CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Random Number", order = VSNodeMenuNames.IMPORTANT)]
 	[NodeTint(VSNodeMenuNames.MATH_NODES_TINT)]
 	public class RandomNumberNode : ValueOnlyNode
     {
@@ -29,10 +29,10 @@ namespace Core.VSEngine.Nodes.Math
 		{
 			OperationResult<Fix> minRes = Resolve<Fix>(nameof(MinInclusive));
 			if (minRes.IsFailure)
-				return INVALID_INPUT(nameof(MinInclusive));
+				return INVALID_INPUT<object>(nameof(MinInclusive));
 			OperationResult<Fix> maxRes = Resolve<Fix>(nameof(MaxInclusive));
 			if (minRes.IsFailure)
-				return INVALID_INPUT(nameof(MaxInclusive));
+				return INVALID_INPUT<object>(nameof(MaxInclusive));
 
 			return OperationResult<object>.Success(RandomSystem.Range(MinInclusive, MaxInclusive));
 		}

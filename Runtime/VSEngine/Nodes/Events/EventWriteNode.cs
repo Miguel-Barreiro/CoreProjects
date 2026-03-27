@@ -13,7 +13,7 @@ namespace Core.VSEngine
 {
     
     [Node.NodeWidth(220)]
-    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Write] Event", order = 3)]
+    [Node.CreateNodeMenu(VSNodeMenuNames.EVENTS_MENU+"/[Write] Event", order = VSNodeMenuNames.IMPORTANT)]
     [Node.NodeTint(VSNodeMenuNames.WRITE_NODES_TINT)]
     public sealed class EventWriteNode : BasicFlowNode
     {
