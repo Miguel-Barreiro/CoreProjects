@@ -58,6 +58,21 @@ namespace Core.VSEngine
             return new List<T>();
         }
 
+        public void StartWith(VSBaseEngine vsBaseEngine, ExecutableNode startNode)
+        {
+            StartWith(vsBaseEngine, startNode, EntId.Invalid);
+        }
+
+        public void StartWith(VSBaseEngine vsBaseEngine, ExecutableNode startNode, EntId ownerId)
+        {
+            this._vsBaseEngine = vsBaseEngine;
+            this.coreEvent = null;
+            this.coreEntityEvent = null;
+            this.ownerId = ownerId;
+
+            nestedScriptExecutionStack.Clear();
+            nestedScriptExecutionStack.Push(new ScriptExecution(startNode.graph as ActionGraph, startNode, null));
+        }
 
         public void StartWithEvent(VSBaseEngine vsBaseEngine, BaseEvent vsEvent, ExecutableNode? startNode, EntId ownerId)
         {

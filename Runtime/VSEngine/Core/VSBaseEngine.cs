@@ -6,6 +6,7 @@ using Core.Events;
 using Core.Model;
 using Core.VSEngine.NestedVisualScripting;
 using Core.VSEngine.Nodes.Events;
+using Core.VSEngine.Nodes.TestNodes;
 using UnityEngine;
 using UnityEngine.UIElements;
 using XNode;
@@ -24,7 +25,11 @@ namespace Core.VSEngine
     {
         private static readonly int INFINITE_LOOP_CHECK = 999;
         
+        public void RunTestNode(BaseTestAssertNode node)
+            => RunInternalEvent(node.graph, node );
         
+        public void RunTestEventForEntity(BaseTestAssertNode node, EntId ownerId)
+            => RunInternalEvent(node.graph, node, ownerId );
         
         public void RunEvent(BaseEventListenNode node, BaseEvent ev, EntId ownerId)
             => RunInternalEvent(node.graph, node, ev, ownerId );
@@ -32,10 +37,54 @@ namespace Core.VSEngine
         public void RunEntityEvent(BaseEventListenNode node, BaseEntityEvent ev, EntId ownerId)
             => RunInternalEntityEvent(node.graph, node, ev, ownerId);
 
-        
+
+
         protected virtual void RunInternalEvent(NodeGraph nodeGraph,
-                                           BaseEventListenNode eventListenNode,
-                                            BaseEvent vsEvent, EntId ownerId)
+                                                BaseTestAssertNode assertNode)
+        {
+            VSExecutionControl vsExecutionControl = new VSExecutionControl();
+            vsExecutionControl.StartWith(this, assertNode);
+            
+            LoopWithoutEvent(vsExecutionControl);
+        }
+
+        protected virtual void RunInternalEvent(NodeGraph nodeGraph,
+                                                BaseTestAssertNode assertNode,
+                                                EntId ownerId)
+        {
+            VSExecutionControl vsExecutionControl = new VSExecutionControl();            
+            vsExecutionControl.StartWith(this, assertNode, ownerId);
+            
+            LoopWithoutEvent(vsExecutionControl);
+        }
+
+        private static void LoopWithoutEvent(VSExecutionControl vsExecutionControl)
+        {
+            int stop = INFINITE_LOOP_CHECK;
+
+            try
+            {
+                while (stop > 0 && vsExecutionControl.CurrentNode != null )
+                {
+                    stop--;
+                    vsExecutionControl.ExecuteCurrentNode();
+                }
+            }
+            catch (Exception e)
+            {
+#if DEBUG_BUILD
+                string graphName = vsExecutionControl.CurrentScriptExecution.Graph.name;
+                string currentNodeName = vsExecutionControl.CurrentNode.name;
+                Log.LogError($"Exception while executing test in <{graphName}>/<{currentNodeName}>:\n{e.Message}");
+#endif
+                throw;
+            }
+        }
+
+
+        protected virtual void RunInternalEvent(NodeGraph nodeGraph,
+                                                BaseEventListenNode eventListenNode,
+                                                BaseEvent vsEvent, EntId ownerId)
         {
             VSExecutionControl vsExecutionControl = new VSExecutionControl();
             
@@ -150,11 +199,17 @@ namespace Core.VSEngine
             foreach (Node node in actionGraph.nodes)
             {
                 if (node is StartVSNode executableNode)
-                {
                     return executableNode;
-                }
+
             }
             return null;
+        }
+
+        public static void GetAssertNodes(ActionGraph actionGraph, List<BaseTestAssertNode> result)
+        {
+            foreach (Node node in actionGraph.nodes)
+                if (node is BaseTestAssertNode assertNode)
+                    result.Add(assertNode);
         }
 
         public static OutputVSNode? GetOutputNode(NodeGraph script)

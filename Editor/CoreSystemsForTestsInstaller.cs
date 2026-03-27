@@ -32,7 +32,11 @@ namespace Core.Editor
 		private void BuildFallbackVSEngine()
 		{
 			if (Container.HasBinding<VSEventListenersSystem>()) return;
-			BindInstance<VSBaseEngine>(new VSEngineCore());
+			
+			VSEngineCore vsSimpleEngine = new VSEngineCore();
+			BindInstance<VSEngineCore>(vsSimpleEngine);
+			BindInstance<VSBaseEngine>(vsSimpleEngine);
+
 			BindInstance(new VSEventListenersEntity());
 			BindInstance(new VSEventListenersSystem());
 		}

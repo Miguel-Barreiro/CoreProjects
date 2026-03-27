@@ -3,11 +3,17 @@ using Core.VSEngine.NestedVisualScripting;
 using UnityEngine;
 using XNode;
 
+#if UNITY_EDITOR
+using System.IO;
+using UnityEditor;
+#endif
+
+
 #nullable enable
 
 namespace Core.VSEngine
 {
-    [CreateAssetMenu(fileName = "new_actiongraph", menuName = "!Game/Visual Scripting/Actiongraph", order = 1)]
+    [CreateAssetMenu(fileName = "new_actiongraph", menuName = "create Actiongraph", order = 1)]
     public sealed class ActionGraph : NodeGraph, ISerializationCallbackReceiver
     //                                                 , IJsonSavableAsset
     {
@@ -27,6 +33,35 @@ namespace Core.VSEngine
         private static Dictionary<ActionGraph, InputVSNode?> InputNodeCache = new Dictionary<ActionGraph, InputVSNode?>();
         private static Dictionary<ActionGraph, OutputVSNode?> OutputNodeCache = new Dictionary<ActionGraph, OutputVSNode?>();
 
+        
+#if UNITY_EDITOR
+
+        [MenuItem("Assets/Create Action Graph", priority = -1000)]
+        private static void Create()
+        {
+            string name = $"NEW_AG";
+
+            
+            var path = "Assets";
+            var obj = Selection.activeObject;
+            if (obj && AssetDatabase.Contains(obj))
+            {
+                path = AssetDatabase.GetAssetPath(obj);
+                if (!Directory.Exists(path))
+                {
+                    path = Path.GetDirectoryName(path);
+                }
+            }
+            
+            var dest = path + $"/{name}.asset";
+            dest = AssetDatabase.GenerateUniqueAssetPath(dest);
+            ScriptableObject previewObject = CreateInstance(typeof(ActionGraph)) as ScriptableObject;
+            AssetDatabase.CreateAsset(previewObject, dest);
+            AssetDatabase.Refresh();
+            Selection.activeObject = previewObject;
+        }
+#endif
+        
         public static void ClearCache()
         {
             StartNodeCache.Clear();

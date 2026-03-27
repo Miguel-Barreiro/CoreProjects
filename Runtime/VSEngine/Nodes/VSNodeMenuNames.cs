@@ -34,6 +34,7 @@ namespace Core.VSEngine.Nodes
 		public const string VALUES_NODES_TINT = "#0E234F";
 		
 		public const string SCRIPT_TINT = "#3d4254";
+		public const string NOT_WORKING_TINT = "#C22211";
 
 		
 		

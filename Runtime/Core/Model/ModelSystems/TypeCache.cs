@@ -402,7 +402,7 @@ namespace Core.Model
                 EventType = eventType;
                 
                 Type genericEventListenerType = typeof(IEventListener<>);
-                Debug.Log($"::: {eventType}");
+                // Debug.Log($"::: {eventType}");
                 EventListenerType = genericEventListenerType.MakeGenericType(new []{eventType});
                 
                 Type genericPostEventListenerType = typeof(IPostEventListener<>);
