@@ -7,30 +7,32 @@ using XNode;
 
 namespace Core.VSEngine.Nodes.TestNodes
 {
-	[Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU +"/" + VSNodeMenuNames.UNIT_TEST_MENU +"/[ASSERT] Number Equal", order = VSNodeMenuNames.IMPORTANT)]
+	[Node.CreateNodeMenu(VSNodeMenuNames.TEST_MENU +"/" + VSNodeMenuNames.UNIT_TEST_MENU +"/[ASSERT] Number Limits", 
+							order = VSNodeMenuNames.IMPORTANT)]
 	[Node.NodeTint(VSNodeMenuNames.DEBUG_NODES_TINT)]
 	[Serializable]
-	public class AssertNumberNode : BaseTestAssertNode
+	public class AssertNumberLimitsNode : BaseTestAssertNode
 	{
-		[SerializeField, HideLabel] private float ValueFloat;
+		[SerializeField] private float MinInclusive;
+		[SerializeField] private float MaxInclusive;
 		
 		[Input(typeConstraint = TypeConstraint.Strict, 
 				connectionType = ConnectionType.Override, 
 				backingValue = ShowBackingValue.Never), SerializeField]
 		private Fix Input;
 
-		[SerializeField] private bool ExpectEqual = true;
-		
+		[SerializeField] private bool ExpectTrue = true;
+
 		protected override void ASSERT()
 		{
 			OperationResult<Fix> operationResult = Resolve<Fix>(nameof(Input));
 			// if(Check(operationResult.IsFailure, "Failed to resolve input"))
 			// 	return false;
-				ASSERT_EXIST(operationResult, nameof(Input));
-			if(ExpectEqual)
-				ASSERT_EQUAL((Fix)ValueFloat , operationResult.Result);
+			ASSERT_EXIST(operationResult, nameof(Input));
+			if(ExpectTrue)
+				ASSERT_LIMIT(operationResult.Result, MinInclusive, MaxInclusive);
 			else
-				ASSERT_DIFERENT((Fix)ValueFloat , operationResult.Result);
+				ASSERT_OUT_LIMIT(operationResult.Result, MinInclusive, MaxInclusive);
 		}
 	}
 }

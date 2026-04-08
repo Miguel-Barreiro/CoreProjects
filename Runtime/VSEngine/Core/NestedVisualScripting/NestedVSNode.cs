@@ -14,7 +14,7 @@ namespace Core.VSEngine.NestedVisualScripting
     [Node.CreateNodeMenu(VSNodeMenuNames.FLOW_MENU+"/" + VSNodeMenuNames.NESTED_MENU +"/"+ VSNodeMenuNames.NESTED_TITLE+ "Script", order = VSNodeMenuNames.LOW)]
     [NodeTint(VSNodeMenuNames.SCRIPT_TINT)]
     [NodeWidth(600)]
-    public sealed class NestedVSNode : BasicFlowNode, IValueNode, ICacheOutputValues
+    public sealed class NestedVSNode : BasicFlowNode, ICacheOutputValues
     {
         // We use these suffixes so that inputs/outputs can have the same name
         // xNode maps by fieldName which would conflict with the other port
@@ -40,7 +40,7 @@ namespace Core.VSEngine.NestedVisualScripting
             ExecutionControl.PushScript(script, this, inputValues);
         }
         
-        public OperationResult<object> GetValue(string portName)
+        public override OperationResult<object> GetValue(string portName)
         {
             if(GetVariable(portName, out object? value))
                 return OperationResult<object>.Success(value!);

@@ -24,6 +24,12 @@ namespace Core.VSEngine.Nodes.TestNodes
         [TextArea(3, 10)]
         private string valueString;
 
+        
+        public override OperationResult<object> GetValue(string portName)
+        {
+            return OperationResult<object>.Failure($"{name} [{GetType().Name}] in {graph.name} should not have any value output ports");
+        }
+        
         protected override void Action()
         {
             if (Pause)

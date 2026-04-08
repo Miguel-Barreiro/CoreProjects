@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Events;
+using Core.Utils;
 using Core.VSEngine.Nodes;
 using Core.VSEngine.Nodes.Events;
 using UnityEngine;
@@ -34,7 +35,12 @@ namespace Core.VSEngine
 
             EventNodeUtils.Write( this, vsFieldPorts, vsEvent, EventType.GetParsedType());
         }
-        
+
+        public override OperationResult<object> GetValue(string portName)
+        {
+            return OperationResult<object>.Failure($"{name} [{GetType().Name}] in {graph.name} should not have any value output ports");
+        }
+
 #if UNITY_EDITOR
         
         private void BuildDynamicPorts()

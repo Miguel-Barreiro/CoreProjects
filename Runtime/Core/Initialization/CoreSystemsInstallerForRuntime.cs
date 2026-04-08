@@ -42,16 +42,7 @@ namespace Core.Initialization
 			
 			BuildVSEngine();
 
-			BuildRandomSystem();
-		}
-
-		private void BuildRandomSystem()
-		{
-			RandomSystem randomSystem = new RandomSystem();
-			BindInstance<IRandomSystem>(randomSystem);
 			
-			RandomModel randomModel = new RandomModel();
-			BindInstance(randomModel);
 		}
 
 		private void BuildVSEngine()

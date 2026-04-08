@@ -2,9 +2,11 @@
 
 
 using Core.Utils;
+using Core.VSEngine.Nodes;
 
 namespace Core.VSEngine
 {
+    [NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
     public abstract class ValueOnlyNode: VSNodeBase, IValueNode
     {
         public abstract OperationResult<object> GetValue(string portName);

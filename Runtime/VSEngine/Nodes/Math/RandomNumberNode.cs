@@ -8,7 +8,6 @@ namespace Core.VSEngine.Nodes.Math
 {
 
 	[CreateNodeMenu(VSNodeMenuNames.MATH_MENU+"/Random Number", order = VSNodeMenuNames.IMPORTANT)]
-	[NodeTint(VSNodeMenuNames.MATH_NODES_TINT)]
 	public class RandomNumberNode : ValueOnlyNode
     {
 		[Input(typeConstraint = TypeConstraint.Strict, connectionType = ConnectionType.Override, 

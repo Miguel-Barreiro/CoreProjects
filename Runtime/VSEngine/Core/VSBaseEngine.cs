@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Events;
+using Core.Initialization;
 using Core.Model;
 using Core.VSEngine.NestedVisualScripting;
 using Core.VSEngine.Nodes.Events;
@@ -10,6 +11,7 @@ using Core.VSEngine.Nodes.TestNodes;
 using UnityEngine;
 using UnityEngine.UIElements;
 using XNode;
+using Zenject;
 
 namespace Core.VSEngine
 {
@@ -24,6 +26,8 @@ namespace Core.VSEngine
     public abstract class VSBaseEngine
     {
         private static readonly int INFINITE_LOOP_CHECK = 999;
+
+        [Inject] private readonly ObjectBuilder ObjectBuilder = null!;
         
         public void RunTestNode(BaseTestAssertNode node)
             => RunInternalEvent(node.graph, node );
@@ -42,7 +46,7 @@ namespace Core.VSEngine
         protected virtual void RunInternalEvent(NodeGraph nodeGraph,
                                                 BaseTestAssertNode assertNode)
         {
-            VSExecutionControl vsExecutionControl = new VSExecutionControl();
+            VSExecutionControl vsExecutionControl = VSExecutionControl.NEW();
             vsExecutionControl.StartWith(this, assertNode);
             
             LoopWithoutEvent(vsExecutionControl);
@@ -192,6 +196,7 @@ namespace Core.VSEngine
                 vsNodeBase.ExecutionControl = vsExecutionControl;
                 vsNodeBase.ScriptExecution = vsExecutionControl.CurrentScriptExecution!;
             }
+            ObjectBuilder.Inject(node);
         }
 
         public static ExecutableNode? GetStartNode(ActionGraph actionGraph)

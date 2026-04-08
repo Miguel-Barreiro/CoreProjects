@@ -16,7 +16,12 @@ namespace Core.VSEngine.Nodes
 
 		[Output(typeConstraint = TypeConstraint.Strict, connectionType = ConnectionType.Override, backingValue = ShowBackingValue.Never), SerializeField]
 		private Control? False;
-
+		
+		public override OperationResult<object> GetValue(string portName)
+		{
+			return OperationResult<object>.Failure($"{name} [{GetType().Name}] in {graph.name} should not have any value output ports");
+		}
+		
 
 		protected override void Action()
 		{

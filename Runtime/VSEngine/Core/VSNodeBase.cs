@@ -147,11 +147,6 @@ namespace Core.VSEngine
 
         #endregion
 
-
-        protected List<T> GetCachedList<T>()
-        {
-            return ExecutionControl.GetCachedList<T>();
-        }
         
         protected bool Check(bool condition, string errorMessage)
         {

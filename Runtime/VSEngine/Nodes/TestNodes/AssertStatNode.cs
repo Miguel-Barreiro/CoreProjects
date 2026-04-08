@@ -3,7 +3,6 @@ using Core.Model;
 using Core.Model.Stats;
 using Core.Utils;
 using FixedPointy;
-using NUnit.Framework;
 using UnityEngine;
 using XNode;
 using Zenject;
@@ -27,10 +26,10 @@ namespace Core.VSEngine.Nodes.TestNodes
 		private EntId Entity;
 
 
-		protected override void Assert()
+		protected override void ASSERT()
 		{
-			OperationResult<EntId> operationResult = Resolve<EntId>(nameof(Input));
-			ASSERT_EXIST(operationResult);
+			OperationResult<EntId> operationResult = Resolve<EntId>(nameof(Entity));
+			ASSERT_EXIST(operationResult, nameof(Entity));
 
 			// NUnit.Framework.Assert.That(operationResult.IsFailure, Is.Not.True);
 			// if(Check(operationResult.IsFailure, $"Failed to resolve {nameof(Entity)} port"))
