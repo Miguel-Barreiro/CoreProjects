@@ -34,14 +34,9 @@ namespace Core.VSEngine.Nodes.Math
 				if (operationResultA.IsFailure)
 					return INVALID_INPUT<object>(nameof(a));
 				
-				OperationResult<MathComparisons> operationResultComp = Resolve<MathComparisons>(nameof(comparison));
-				if (operationResultComp.IsFailure)
-					return INVALID_INPUT<object>(nameof(comparison));
-				
-				
 				Fix aValue = operationResultA.Result;
 				Fix bValue = b;
-				return SUCCESS_RETURN<object>(MathUtils.MakeComparison(aValue, bValue, operationResultComp.Result));
+				return SUCCESS_RETURN<object>(MathUtils.MakeComparison(aValue, bValue, comparison));
 			}
 
 			return portName switch

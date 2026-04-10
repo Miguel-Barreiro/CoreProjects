@@ -16,8 +16,8 @@ namespace Core.VSEngine
         
         public override void Execute()
         {
-            Action();
             ContinueWith(nameof(Continue));
+            Action();
         }
 
         public abstract OperationResult<object> GetValue(string portName);

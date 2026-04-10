@@ -1,7 +1,6 @@
 using System;
 using Core.Utils;
 using FixedPointy;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using XNode;
 
@@ -12,7 +11,7 @@ namespace Core.VSEngine.Nodes.TestNodes
 	[Serializable]
 	public class AssertNumberNode : BaseTestAssertNode
 	{
-		[SerializeField, HideLabel] private float ValueFloat;
+		[SerializeField] private float ValueFloat;
 		
 		[Input(typeConstraint = TypeConstraint.Strict, 
 				connectionType = ConnectionType.Override, 
@@ -26,7 +25,8 @@ namespace Core.VSEngine.Nodes.TestNodes
 			OperationResult<Fix> operationResult = Resolve<Fix>(nameof(Input));
 			// if(Check(operationResult.IsFailure, "Failed to resolve input"))
 			// 	return false;
-				ASSERT_EXIST(operationResult, nameof(Input));
+			ASSERT_EXIST(operationResult, nameof(Input));
+			
 			if(ExpectEqual)
 				ASSERT_EQUAL((Fix)ValueFloat , operationResult.Result);
 			else

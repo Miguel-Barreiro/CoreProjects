@@ -15,14 +15,14 @@ namespace Core.VSEngine
         
         protected void CacheResult(object filteredEntities)
         {
-            SetVariable(CACHE_RESULT_VARIABLE_NAME, filteredEntities);
+            SetLocalVariable(CACHE_RESULT_VARIABLE_NAME, filteredEntities);
         }
 
         protected bool TryCache(out object? variable) 
         {
-            if (HasVariable(CACHE_RESULT_VARIABLE_NAME))
+            if (HasLocalVariable(CACHE_RESULT_VARIABLE_NAME))
             {
-                variable = GetVariable(CACHE_RESULT_VARIABLE_NAME);
+                variable = GetLocalVariable(CACHE_RESULT_VARIABLE_NAME);
                 return true;
             }
             variable = null;

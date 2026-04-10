@@ -27,7 +27,7 @@ namespace Core.VSEngine.NestedVisualScripting
         
         public override OperationResult<object> GetValue(string portName)
         {
-            return GetVariable(portName);
+            return GetLocalVariable(portName);
         }
 
         private void AddParameterPort(SerializedTypeParameter input) {

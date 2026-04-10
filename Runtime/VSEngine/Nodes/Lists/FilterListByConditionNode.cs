@@ -38,7 +38,7 @@ namespace Core.VSEngine.Nodes.Lists
 
         private OperationResult<object> GetCurrentConditionEntity()
         {
-            return GetVariable(CURRENT_CONDITION_ENTITY_VARIABLE);
+            return GetLocalVariable(CURRENT_CONDITION_ENTITY_VARIABLE);
         }
 
         private OperationResult<object> GetFilteredList()
@@ -77,9 +77,9 @@ namespace Core.VSEngine.Nodes.Lists
 
         private bool CheckCondition(object element)
         {
-            SetVariable(CURRENT_CONDITION_ENTITY_VARIABLE, element);
+            SetLocalVariable(CURRENT_CONDITION_ENTITY_VARIABLE, element);
             OperationResult<object> doesEntityPassRes = ResolveDynamic(SHOULD_INCLUDE_PORT_NAME);
-            SetVariable(CURRENT_CONDITION_ENTITY_VARIABLE, null);
+            SetLocalVariable(CURRENT_CONDITION_ENTITY_VARIABLE, null);
             
             if(doesEntityPassRes.IsFailure)
                 return false;

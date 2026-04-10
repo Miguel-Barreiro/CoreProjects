@@ -20,18 +20,26 @@ namespace Core.VSEngine.Nodes
 		
 
 		//other node properties
+		
+		public const string DEFAULT_TINT = "#3d4254";
+		public const string DEFAULT_HIGHER_TINT = "#2a2f3f";
 
 		public const string WRITE_NODES_TINT = "#24173b";
 		public const string LISTEN_NODES_TINT = "#215C32";
 		public const string CONDITION_NODES_TINT = "#3d4254";
-		public const string FLOW_NODES_TINT = "#0F3629";
+		public const string FLOW_NODES_TINT = DEFAULT_TINT;
+		// public const string FLOW_NODES_TINT = "#0F3629";
 		public const string LIST_NODES_TINT = "#3d4254";
 		
 		
 		public const string DEBUG_NODES_TINT = "#452438";
+		public const string DEBUG_TEST_NODES_TINT = "#530e68";
 
 		public const string MATH_NODES_TINT = "#0D4F5C";
-		public const string VALUES_NODES_TINT = "#0E234F";
+		public const string VALUES_NODES_TINT = "#141e60";
+		
+		public const string VARIABLE_NODES_TINT = DEFAULT_TINT;              //"#141e60";
+		public const string VARIABLE_WRITE_NODES_TINT = DEFAULT_HIGHER_TINT; //"#0E234F";
 		
 		public const string SCRIPT_TINT = "#3d4254";
 		public const string NOT_WORKING_TINT = "#C22211";

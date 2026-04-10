@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
 using Core.Utils;
 using VSEngine.Core.NestedVisualScripting;
@@ -7,7 +8,40 @@ using XNode;
 
 namespace Core.VSEngine
 {
-    public sealed class ScriptExecution
+
+    public interface IScriptExecution
+    {
+        
+        /// <summary>
+        /// local variables exist only inside each node they are useful for storing temporary values during the execution
+        /// of a node, and will not affect other nodes. will be cleared when execution ends
+        /// </summary>
+        #region Local Variables
+
+        public bool HasLocalVariable(VSNodeBase owner, string name);
+        public void SetLocalVariable(VSNodeBase owner, string name, object? value);
+        public OperationResult<object?> GetLocalVariable(VSNodeBase owner, string name);
+        
+        public void RemoveAllLocalVariables(VSNodeBase owner);
+
+        #endregion
+        
+        /// <summary>
+        /// Graph variables exist inside each graph execution node they are useful for storing temporary values
+        /// during the execution that will be used by all nodes. will be cleared when execution ends
+        /// </summary>
+        #region Local Variables
+
+        public bool HasGraphVariable(string name);
+        public void SetGraphVariable(string name, object? value);
+        public OperationResult<object?> GetGraphVariable(string name);
+
+        #endregion
+        
+        
+    }
+
+    public sealed class ScriptExecution : IScriptExecution
     {
         private readonly HashSet<Node?> injectedNodes = new();
 
@@ -21,14 +55,14 @@ namespace Core.VSEngine
 
         private readonly Stack<ExecutableNode?> NodeExecutionStack = new();
         
-        private readonly Dictionary<VSNodeBase, Dictionary<string, object?>> NodeScriptNodeVariables = new();
-        private readonly Dictionary<string, object?> NodeScriptExecutionVariables = new();
+        private readonly Dictionary<VSNodeBase, Dictionary<string, object?>> LocalNodeVariables = new();
+        private readonly Dictionary<string, object?> GraphExecutionVariables = new();
 
         public ScriptExecution(ActionGraph nodeGraph, ExecutableNode? startNode, ICacheOutputValues? fromNode = null)
         {
             injectedNodes.Clear();
             NodeExecutionStack.Clear();
-            NodeScriptNodeVariables.Clear();
+            LocalNodeVariables.Clear();
             
             this.nodeGraph = nodeGraph;
             CurrentNode = startNode;
@@ -68,64 +102,73 @@ namespace Core.VSEngine
         }
         
         
+        
+        #region LOCAL VARIABLES
 
-        public bool HasVariable(VSNodeBase owner, string name)
+        public bool HasLocalVariable(VSNodeBase owner, string name)
         {
-            bool containsKey = NodeScriptNodeVariables.ContainsKey(owner);
-            if (containsKey)
-            {
-                return NodeScriptNodeVariables[owner].ContainsKey(name) && NodeScriptNodeVariables[owner][name] != null;
-            }
-            return false;
+            throw new NotImplementedException();
         }
-        
-        public bool HasVariable(string name)
+        public void SetLocalVariable(VSNodeBase owner, string name, object? newValue)
         {
-            return NodeScriptExecutionVariables.ContainsKey(name) && NodeScriptExecutionVariables[name] != null;
-        }
-        
-        public OperationResult<object> GetVariable(string name)
-        {
-            return NodeScriptExecutionVariables.TryGetValue(name, out object? value) ? 
-                       OperationResult<object>.Success(value) : 
-                       OperationResult<object>.Failure("no variable with name " + name);
-        }
-        public void SetVariable(string name, object? newValue)
-        {
-            NodeScriptExecutionVariables[name] = newValue;
-        }
-        
-
-        public OperationResult<object> GetVariable(VSNodeBase owner, string name)
-        {
-            bool containsKey = NodeScriptNodeVariables.ContainsKey(owner);
-            if (containsKey)
-            {
-                return NodeScriptNodeVariables[owner]!.TryGetValue(name, out object? value) ? 
-                           OperationResult<object>.Success(value) : 
-                           OperationResult<object>.Failure("no variable with name " + name);
-            }
-            return OperationResult<object>.Failure("Variable not found");
-        }
-        public void SetVariable(VSNodeBase owner, string name, object? newValue)
-        {
-            bool containsKey = NodeScriptNodeVariables.ContainsKey(owner);
+            bool containsKey = LocalNodeVariables.ContainsKey(owner);
             if (!containsKey)
             {
-                NodeScriptNodeVariables.Add(owner, new ());
+                //TODO: we need to remove this dictionary allocation everytime
+                LocalNodeVariables.Add(owner, new ());
             }
-            Dictionary<string,object?> ownerVariables = NodeScriptNodeVariables[owner];
+            Dictionary<string,object?> ownerVariables = LocalNodeVariables[owner];
 
             ownerVariables[name] = newValue;
-            
+
         }
-        public void RemoveVariables(VSNodeBase owner)
+        public OperationResult<object?> GetLocalVariable(VSNodeBase owner, string name)
         {
-            bool containsKey = NodeScriptNodeVariables.ContainsKey(owner);
+            bool containsKey = LocalNodeVariables.ContainsKey(owner);
             if (containsKey)
             {
-                NodeScriptNodeVariables[owner].Clear();
+                return LocalNodeVariables[owner]!.TryGetValue(name, out object? value) ? 
+                           OperationResult<object?>.Success(value) : 
+                           OperationResult<object?>.Failure("no variable with name " + name);
+            }
+            
+            return OperationResult<object?>.Failure("Variable not found");
+        }
+
+        public void RemoveAllLocalVariables(VSNodeBase owner)
+        {
+            bool containsKey = LocalNodeVariables.ContainsKey(owner);
+            if (containsKey)
+            {
+                LocalNodeVariables[owner].Clear();
             }
         }
+        
+        #endregion
+
+        
+        #region GRAPH VARIABLES
+        
+        public bool HasGraphVariable(string name)
+        {
+            return GraphExecutionVariables.ContainsKey(name);
+        }
+        public void SetGraphVariable(string name, object? newValue)
+        {
+            GraphExecutionVariables[name] = newValue;
+        }
+        public OperationResult<object?> GetGraphVariable(string name)
+        {
+            return GraphExecutionVariables.TryGetValue(name, out object? value) ? 
+                       OperationResult<object?>.Success(value) : 
+                       OperationResult<object?>.Failure($"no graph variable with name <{name}>");
+
+        }
+        
+        
+        #endregion
+        
     }
+    
+    
 }

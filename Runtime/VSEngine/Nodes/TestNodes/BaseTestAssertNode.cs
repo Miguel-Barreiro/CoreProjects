@@ -11,12 +11,13 @@ namespace Core.VSEngine.Nodes.TestNodes
 	[Node.NodeTint(VSNodeMenuNames.DEBUG_NODES_TINT)]
 	public abstract class BaseTestAssertNode : BasicFlowNode {
 
-		[SerializeField]
-		[TextArea(2, 10), HideLabel]
-		private string Header;
-
 		[SerializeField, Space(10)]
 		private int RepeatNumber = 1;
+
+		// [SerializeField]
+		// [TextArea(2, 10)]
+		// private string Header;
+
 		
 		// [Input(ShowBackingValue.Unconnected, ConnectionType.Override, TypeConstraint.Strict), SerializeField]
 		// private Fix In;
@@ -40,21 +41,28 @@ namespace Core.VSEngine.Nodes.TestNodes
 		protected abstract void ASSERT();
 
 
+		protected void ASSERT_TRUE(bool value)
+		{
+				Assert.That(value , expression:Is.True, 
+							message: $"\nIn <{name}> [ {value} != TRUE ] in graph {graph.name}");
+		}
+
+		
 		protected void ASSERT_OUT_LIMIT(Fix value, Fix minExpected, Fix maxExpected)
 		{
 			Assert.That(value > maxExpected, expression:Is.True, 
-						message: $"In <{name}> [ {value} < {maxExpected} ] in graph {graph.name}");
+						message: $"In <{name}> value is within limit [ value({value}) < maxLimitExpected({maxExpected} ] in graph {graph.name}");
 			Assert.That(value < minExpected, expression:Is.True, 
-						message: $"In <{name}> [ {value} > {minExpected} ] in graph {graph.name}");
+						message: $"In <{name}> value is within limit [ value({value}) > minExpected({minExpected} ] in graph {graph.name}");
 
 		}
 
 		protected void ASSERT_LIMIT(Fix value, Fix minExpected, Fix maxExpected)
 		{
 			Assert.That(value <= maxExpected, expression:Is.True, 
-						message: $"In <{name}> [ {value} > {maxExpected} ] in graph {graph.name}");
+						message: $"In <{name}> value is outside limit [ value({value}) > maxExpected({maxExpected} ] in graph {graph.name}");
 			Assert.That(value >= minExpected, expression:Is.True, 
-						message: $"In <{name}> [ {value} < {minExpected} ] in graph {graph.name}");
+						message: $"In <{name}> value is outside limit [ value({value}) < minExpected({minExpected} ] in graph {graph.name}");
 
 		}
 
@@ -62,13 +70,13 @@ namespace Core.VSEngine.Nodes.TestNodes
 		protected void ASSERT_EQUAL<T>(T expected, T actual)
 		{
 			Assert.That(expected, expression:Is.EqualTo(actual), 
-						message: $"In <{name}> [ {expected} != {actual} ] in graph {graph.name}");
+						message: $"In <{name}> value should be equal [ expected({expected}) != actual({actual}) ] in graph {graph.name}");
 		}
 
 		protected void ASSERT_DIFERENT<T>(T expected, T actual)
 		{
 			Assert.That(expected, expression:Is.Not.EqualTo(actual), 
-						message: $"In <{name}> [ {expected} == {actual} ]  in graph {graph.name}");
+						message: $"In <{name}> value should be different [ expected({expected}) == actual({actual} ]  in graph {graph.name}");
 		}
 
 		
@@ -78,7 +86,7 @@ namespace Core.VSEngine.Nodes.TestNodes
 			{
 				Assert.That(input.IsSuccess, 
 							Is.True, 
-							message: $"Failed to resolve input {inputName} in graph {graph.name}: \n {input.Exception.Message}");
+							message: $"node {name}({GetType().Name}) Failed to resolve input {inputName} in graph {graph.name}: \n {input.Exception.Message}");
 			} else
 			{
 				Assert.That(input.IsSuccess, Is.True);

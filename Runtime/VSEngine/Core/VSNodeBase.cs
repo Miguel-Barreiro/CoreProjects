@@ -94,59 +94,31 @@ namespace Core.VSEngine
 #endif
         }
         
-        #region Variables
+        #region Local Variables
 
-        protected void SetVariable(string name, object? newValue)
+        protected void SetLocalVariable(string name, object? newValue)
         {
-            ScriptExecution!.SetVariable(this, name, newValue);
-        }
-
-        protected bool GetVariable(string name, out object? value)
-        {
-            value = ScriptExecution!.GetVariable(this, name);
-            return HasVariable(name);
-        }
-
-        protected OperationResult<object> GetVariable(string name)
-        {
-            return ScriptExecution!.GetVariable(this, name);
+            ScriptExecution!.SetLocalVariable(this, name, newValue);
         }
         
-        protected bool HasVariable(string name)
+        protected OperationResult<object?> GetLocalVariable(string name)
         {
-            return ScriptExecution!.HasVariable(this, name);
+            return ScriptExecution!.GetLocalVariable(this, name);
         }
         
-        protected void RemoveVariables()
+        protected bool HasLocalVariable(string name)
         {
-            ScriptExecution!.RemoveVariables(this);
+            return ScriptExecution!.HasLocalVariable(this, name);
         }
         
-        
-        protected void SetExecutionVariable(string name, object? newValue)
+        protected void RemoveAllLocalVariables()
         {
-            ScriptExecution!.SetVariable(name, newValue);
-        }
-
-        protected bool GetExecutionVariable(string name, out object? value)
-        {
-            value = ScriptExecution!.GetVariable(name);
-            return HasExecutionVariable(name);
-        }
-
-        protected object? GetExecutionVariable(string name)
-        {
-            return ScriptExecution!.GetVariable(name);
+            ScriptExecution!.RemoveAllLocalVariables(this);
         }
         
-        protected bool HasExecutionVariable(string name)
-        {
-            return ScriptExecution!.HasVariable(name);
-        }
-        
-
         #endregion
-
+        
+        
         
         protected bool Check(bool condition, string errorMessage)
         {

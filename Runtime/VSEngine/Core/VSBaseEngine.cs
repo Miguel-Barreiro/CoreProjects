@@ -31,7 +31,10 @@ namespace Core.VSEngine
         
         public void RunTestNode(BaseTestAssertNode node)
             => RunInternalEvent(node.graph, node );
-        
+
+        public void RunTestNode(TestStartNode node)
+            => RunInternalEvent(node.graph, node );
+
         public void RunTestEventForEntity(BaseTestAssertNode node, EntId ownerId)
             => RunInternalEvent(node.graph, node, ownerId );
         
@@ -52,6 +55,16 @@ namespace Core.VSEngine
             LoopWithoutEvent(vsExecutionControl);
         }
 
+        protected virtual void RunInternalEvent(NodeGraph nodeGraph,
+                                                TestStartNode testStartNode)
+        {
+            VSExecutionControl vsExecutionControl = VSExecutionControl.NEW();
+            vsExecutionControl.StartWith(this, testStartNode);
+            
+            LoopWithoutEvent(vsExecutionControl);
+        }
+
+        
         protected virtual void RunInternalEvent(NodeGraph nodeGraph,
                                                 BaseTestAssertNode assertNode,
                                                 EntId ownerId)
@@ -217,6 +230,14 @@ namespace Core.VSEngine
                     result.Add(assertNode);
         }
 
+        public static void GetTestStartNodes(ActionGraph actionGraph, List<TestStartNode> result)
+        {
+            foreach (Node node in actionGraph.nodes)
+                if (node is TestStartNode testStartNode)
+                    result.Add(testStartNode);
+        }
+
+        
         public static OutputVSNode? GetOutputNode(NodeGraph script)
         {
             foreach (Node node in script.nodes)

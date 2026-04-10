@@ -40,14 +40,16 @@ namespace Core.VSEngine.NestedVisualScripting
             ExecutionControl.PushScript(script, this, inputValues);
         }
         
-        public override OperationResult<object> GetValue(string portName)
+        public override OperationResult<object?> GetValue(string portName)
         {
-            if(GetVariable(portName, out object? value))
-                return OperationResult<object>.Success(value!);
-
-            string message = $"No value was cached in {name} for {portName} in {graph.name}";
-            Debug.LogError(message);
-            return OperationResult<object>.Failure(message);
+            OperationResult<object?> operationResult = GetLocalVariable(portName);
+            return operationResult;
+            
+            // if(operationResult.IsFailure)
+            //
+            // string message = $"No value was cached in {name} for {portName} in {graph.name}";
+            // Debug.LogError(message);
+            // return OperationResult<object?>.Failure(message);
         }
 
         void ICacheOutputValues.CacheOutputValues(Dictionary<string, object?> outputs)
@@ -55,7 +57,7 @@ namespace Core.VSEngine.NestedVisualScripting
             foreach ((string parameterName, object? value) in outputs)
             {
                 string outputParameterName = parameterName + OUTPUT_PARAMETER_SUFFIX;
-                SetVariable(outputParameterName, value);
+                SetLocalVariable(outputParameterName, value);
             }
         }
         

@@ -22,7 +22,7 @@ namespace Core.VSEngine.Nodes
         [Node.Output(Node.ShowBackingValue.Never, Node.ConnectionType.Override), SerializeField] 
         private Control? Continue;
 
-        [SerializeField]
+        [SerializeField, Space(10)]
         private NodeElementType Type = NodeElementType.Entities;
         
         [Node.Output(Node.ShowBackingValue.Never, Node.ConnectionType.Override), SerializeField] 
@@ -47,10 +47,10 @@ namespace Core.VSEngine.Nodes
             if (list == null)
                 return INVALID_EXECUTION_MESSAGE<object>("List was null");
 
-            if (!HasVariable(LOOP_INDEX_VARIABLE))
+            if (!HasLocalVariable(LOOP_INDEX_VARIABLE))
                 return INVALID_EXECUTION_MESSAGE<object>("there was no loop index variable set(likely means the loop isnt executed)");
 
-            OperationResult<object> variable = GetVariable( LOOP_INDEX_VARIABLE);
+            OperationResult<object> variable = GetLocalVariable( LOOP_INDEX_VARIABLE);
             int index = (int)variable.Result;
             if (index < list.Count)
                 return SUCCESS_RETURN(list![index]);
@@ -65,11 +65,11 @@ namespace Core.VSEngine.Nodes
                 return;
 
             IList list = listRes.Result;
-            if (!HasVariable(LOOP_INDEX_VARIABLE))
+            if (!HasLocalVariable(LOOP_INDEX_VARIABLE))
             {
                 if (list.Count > 0)
                 {
-                    SetVariable( LOOP_INDEX_VARIABLE, 0);
+                    SetLocalVariable( LOOP_INDEX_VARIABLE, 0);
                     ContinueWithAndComeBack(nameof(LoopExecute));
                 }else
                 {
@@ -78,7 +78,7 @@ namespace Core.VSEngine.Nodes
                 return;
             }
 
-            OperationResult<object> loopIndexRes = GetVariable( LOOP_INDEX_VARIABLE);
+            OperationResult<object> loopIndexRes = GetLocalVariable( LOOP_INDEX_VARIABLE);
             if (Check(loopIndexRes.IsFailure, "couldnt get loop index"))
                 return;
             
@@ -87,7 +87,7 @@ namespace Core.VSEngine.Nodes
             int newIndex = index + 1;
             if (newIndex < list.Count)
             {
-                SetVariable( LOOP_INDEX_VARIABLE, newIndex);
+                SetLocalVariable( LOOP_INDEX_VARIABLE, newIndex);
                 ContinueWithAndComeBack(nameof(LoopExecute));
             }
             else
@@ -98,7 +98,7 @@ namespace Core.VSEngine.Nodes
 
         private void FinishForEachLoop()
         {
-            RemoveVariables();
+            RemoveAllLocalVariables();
             ContinueWith(nameof(Continue));
         }
 

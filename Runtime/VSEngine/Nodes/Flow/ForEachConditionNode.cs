@@ -57,10 +57,10 @@ namespace Core.VSEngine.Nodes
             if (list == null)
                 return INVALID_EXECUTION_MESSAGE<object>("List was null");
 
-            if (!HasVariable(LOOP_INDEX_VARIABLE))
+            if (!HasLocalVariable(LOOP_INDEX_VARIABLE))
                 return INVALID_EXECUTION_MESSAGE<object>("there was no loop index variable set(likely means the loop isnt executed)");
 
-            OperationResult<object> variable = GetVariable( LOOP_INDEX_VARIABLE);
+            OperationResult<object> variable = GetLocalVariable( LOOP_INDEX_VARIABLE);
             int index = (int)variable.Result;
             if (index < list.Count)
                 return SUCCESS_RETURN(list![index]);
@@ -75,7 +75,7 @@ namespace Core.VSEngine.Nodes
                 return;
 
             IList list = listRes.Result;
-            if (!HasVariable(LOOP_INDEX_VARIABLE))
+            if (!HasLocalVariable(LOOP_INDEX_VARIABLE))
             {
                 if (list.Count > 0)
                     TestAndContinue(0);
@@ -85,7 +85,7 @@ namespace Core.VSEngine.Nodes
                 return;
             }
 
-            OperationResult<object> loopIndexRes = GetVariable( LOOP_INDEX_VARIABLE);
+            OperationResult<object> loopIndexRes = GetLocalVariable( LOOP_INDEX_VARIABLE);
             if (Check(loopIndexRes.IsFailure, "couldnt get loop index"))
                 return;
             
@@ -99,7 +99,7 @@ namespace Core.VSEngine.Nodes
 
             void TestAndContinue(int newIndex)
             {
-                SetVariable( LOOP_INDEX_VARIABLE, newIndex);
+                SetLocalVariable( LOOP_INDEX_VARIABLE, newIndex);
                 OperationResult<bool> operationResult = Resolve<bool>(nameof(Condition));
                 if(Check(operationResult.IsFailure, "Failed to resolve condition input"))
                     return;
@@ -114,7 +114,7 @@ namespace Core.VSEngine.Nodes
 
         private void FinishForEachLoop()
         {
-            RemoveVariables();
+            RemoveAllLocalVariables();
             ContinueWith(nameof(Continue));
         }
 

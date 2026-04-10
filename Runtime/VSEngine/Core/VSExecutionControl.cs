@@ -175,9 +175,7 @@ namespace Core.VSEngine
             if (inputsNode != null)
             {
                 foreach ((string inputName, object? value) in inputValues)
-                {
-                    scriptExecution.SetVariable(inputsNode, inputName, value);
-                }
+                    scriptExecution.SetGraphVariable( inputName, value);
             }
             
         }
