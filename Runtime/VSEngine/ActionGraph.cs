@@ -24,6 +24,13 @@ namespace Core.VSEngine
         [SerializeField]
         private long fileId;
         public long FileId => fileId;
+
+        [SerializeField] public List<LocalVariableDefinition> localVariables = new();
+        public IReadOnlyList<LocalVariableDefinition> LocalVariables => localVariables;
+
+#if UNITY_EDITOR
+        public List<LocalVariableDefinition> LocalVariablesMutable => localVariables;
+#endif
         
         public OutputVSNode? OutputsNode => GetOutputsNode();
         public InputVSNode? InputsNode => GetInputsNode();

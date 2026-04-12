@@ -9,6 +9,7 @@ using XNodeEditor;
 
 namespace Core.Editor.VSEngine
 {
+    
     [CustomNodeEditor(typeof(GetGraphVariableNode))]
     public class GetGraphVariableNodeEditor : GraphVariableNodeEditorBase { }
 
@@ -34,7 +35,8 @@ namespace Core.Editor.VSEngine
             serializedObject.Update();
 
             ActionGraph graph = target.graph as ActionGraph;
-            string[] declaredNames = graph != null && graph.LocalVariables.Count > 0
+            bool hasDeclarations = graph != null && graph.LocalVariables.Count > 0;
+            string[] declaredNames = hasDeclarations
                 ? graph.LocalVariables.Select(v => v.Name).ToArray()
                 : null;
 
@@ -45,9 +47,9 @@ namespace Core.Editor.VSEngine
                 enterChildren = false;
                 if (Array.IndexOf(Excludes, iterator.name) >= 0) continue;
 
-                if (iterator.name == "VariableName" && declaredNames != null)
+                if (iterator.name == nameof(GetGraphVariableNode.VariableIndex) && declaredNames != null)
                 {
-                    DrawVariableDropdown(iterator, declaredNames);
+                    DrawVariableDropdown(iterator, declaredNames, graph);
                 }
                 else
                 {
@@ -57,25 +59,33 @@ namespace Core.Editor.VSEngine
 
             // Dynamic "Value" port has no backing serialized field, so it must
             // be drawn explicitly. Only Get/Set nodes have this port.
-            NodePort valueOutput = target.GetOutputPort("Value");
-            NodePort valueInput  = target.GetInputPort("Value");
+            NodePort valueOutput = target.GetOutputPort(GetGraphVariableNode.VAR_VALUE_PORT_NAME);
+            NodePort valueInput  = target.GetInputPort(SetGraphVariableNode.VAR_VALUE_PORT_NAME);
             if (valueOutput != null)
-                NodeEditorGUILayout.PortField(new GUIContent("Value"), valueOutput);
+                NodeEditorGUILayout.PortField(new GUIContent(GetGraphVariableNode.VAR_VALUE_PORT_NAME), valueOutput);
             else if (valueInput != null)
-                NodeEditorGUILayout.PortField(new GUIContent("Value"), valueInput);
+                NodeEditorGUILayout.PortField(new GUIContent(SetGraphVariableNode.VAR_VALUE_PORT_NAME), valueInput);
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        private static void DrawVariableDropdown(SerializedProperty prop, string[] names)
+        private void DrawVariableDropdown(SerializedProperty nameProp, string[] names, ActionGraph graph)
         {
-            int currentIndex = Array.IndexOf(names, prop.stringValue);
+            int currentIndex = nameProp.intValue;
             if (currentIndex < 0) currentIndex = 0;
 
             EditorGUI.BeginChangeCheck();
-            int selected = EditorGUILayout.Popup("Variable", currentIndex, names);
+            int selected = EditorGUILayout.Popup("Name", currentIndex, names);
             if (EditorGUI.EndChangeCheck())
-                prop.stringValue = names[selected];
+            {
+                nameProp.intValue = selected;
+
+                // Sync the node's Type to match the declared variable's type so
+                // OnBeforeSerialize can update the dynamic port correctly.
+                // SerializedProperty typeProp = serializedObject.FindProperty("Type");
+                // if (typeProp != null)
+                //     typeProp.enumValueIndex = (int)graph.LocalVariables[selected].Type;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+
 using System;
 using Core.Utils;
 using UnityEngine;
@@ -6,28 +7,40 @@ using XNode;
 namespace Core.VSEngine.Nodes.LocalVariables
 {
 	
-	[CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/Graph Variable", order = VSNodeMenuNames.IMPORTANT)]
-	[NodeTint(VSNodeMenuNames.VARIABLE_NODES_TINT)]
-	public sealed class GetGraphVariableNode : ValueOnlyNode
+	[CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/Set Graph Variable", order = VSNodeMenuNames.IMPORTANT)]
+	[NodeTint(VSNodeMenuNames.VARIABLE_WRITE_NODES_TINT)]
+	public sealed class SetGraphVariableNode : BasicFlowNode
 	{
-		// [SerializeField] private string VariableName;
+		[SerializeField] private int VariableIndex = 1;
 		
 		// [SerializeField, Space(10)]
 		// private NodeElementType Type = NodeElementType.Numbers;
-		[SerializeField] public int VariableIndex = 1;
-		
-		public override OperationResult<object> GetValue(string portName)
-		{
 
+
+		protected override void Action()
+		{
 			string errorMessage = $"Variable index {VariableIndex} is out of range({VariableIndex}) for node {name} in graph {graph.name} ";
-			
 			ActionGraph actionGraph = graph as ActionGraph;
 			if(Check(VariableIndex < 0 || VariableIndex >= actionGraph!.LocalVariables.Count, errorMessage))
-				return OperationResult<object>.Failure(errorMessage);
-
+				return;
 			LocalVariableDefinition graphVariable = actionGraph!.LocalVariables[VariableIndex];
 			
-			return ScriptExecution!.GetGraphVariable(graphVariable.Name);
+			OperationResult<object> operationResult = GetNewValue();
+			if (operationResult.IsSuccess)
+				ScriptExecution!.SetGraphVariable(graphVariable.Name, operationResult.Result);
+
+		}
+
+		public override OperationResult<object> GetValue(string portName)
+		{
+			throw new NotImplementedException();
+		}
+
+		public OperationResult<object> GetNewValue()
+		{
+			OperationResult<object> operationResult = Resolve<object>(VAR_VALUE_PORT_NAME);
+			return operationResult;
+
 		}
 		
 		public const string VAR_VALUE_PORT_NAME = "Value";
@@ -37,9 +50,8 @@ namespace Core.VSEngine.Nodes.LocalVariables
         
 		public override void OnBeforeSerialize()
 		{
-			
 			ActionGraph actionGraph = graph as ActionGraph;
-			if (VariableIndex < 0 || VariableIndex >= actionGraph!.LocalVariables.Count)
+			if (VariableIndex < 0 || VariableIndex >= actionGraph.LocalVariables.Count)
 			{
 				Debug.LogError($"Variable index {VariableIndex} is out of range({VariableIndex}) for node {name} in graph {graph.name} ");
 				return;
@@ -47,10 +59,8 @@ namespace Core.VSEngine.Nodes.LocalVariables
 
 			LocalVariableDefinition graphVariable = actionGraph!.LocalVariables[VariableIndex];
 			Type variableType = ElementTypeExtensions.GetLogicType(graphVariable.Type);
-			// Type variableType = ElementTypeExtensions.GetLogicType(Type);
-			
-
-			NodePort? executePort = GetOutputPort(VAR_VALUE_PORT_NAME);
+            
+			NodePort? executePort = GetInputPort(VAR_VALUE_PORT_NAME);
 			if (executePort != null && executePort.ValueType != variableType)
 			{
 				RemoveDynamicPort(VAR_VALUE_PORT_NAME);
@@ -58,8 +68,9 @@ namespace Core.VSEngine.Nodes.LocalVariables
 			}
 			if (executePort == null)
 			{
-				AddDynamicOutput(variableType, fieldName: VAR_VALUE_PORT_NAME,
-								typeConstraint: TypeConstraint.Strict, connectionType: Node.ConnectionType.Multiple);
+				AddDynamicInput(variableType, fieldName: VAR_VALUE_PORT_NAME,
+								typeConstraint: TypeConstraint.Strict,
+								connectionType: Node.ConnectionType.Override);
 			}
 			base.OnBeforeSerialize();
 		}

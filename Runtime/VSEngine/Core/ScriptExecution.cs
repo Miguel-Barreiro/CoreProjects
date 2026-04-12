@@ -107,8 +107,13 @@ namespace Core.VSEngine
 
         public bool HasLocalVariable(VSNodeBase owner, string name)
         {
-            throw new NotImplementedException();
+            
+            if (!LocalNodeVariables.TryGetValue(owner, out Dictionary<string, object?>? ownerVariables))
+                return false;
+            
+            return ownerVariables.ContainsKey(name);
         }
+        
         public void SetLocalVariable(VSNodeBase owner, string name, object? newValue)
         {
             bool containsKey = LocalNodeVariables.ContainsKey(owner);
