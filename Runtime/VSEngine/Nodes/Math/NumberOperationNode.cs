@@ -40,7 +40,7 @@ namespace Core.VSEngine.Nodes.Math
                 return OperationResult<object>.Failure("inputA is null");
 
             if(Check(inputB.IsFailure, "inputB is null"))
-                return OperationResult<object>.Failure("inputA is null");
+                return OperationResult<object>.Failure("inputB is null");
             
             return type switch
             {
