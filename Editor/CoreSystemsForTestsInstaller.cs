@@ -29,6 +29,10 @@ namespace Core.Editor
 			SetSystemsControllerForTests();
 		}
 
+#if DEBUG
+		protected override void AddDebugOptions() { }
+#endif		
+
 		private void BuildFallbackVSEngine()
 		{
 			if (Container.HasBinding<VSEventListenersSystem>()) return;

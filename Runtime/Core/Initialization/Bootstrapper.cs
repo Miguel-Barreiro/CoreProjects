@@ -19,8 +19,7 @@ namespace Core.Initialization
 		
 		private readonly Queue<SystemsInstallerBase> Installers = new Queue<SystemsInstallerBase>();
 		private readonly HashSet<SystemsInstallerBase> completedInstallers = new HashSet<SystemsInstallerBase>();
-
-
+		
 #region PUBLIC
 
 
@@ -49,6 +48,8 @@ namespace Core.Initialization
 		{
 			_currentSceneInstallers.Remove(installerToRemove);
 			completedInstallers.Remove(installerToRemove);
+			
+			
 			if (Installers.Contains(installerToRemove))
 			{
 				using CachedList<SystemsInstallerBase> temp = ListCache<SystemsInstallerBase>.Get();
@@ -90,33 +91,29 @@ namespace Core.Initialization
 					installer.ResetComponentContainers(dataContainersController);
 				
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
 					installer.CreateSystems();
-				}
 			
 				if(_currentSceneInstallers.Count > 0 )
-				{
 					foreach (SystemsInstallerBase currentSceneInstaller in _currentSceneInstallers)
-					{
 						UpdateObjectBuilder(currentSceneInstaller);
-					}
-				}
 
-				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
-					installer.SetupConfigurations();
-				}
 				
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
+					installer.SetupConfigurations();
+				
+				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 					installer.InjectInstances();
-				}
 
 			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
 					installer.InitializeInstances();
-				}
+
+
+#if DEBUG
+				foreach (SystemsInstallerBase systemsInstallerBase in systemsInstallerBases)
+					systemsInstallerBase.InitializeDebugOptions();
+#endif		
+
 			
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
 				{
@@ -127,14 +124,11 @@ namespace Core.Initialization
 				}
 
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
 					installer.StartSystems();
-				}
 
 				foreach (SystemsInstallerBase installer in systemsInstallerBases)
-				{
 					installer.OnComplete();
-				}
+
 				
 #if !UNITY_EDITOR
 			} catch (Exception e)

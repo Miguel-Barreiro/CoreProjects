@@ -45,6 +45,10 @@ namespace Core.Initialization
 			
 		}
 
+#if DEBUG
+		protected override void AddDebugOptions() { }
+#endif		
+
 		private void BuildVSEngine()
 		{
 			VSEngineCore vsSimpleEngine = new VSEngineCore();

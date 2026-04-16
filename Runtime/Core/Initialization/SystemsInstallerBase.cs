@@ -8,6 +8,8 @@ using Core.View;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
+using SRDebugger;
+using SRDebugger.Internal;
 using UnityEngine;
 
 namespace Core.Initialization
@@ -17,6 +19,11 @@ namespace Core.Initialization
     {
         public abstract void SetupConfigurations();
         protected abstract void InstallSystems();
+
+#if DEBUG
+        protected abstract void AddDebugOptions();
+#endif       
+        
         public abstract void ResetComponentContainers(DataContainersController dataController);
 
         protected readonly DiContainer Container;
@@ -39,6 +46,13 @@ namespace Core.Initialization
             return Container.Resolve<T>();
         }
 
+#if DEBUG
+        internal void InitializeDebugOptions()
+        {
+            AddDebugOptions();
+        }
+#endif        
+        
         internal void InitializeInstances()
         {
             foreach ( (System.Object system, List<Type> types) in ownedSystems)
@@ -50,6 +64,15 @@ namespace Core.Initialization
             }
         }
 
+#if DEBUG
+        protected void AddDebugOption<T>( T optionsClass) 
+            where T : new()
+        {
+            _debugOptionsContainer.Add(optionsClass);
+            SRDebug.Instance.AddOptionContainer(optionsClass);
+        }
+#endif
+        
         internal void InjectInstances()
         {
             foreach (System.Object injectableObject in injectableObjects)
@@ -253,6 +276,9 @@ namespace Core.Initialization
 
         protected readonly Dictionary<System.Object, List<Type>> ownedSystems = new ();
         protected readonly List<GameObject> ownedGameObjectSystems = new ();
+        
+        private readonly List<object> _debugOptionsContainer = new List<object>();
+
         protected SystemsInstallerBase(DiContainer container) { Container = container; }
 
         protected void Clear()
@@ -291,7 +317,11 @@ namespace Core.Initialization
             
             foreach (System.Object system in ownedSystemsTemp)
                 RemoveSystem(system);
+#if DEBUG
+            foreach (object optionContainer in _debugOptionsContainer)
+                SRDebug.Instance.RemoveOptionContainer(optionContainer);
 
+#endif
   
             ownedSystems.Clear();
             ownedGameObjectSystems.Clear();
