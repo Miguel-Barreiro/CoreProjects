@@ -1,13 +1,14 @@
 {
   "name": "com.miguel.core",
-  "version": "0.5.72",
+  "version": "0.5.73",
   "displayName": "Core Modules",
   "description": "This is a collection of core modules for Miguel's games",
   "unity" : "2022.3", 
   "dependencies": {
     "com.cysharp.unitask" : "2.5.4", 
     "com.unity.nuget.newtonsoft-json" : "3.2.1 ", 
-    "com.miguel.xnode" : "1.8.6"
+    "com.miguel.xnode" : "1.8.6", 
+    "StompyRobot.SRDebugger" : "1.13.1"
   },
   "testables": [ "com.Core.TestsBase.Editor" ], 
   "author": {
