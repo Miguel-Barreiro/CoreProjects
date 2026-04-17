@@ -5,9 +5,9 @@ using Core.Utils.Reflection;
 using Core.VSEngine;
 using UnityEditor;
 using UnityEngine;
+using Core.VSEngine.Nodes.Events;
 
 #if ODIN_INSPECTOR
-using Core.VSEngine.Nodes.Events;
 using Sirenix.OdinInspector.Editor;
 #endif
 
@@ -65,7 +65,7 @@ namespace Core.Editor.VSEngine
     }
 
 #else
-
+    
     /// <summary>
     /// Fallback Unity IMGUI drawer used when Odin Inspector is not present.
     /// </summary>
@@ -73,33 +73,33 @@ namespace Core.Editor.VSEngine
     public class EventSerializedTypeDrawer : PropertyDrawer
     {
         private const string NoneLabel = "(None)";
-
+    
         public void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty typeName = property.FindPropertyRelative(nameof(EventSerializedType.TypeName));
             SerializedProperty aqn      = property.FindPropertyRelative(nameof(EventSerializedType.AssemblyQualifiedName));
-
+    
             string currentLabel = string.IsNullOrEmpty(typeName.stringValue) ? NoneLabel : typeName.stringValue;
-
+    
             EditorGUI.BeginProperty(position, label, property);
             Rect prefixRect = EditorGUI.PrefixLabel(position, label);
             EditorGUI.EndProperty();
-
+    
             if (EditorGUI.DropdownButton(prefixRect, new GUIContent(currentLabel), FocusType.Keyboard))
             {
                 UnityEngine.Object targetObject = property.serializedObject.targetObject;
                 string propertyPath = property.propertyPath;
                 string currentAqn   = aqn.stringValue;
-
+    
                 EditorApplication.delayCall += () =>
                 {
                     if (targetObject == null) return;
-
+    
                     var menu = new GenericMenu();
                     menu.AddItem(new GUIContent(NoneLabel), string.IsNullOrEmpty(currentAqn), () =>
                         Apply(targetObject, propertyPath, "", ""));
                     menu.AddSeparator("");
-
+    
                     foreach ((string pretty, string qualifiedName) in SerializedTypeOptions.GetTypeOptions())
                     {
                         bool   selected = currentAqn == qualifiedName;
@@ -108,15 +108,15 @@ namespace Core.Editor.VSEngine
                         menu.AddItem(new GUIContent(p), selected, () =>
                             Apply(targetObject, propertyPath, q, p));
                     }
-
+    
                     menu.ShowAsContext();
                 };
             }
         }
-
+    
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             => EditorGUIUtility.singleLineHeight;
-
+    
         private static void Apply(UnityEngine.Object target, string path, string qualifiedName, string pretty)
         {
             var so   = new SerializedObject(target);
