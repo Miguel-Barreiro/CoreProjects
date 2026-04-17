@@ -7,8 +7,7 @@
   "dependencies": {
     "com.cysharp.unitask" : "2.5.4", 
     "com.unity.nuget.newtonsoft-json" : "3.2.1 ", 
-    "com.miguel.xnode" : "1.8.6", 
-    "StompyRobot.SRDebugger" : "1.13.1"
+    "com.miguel.xnode" : "1.8.6"
   },
   "testables": [ "com.Core.TestsBase.Editor" ], 
   "author": {
