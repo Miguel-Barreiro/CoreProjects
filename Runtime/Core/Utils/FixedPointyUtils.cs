@@ -8,7 +8,7 @@ namespace Core.Utils
     {
         public static Vector3 ToVector3(this FixVec2 fixVec2)
         {
-            return new Vector3((float)fixVec2.X, 0f, (float)fixVec2.Y);
+            return new Vector3((float)fixVec2.X, (float)fixVec2.Y, 0f);
         }
 
         public static Vector2 ToVector2(this FixVec2 fixVec2)
