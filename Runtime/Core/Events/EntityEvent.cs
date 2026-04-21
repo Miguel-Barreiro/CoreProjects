@@ -1,4 +1,5 @@
 using System;
+using Core.Initialization;
 using Core.Model;
 using Core.Zenject.Source.Factories.Pooling.Static;
 using UnityEngine;
@@ -20,8 +21,13 @@ namespace Core.Events
 
 		private bool isPropagating = true;
 		public bool IsPropagating => isPropagating;
-        
-        
+
+
+		protected BaseEntityEvent()
+		{
+			ObjectBuilder.GetInstance().Inject(this);
+		}
+
 		public void StopPropagation()
 		{
 			Debug.Log($"VS: Stopped propagation on event {this.GetType().Name}");
@@ -37,7 +43,6 @@ namespace Core.Events
 	public abstract class EntityEvent<TEvent> : BaseEntityEvent, IDisposable 
 		where TEvent : EntityEvent<TEvent>, new() 
 	{
-		
 		internal static readonly StaticMemoryPool<TEvent> Pool = new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned);
 
 		protected virtual void OnSpawned() { }

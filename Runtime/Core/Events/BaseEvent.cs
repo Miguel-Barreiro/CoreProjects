@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Initialization;
 using Core.Systems;
 using Core.VSEngine.Systems;
 using Core.Zenject.Source.Factories.Pooling.Static;
@@ -38,7 +39,10 @@ namespace Core.Events
 			isPropagating = false;
 		}
 
-		protected BaseEvent() { }
+		protected BaseEvent()
+		{
+			ObjectBuilder.GetInstance().Inject(this);
+		}
 
 		public abstract void CallPreListenerSystemsInternal();
 		public abstract void CallPostListenerSystemsInternal();
@@ -52,7 +56,7 @@ namespace Core.Events
 		
 		internal static readonly StaticMemoryPool<TEvent> Pool =
 			new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned);
-
+		
 		protected virtual void OnSpawned() { }
 		protected virtual void OnDespawned() { }
 
