@@ -163,6 +163,7 @@ namespace Core.Events
 					eventListener.Invoke(entityEvent);
 				
 				VSEventListenersSystem.ExecuteEntityEvent(entityEvent);
+				entityEvent.Execute();
 				VSEventListenersSystem.ExecutePostEntityEvent(entityEvent);
 				
 				entityEvent.Dispose();
