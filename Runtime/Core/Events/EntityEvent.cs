@@ -52,11 +52,6 @@ namespace Core.Events
 			obj.OnSpawned();
 		}
 
-		public override void Execute()
-		{
-			throw new NotImplementedException();
-		}
-
 		public override void Dispose()
 		{
 			Pool.Despawn(this as TEvent);
