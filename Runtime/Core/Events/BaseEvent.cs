@@ -39,10 +39,7 @@ namespace Core.Events
 			isPropagating = false;
 		}
 
-		protected BaseEvent()
-		{
-			ObjectBuilder.GetInstance().Inject(this);
-		}
+		protected BaseEvent() { }
 
 		public abstract void CallPreListenerSystemsInternal();
 		public abstract void CallPostListenerSystemsInternal();
