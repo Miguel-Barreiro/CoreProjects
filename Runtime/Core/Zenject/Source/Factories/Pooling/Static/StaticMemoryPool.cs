@@ -221,12 +221,12 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
     {
         Action<TValue> _onSpawnMethod;
 
-        public StaticMemoryPool(
-            Action<TValue> onSpawnMethod = null, Action<TValue> onDespawnedMethod = null)
-            : base(onDespawnedMethod, null)
-        {
-            _onSpawnMethod = onSpawnMethod;
-        }
+        // public StaticMemoryPool(
+        //     Action<TValue> onSpawnMethod = null, Action<TValue> onDespawnedMethod = null)
+        //     : base(onDespawnedMethod, null)
+        // {
+        //     _onSpawnMethod = onSpawnMethod;
+        // }
 
         public StaticMemoryPool(
             Action<TValue> onSpawnMethod = null, 
