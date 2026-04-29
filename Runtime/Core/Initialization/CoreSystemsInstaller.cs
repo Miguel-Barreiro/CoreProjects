@@ -111,7 +111,7 @@ namespace Core.Initialization
         {
             if (eventQueue == null)
             {
-                eventQueue = new EventQueue();
+                eventQueue = EventQueue.Instance();
                 BindInstance(eventQueue);
             }
         }

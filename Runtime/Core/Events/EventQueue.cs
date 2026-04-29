@@ -18,7 +18,24 @@ namespace Core.Events
 		
 		private readonly List<EventOrder> ProcessOrder = new ();
 		private readonly Dictionary<EventOrder, Dictionary<Type, List<BaseEvent>>> EventQueueByType = new();
-		
+
+
+		private static EventQueue? _instance;
+		public static EventQueue Instance()
+		{
+			if(_instance == null)
+				_instance = new EventQueue();
+			
+			return _instance;
+		}
+
+		public static TEvent Trigger<TEvent>() 
+			where TEvent : Event<TEvent>, new()
+		{
+			return Instance().Execute<TEvent>();
+		}
+
+
 		public TEvent Execute<TEvent>() where TEvent : Event<TEvent>, new()
 		{
 			Type eventType = typeof(TEvent);
