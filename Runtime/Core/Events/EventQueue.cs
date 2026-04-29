@@ -41,7 +41,7 @@ namespace Core.Events
 			Type eventType = typeof(TEvent);
 			
 			TEvent newEvent = Event<TEvent>.Pool.Spawn();
-			ObjectBuilder.Inject(newEvent);
+			// ObjectBuilder.Inject(newEvent);
 
 			TypeCache.EventAttributes? attributes = TypeCache.Get().GetEventAttributes(eventType);
 

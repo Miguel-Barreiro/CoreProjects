@@ -43,7 +43,11 @@ namespace Core.Events
 	public abstract class EntityEvent<TEvent> : BaseEntityEvent, IDisposable 
 		where TEvent : EntityEvent<TEvent>, new() 
 	{
-		internal static readonly StaticMemoryPool<TEvent> Pool = new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned);
+		internal static readonly StaticMemoryPool<TEvent> Pool = new StaticMemoryPool<TEvent>(OnSpawned, OnDespawned, OnAllocMethod);
+		private static void OnAllocMethod(TEvent obj)
+		{
+			ObjectBuilder.GetInstance().Inject(obj);
+		}
 
 		protected virtual void OnSpawned() { }
 		protected virtual void OnDespawned() { }

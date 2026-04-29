@@ -8,7 +8,7 @@ namespace Core.Zenject.Source.Factories.Pooling.Util
     {
         static DictionaryPool<TKey, TValue> _instance = new DictionaryPool<TKey, TValue>();
 
-        public DictionaryPool()
+        public DictionaryPool() : base(null, null)
         {
             OnSpawnMethod = OnSpawned;
             OnDespawnedMethod = OnDespawned;

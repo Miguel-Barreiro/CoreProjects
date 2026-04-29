@@ -14,15 +14,18 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
         readonly Stack<TValue> _stack = new Stack<TValue>();
 
         Action<TValue> _onDespawnedMethod;
+        Action<TValue> _onAllocMethod;
+
         int _activeCount;
 
 #if ZEN_MULTITHREADING
         protected readonly object _locker = new object();
 #endif
 
-        public StaticMemoryPoolBaseBase(Action<TValue> onDespawnedMethod)
+        public StaticMemoryPoolBaseBase(Action<TValue> onDespawnedMethod, Action<TValue> onAllocMethod = null)
         {
             _onDespawnedMethod = onDespawnedMethod;
+            _onAllocMethod = onAllocMethod;
 
 #if UNITY_EDITOR
             StaticMemoryPoolRegistry.Add(this);
@@ -32,6 +35,11 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
         public Action<TValue> OnDespawnedMethod
         {
             set { _onDespawnedMethod = value; }
+        }
+        
+        public Action<TValue> OnAllocMethod
+        {
+            set { _onAllocMethod = value; }
         }
 
         public int NumTotal
@@ -188,11 +196,17 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
     public abstract class StaticMemoryPoolBase<TValue> : StaticMemoryPoolBaseBase<TValue>
         where TValue : class, new()
     {
-        public StaticMemoryPoolBase(Action<TValue> onDespawnedMethod)
-            : base(onDespawnedMethod)
+        // public StaticMemoryPoolBase(Action<TValue> onDespawnedMethod)
+        //     : base(onDespawnedMethod, null)
+        // {
+        // }
+
+        public StaticMemoryPoolBase(Action<TValue> onDespawnedMethod, Action<TValue> onAllocMethod = null)
+            : base(onDespawnedMethod, onAllocMethod)
         {
         }
 
+        
         protected override TValue Alloc()
         {
             return new TValue();
@@ -209,11 +223,21 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
 
         public StaticMemoryPool(
             Action<TValue> onSpawnMethod = null, Action<TValue> onDespawnedMethod = null)
-            : base(onDespawnedMethod)
+            : base(onDespawnedMethod, null)
         {
             _onSpawnMethod = onSpawnMethod;
         }
 
+        public StaticMemoryPool(
+            Action<TValue> onSpawnMethod = null, 
+            Action<TValue> onDespawnedMethod = null, 
+            Action<TValue> onAllocMethod = null)
+            : base(onDespawnedMethod, onAllocMethod)
+        {
+            _onSpawnMethod = onSpawnMethod;
+        }
+
+        
         public Action<TValue> OnSpawnMethod
         {
             set { _onSpawnMethod = value; }
