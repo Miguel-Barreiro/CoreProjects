@@ -39,6 +39,13 @@ namespace Core.Events
 			isPropagating = false;
 		}
 
+		protected void Log(string message)
+		{
+#if DEBUG
+			Debug.Log($"{GetType().Name}: {message}");
+#endif
+		}
+
 		protected BaseEvent() { }
 
 		public abstract void CallPreListenerSystemsInternal();
