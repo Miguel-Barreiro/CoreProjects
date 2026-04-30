@@ -33,7 +33,11 @@ namespace Core.Zenject.Source.Factories.Pooling.Util
 
         protected override T[] Alloc()
         {
-            return new T[_length];
+            T[] newArray = new T[_length];
+            if( _onAllocMethod != null )
+                _onAllocMethod(newArray);
+
+            return newArray;
         }
 
         static readonly Dictionary<int, ArrayPool<T>> _pools =

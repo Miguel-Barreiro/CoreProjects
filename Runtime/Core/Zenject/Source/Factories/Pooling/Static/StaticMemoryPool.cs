@@ -13,8 +13,8 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
         // I also tried using ConcurrentBag instead of Stack + lock here but that performed much much worse
         readonly Stack<TValue> _stack = new Stack<TValue>();
 
-        Action<TValue> _onDespawnedMethod;
-        Action<TValue> _onAllocMethod;
+        protected Action<TValue> _onDespawnedMethod;
+        protected Action<TValue> _onAllocMethod;
 
         int _activeCount;
 
@@ -209,7 +209,10 @@ namespace Core.Zenject.Source.Factories.Pooling.Static
         
         protected override TValue Alloc()
         {
-            return new TValue();
+            TValue newValue = new TValue();
+            if( _onAllocMethod != null )
+                _onAllocMethod(newValue);
+            return newValue;
         }
     }
 
