@@ -34,10 +34,21 @@ namespace Core.Model.ModelSystems
 		{
 			ID = EntId.Invalid
 		};
+		
+		public const uint INVALID_INDEX = uint.MaxValue;
 
 		protected BaseMultiArrayComponentContainer(uint maxNumber)
 		{
 			RebuildWithMax(maxNumber);
+		}
+
+
+		public uint GetComponentIndex(EntId owner)
+		{
+			if (ComponentIndexByOwner.TryGetValue(owner, out TComponentAttribute attributes))
+				return attributes.ArrayType;
+			
+			return INVALID_INDEX;
 		}
 
 		protected void SwitchToArray(EntId target, uint newArrayIndex)
