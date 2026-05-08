@@ -51,7 +51,7 @@ namespace Core.Model.ModelSystems
 			return INVALID_INDEX;
 		}
 
-		protected void SwitchToArray(EntId target, uint newArrayIndex)
+		public void SwitchToArray(EntId target, uint newArrayIndex)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(target, out TComponentAttribute attributes))
 				return;
