@@ -118,7 +118,7 @@ namespace Core.Initialization
         
 #region System Installation
 
-        protected GameObject InstantiatePrefabAndBind<T>(T prefab, Transform parent = null) where T : MonoBehaviour
+        protected GameObject InstantiatePrefabAndBind<T>(T prefab, Transform parent = null) where T : Component
         {
             GameObject viewInstance = GameObject.Instantiate(prefab.gameObject, parent);
             BindComponentInHierarchy<T>(viewInstance);
