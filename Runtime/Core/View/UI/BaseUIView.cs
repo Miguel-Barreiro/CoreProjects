@@ -25,10 +25,10 @@ namespace Core.View.UI
 		}
 		public void Unregister(TUIMessenger uiMessenger)
 		{
-			Messenger = null!;
 			uiMessenger.OnShow -= OnShow;
 			uiMessenger.OnHide -= OnHide;
 			OnUnregister(uiMessenger);
+			Messenger = null!;
 		}
 
 		protected virtual void OnShow() { }
