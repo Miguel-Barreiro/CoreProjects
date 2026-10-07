@@ -53,7 +53,7 @@ namespace Core.Model
 				Components[i].Reset();
 		}
 		
-		public void SetupComponent(EntId owner)
+		public virtual void SetupComponent(EntId owner)
 		{
 			if (ComponentIndexByOwner.ContainsKey(owner))
 			{
@@ -75,7 +75,7 @@ namespace Core.Model
 			_topEmptyIndex++;
 		}
 
-		public void RemoveComponent(EntId owner)
+		public virtual void RemoveComponent(EntId owner)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 				return;
@@ -106,7 +106,7 @@ namespace Core.Model
 			Invalid.Reset();
 		}
 
-		public ref T GetComponent(EntId owner)
+		public virtual ref T GetComponent(EntId owner)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 			{
@@ -118,7 +118,7 @@ namespace Core.Model
 		}
 		
 
-		public void RebuildWithMax(uint maxNumber)
+		public virtual void RebuildWithMax(uint maxNumber)
 		{
 			_topEmptyIndex = 0;
 			ComponentIndexByOwner.Clear();
