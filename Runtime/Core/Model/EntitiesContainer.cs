@@ -33,7 +33,7 @@ namespace Core.Model
         private readonly HashSet<EntId> destroyedEntities = new ();
         private readonly Dictionary<EntId,Entity> newEntities = new ();
         
-        private uint nextEntityID = 0;
+        private uint nextEntityID = 1;
 
         private static EntitiesContainer? instance = null!;
         
