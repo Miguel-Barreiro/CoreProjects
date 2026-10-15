@@ -153,7 +153,7 @@ namespace Core.Systems
                 EntityEventQueuesContainer.ExecuteAllEntityEvents();
                 
                 bool hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || EntitiesContainer.destroyedEntitiesCount > 0;
-                EntitiesContainer.FlushEntities();
+                // EntitiesContainer.FlushEntities();
                 
                 int loopGard = 0;
                 while ( loopGard < 10 && 
@@ -167,7 +167,7 @@ namespace Core.Systems
                     
                      hasEntitiesToProcess = EntitiesContainer.newEntitiesCount > 0 || 
                                             EntitiesContainer.destroyedEntitiesCount > 0;
-                     EntitiesContainer.FlushEntities();
+                     // EntitiesContainer.FlushEntities();
                     
                      loopGard++;
                 }
@@ -325,6 +325,7 @@ namespace Core.Systems
                     NewEntities.Add(newEntityID);
                 }
                 
+                EntitiesContainer.FlushEntities();
             }
 
             #endregion
