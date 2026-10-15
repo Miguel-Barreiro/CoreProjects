@@ -107,6 +107,7 @@ namespace Core.Model.Data.Stats
 			{
 				UpdateDepletedAfterStatChange(statData, newDepletedValue);
 			}
+			statData.CacheDirty = true;
 		}
 
 
@@ -186,6 +187,7 @@ namespace Core.Model.Data.Stats
 				Fix beforeChange = CalculateNonDepletedValue(targetStat);
 
 				targetStat.RemoveModifier(modifier);
+				targetStat.CacheDirty = true;
 				
 				Fix afterChange = CalculateNonDepletedValue(targetStat);
 
@@ -224,6 +226,7 @@ namespace Core.Model.Data.Stats
 				
 		        Stat stat = StatsById[modifier.TargetStatId];
 		        stat.RemoveModifier(modifier);
+				stat.CacheDirty = true;
 			}
 			
 		    ModifiersByOwner.Remove(modifierOwner);
@@ -520,7 +523,7 @@ namespace Core.Model.Data.Stats
 					RemoveModifier(modId);
 			}
 
-			
+
 			
 		}
 
