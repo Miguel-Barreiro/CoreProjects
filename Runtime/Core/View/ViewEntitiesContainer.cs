@@ -12,6 +12,7 @@ namespace Core.View
 	{
 		public void Destroy(EntId entityID);
 		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID);
+		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID, Vector3 position, Quaternion rotation);
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
 		public void SetEntityViewParent(EntId entId, Transform newParent);
 	}
@@ -40,7 +41,36 @@ namespace Core.View
 
 			GameobjectsByEntityId.Remove(entityID);
 		}
-		
+
+
+		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID, Vector3 position, Quaternion rotation)
+		{
+			if (entityPrefab == null)
+			{
+				// Debug.Log($"No prefab set for entity {entity.GetType().Name}({entityID})");
+				return null;
+			}
+
+			if (GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes) &&
+				entityViewAtributes.GameObject != null)
+			{
+				return entityViewAtributes;
+			}
+
+			GameObject newGameObject = genericGameObjectPool.GetGameObjectFromPrefab(entityPrefab)!;
+			newGameObject.transform.position = position;
+			newGameObject.transform.rotation = rotation;
+			
+			entityViewAtributes = GetOrCreateEntityAttributes(entityID);
+			entityViewAtributes.GameObject = newGameObject;
+
+			EntityView entityView = newGameObject.GetComponent<EntityView>();
+			if(entityView != null)
+				entityView.EntityID = entityID;
+
+			return entityViewAtributes;
+		}
+
 		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID)
 		{
 			if (entityPrefab == null)
