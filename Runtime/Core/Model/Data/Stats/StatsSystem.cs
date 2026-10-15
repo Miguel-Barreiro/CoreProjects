@@ -11,12 +11,14 @@ namespace Core.Model
 	public interface StatsSystemRo
 	{
 		public Fix GetStatValue(EntId targetEntId, StatConfig stat);
+		public Fix GetStatDepletedPercentage(EntId targetEntId, StatConfig stat);
 		public Fix GetStatDepletedValue(EntId targetEntId, StatConfig stat);
 		public Fix GetModifierValue(StatModId statModId);
 		
 		public IEnumerable<StatModId> GetModifiersOwnedBy(EntId owner);
 		public IEnumerable<StatModId> GetModifiers(EntId owner, EntId targetEntId);
 
+		
 	}
 	
 	
