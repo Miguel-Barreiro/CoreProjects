@@ -95,6 +95,7 @@ namespace Core.Model.Data.Stats
 			Fix beforeChange = CalculateNonDepletedValue(statData);
 			
 			statData.BaseValue = baseValue;
+			statData.CacheDirty = true;
 			
 			Fix afterChange = CalculateNonDepletedValue(statData);
 
@@ -107,7 +108,6 @@ namespace Core.Model.Data.Stats
 			{
 				UpdateDepletedAfterStatChange(statData, newDepletedValue);
 			}
-			statData.CacheDirty = true;
 		}
 
 
@@ -159,6 +159,7 @@ namespace Core.Model.Data.Stats
 			Fix beforeChange = CalculateNonDepletedValue(statData);
 			
 			statData.AddModifier(modifier);
+			statData.CacheDirty = true;
 			
 			Fix afterChange = CalculateNonDepletedValue(statData);
 
