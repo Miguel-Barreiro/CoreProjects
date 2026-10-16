@@ -12,7 +12,7 @@ namespace Core.Model
 		Fix Range(Fix min, Fix max);
 	}
 	
-	public sealed class RandomSystem : IRandomSystem, IInitSystem, IOnDestroyEntitySystem
+	public sealed class RandomSystem : IRandomSystem, IInitSystem, IOnDestroySystem
 	{
 		[Inject] private readonly RandomModel RandomModel = null!;
 		[Inject] private readonly SystemsController SystemsController = null!;
@@ -27,6 +27,7 @@ namespace Core.Model
 		{
 			ref RandomData randomData = ref RandomContainer.GetComponent(RandomModel.ID);
 			Random.InitState(randomData.CurrentSeed);
+			randomData.CurrentSeed++;
 		}
 		
 		public void Initialize()
@@ -34,7 +35,7 @@ namespace Core.Model
 			SystemsController.OnStartFrame += OnStartFrame;
 		}
 
-		public void OnDestroyEntity(EntId destroyedEntityId)
+		public void OnDestroy()
 		{
 			SystemsController.OnStartFrame -= OnStartFrame;
 		}
