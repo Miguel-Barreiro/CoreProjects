@@ -4,50 +4,53 @@ using UnityEngine;
 
 namespace Core.Model.ModelSystems
 {
-	public abstract class MultipleComponentEntityContainer<T> : ComponentContainer<T>
-		where T : struct, IComponentData
+	
+	public struct EntityComponentsHeader
 	{
-		private const int MAX_COMPONENTS = 10;
+		public const int MAX_COMPONENTS = 10;
 		
-		public struct EntityComponentsHeader
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst=MAX_COMPONENTS)] public uint[] Indexes;
+		public uint Count;
+
+		public static EntityComponentsHeader NEW(uint firstComponentIndex)
 		{
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst=MAX_COMPONENTS)] public uint[] Indexes;
-			public uint Count;
-
-			public static EntityComponentsHeader NEW(uint firstComponentIndex)
+			EntityComponentsHeader newEntityComponentsHeader = new EntityComponentsHeader()
 			{
-				EntityComponentsHeader newEntityComponentsHeader = new EntityComponentsHeader()
-				{
-					Count = 1,
-					Indexes = new uint[MAX_COMPONENTS],
-				};
-				newEntityComponentsHeader.Indexes[0] = firstComponentIndex;
+				Count = 1,
+				Indexes = new uint[MAX_COMPONENTS],
+			};
+			newEntityComponentsHeader.Indexes[0] = firstComponentIndex;
 				
-				return newEntityComponentsHeader;
-			}
-			public void AddIndex(uint index)
+			return newEntityComponentsHeader;
+		}
+		public void AddIndex(uint index)
+		{
+			if (Count >= MAX_COMPONENTS)
 			{
-				if (Count >= MAX_COMPONENTS)
-				{
-					Debug.LogError($"EntityHeader: Cannot add more than {MAX_COMPONENTS} components");
-					return;
-				}
-				Indexes[Count] = index;
-				Count++;
+				Debug.LogError($"EntityHeader: Cannot add more than {MAX_COMPONENTS} components");
+				return;
 			}
+			Indexes[Count] = index;
+			Count++;
+		}
 
-			public void SetNewIndex(uint lastComponentIndex, uint newIndex)
+		public void SetNewIndex(uint lastComponentIndex, uint newIndex)
+		{
+			for (int i = 0; i < Count; i++)
 			{
-				for (int i = 0; i < Count; i++)
+				if (Indexes[i] == lastComponentIndex)
 				{
-					if (Indexes[i] == lastComponentIndex)
-					{
-						Indexes[i] = newIndex;
-						return;
-					}
+					Indexes[i] = newIndex;
+					return;
 				}
 			}
 		}
+	}
+
+	public abstract class MultipleComponentEntityContainer<T> : ComponentContainer<T>
+		where T : struct, IComponentData
+	{
+		
 
 		public T[] Components = null;
 		public uint TopEmptyIndex => _topEmptyIndex;
@@ -68,7 +71,7 @@ namespace Core.Model.ModelSystems
 		public EntityComponentsHeader InvalidHeader = new EntityComponentsHeader()
 		{
 			Count = 0,
-			Indexes = new uint[MAX_COMPONENTS],
+			Indexes = new uint[EntityComponentsHeader.MAX_COMPONENTS],
 		};
 
 
@@ -76,7 +79,7 @@ namespace Core.Model.ModelSystems
 		{
 			_topEmptyIndex = 0;
 			_topEntityEmptyIndex = 0;
-			uint totalComponents = maxNumber * MAX_COMPONENTS;
+			uint totalComponents = maxNumber * EntityComponentsHeader.MAX_COMPONENTS;
 			Components = new T[totalComponents];
 			for (int i = 0; i < totalComponents; i++)
 				Components[i].Reset();
@@ -120,9 +123,9 @@ namespace Core.Model.ModelSystems
 				return uint.MaxValue;
 			}
 			ref EntityComponentsHeader entityHeader = ref EntityComponentsHeaders[entityHeaderIndex];
-			if(entityHeader.Count >= MAX_COMPONENTS)
+			if(entityHeader.Count >= EntityComponentsHeader.MAX_COMPONENTS)
 			{
-				Debug.LogError($"Entity({owner}) already has maximum number of components({MAX_COMPONENTS})");
+				Debug.LogError($"Entity({owner}) already has maximum number of components({EntityComponentsHeader.MAX_COMPONENTS})");
 				return uint.MaxValue;
 			}
 			
@@ -230,7 +233,7 @@ namespace Core.Model.ModelSystems
 			
 			EntityComponentsHeaders = new EntityComponentsHeader[maxNumber];
 
-			uint maxComponents = maxNumber * MAX_COMPONENTS;
+			uint maxComponents = maxNumber * EntityComponentsHeader.MAX_COMPONENTS;
 			Components = new T[maxComponents];
 			for (int i = 0; i < maxComponents; i++)
 				Components[i].Reset();
