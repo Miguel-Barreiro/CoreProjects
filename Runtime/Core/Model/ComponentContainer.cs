@@ -34,8 +34,8 @@ namespace Core.Model
 		public uint TopEmptyIndex => _topEmptyIndex;
 		
 
-		private readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
-		private uint _topEmptyIndex = 0;
+		protected readonly Dictionary<EntId, uint> ComponentIndexByOwner = new Dictionary<EntId, uint>();
+		protected uint _topEmptyIndex = 0;
 
 		/// This is a dummy component to return when the requested component is not found
 		/// do not override it
@@ -68,9 +68,9 @@ namespace Core.Model
 				return;
 			}
 			
+			Components[_topEmptyIndex].Init();
 			Components[_topEmptyIndex].ID = owner;
 			ComponentIndexByOwner[owner] = _topEmptyIndex;
-			Components[_topEmptyIndex].Init();
 			
 			_topEmptyIndex++;
 		}
@@ -79,15 +79,23 @@ namespace Core.Model
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint index))
 				return;
+			
+			
+			RemoveComponentInternal(index);
+			ComponentIndexByOwner.Remove(owner);
+		}
 
+		protected virtual void RemoveComponentInternal(uint index)
+		{
 			if (_topEmptyIndex <= 1)
 			{
+				if(index > 1)
+					return;
 				Components[index].ID = EntId.Invalid;
 				_topEmptyIndex--;
-				ComponentIndexByOwner.Remove(owner);
 				return;
 			}
-
+			
 			
 			uint lastComponentIndex = _topEmptyIndex-1;
 			EntId topEntityID = Components[lastComponentIndex].ID;
@@ -97,7 +105,6 @@ namespace Core.Model
 
 			Components[lastComponentIndex].ID = EntId.Invalid;
 			_topEmptyIndex--;
-			ComponentIndexByOwner.Remove(owner);
 		}
 
 

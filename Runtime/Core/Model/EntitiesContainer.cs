@@ -130,8 +130,13 @@ namespace Core.Model
                 {
                     if (newEntities.TryGetValue(destroyedEntityId, out destroyedEntity))
                         yield return destroyedEntity;
+                    Entity? entityFromFlushedNewEntities = GetEntityFromFlushedNewEntities(destroyedEntityId);
+                    if(entityFromFlushedNewEntities != null)
+                        yield return entityFromFlushedNewEntities;
                 } else
+                {
                     yield return destroyedEntity;
+                }
             }
         }
 
@@ -139,6 +144,15 @@ namespace Core.Model
         private readonly HashSet<Entity> FlushedDeadEntities = new();
         private readonly HashSet<Entity> FlushedNewEntities = new();
         
+        private Entity? GetEntityFromFlushedNewEntities(EntId entID)
+        {
+            foreach (Entity flushedNewEntity in FlushedNewEntities)
+            {
+                if (flushedNewEntity.ID == entID)
+                    return flushedNewEntity;
+            }
+            return null;
+        }
         
         internal void FlushCurrentDestroyedEntities()
         {
