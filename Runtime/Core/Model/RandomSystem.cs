@@ -18,6 +18,11 @@ namespace Core.Model
 		[Inject] private readonly SystemsController SystemsController = null!;
 		[Inject] private readonly BasicCompContainer<RandomData> RandomContainer = null!;
 
+		public int RangeInt(int min, int max)
+		{
+			return Random.Range(min, max);
+		}
+
 		public Fix Range(Fix min, Fix max)
 		{
 			return Random.Range((float) min, (float)max);
