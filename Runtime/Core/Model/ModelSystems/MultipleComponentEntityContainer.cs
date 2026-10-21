@@ -23,15 +23,19 @@ namespace Core.Model.ModelSystems
 				
 			return newEntityComponentsHeader;
 		}
-		public void AddIndex(uint index)
+		public uint AddIndex(uint index)
 		{
 			if (Count >= MAX_COMPONENTS)
 			{
 				Debug.LogError($"EntityHeader: Cannot add more than {MAX_COMPONENTS} components");
-				return;
+				return uint.MaxValue;
 			}
-			Indexes[Count] = index;
+
+			uint newChildOrder = Count;
 			Count++;
+			
+			Indexes[newChildOrder] = index;
+			return newChildOrder;
 		}
 
 		public void SetNewIndex(uint lastComponentIndex, uint newIndex)
@@ -115,6 +119,19 @@ namespace Core.Model.ModelSystems
 			_topEmptyIndex++;
 		}
 		
+		
+		public uint GetChildIndex(EntId entId, uint childOrder)
+		{
+			ref EntityComponentsHeader componentsHeader = ref EntityComponentsHeaders[ComponentIndexByOwner[entId]];
+			return componentsHeader.Indexes[childOrder];
+		}
+
+
+		/// <summary>
+		/// Adds a new component for the given owner entity.
+		/// Returns the child order of the newly added component within the entity's component list.
+		/// </summary>
+		/// <returns>Returns the child order of the newly added component within the entity's component list.</returns>
 		public virtual uint AddComponent(EntId owner)
 		{
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint entityHeaderIndex))
@@ -136,13 +153,13 @@ namespace Core.Model.ModelSystems
 			}
 			
 			Components[_topEmptyIndex].ID = owner;
-			entityHeader.AddIndex(_topEmptyIndex);
+			uint newChildOrder = entityHeader.AddIndex(_topEmptyIndex);
 			Components[_topEmptyIndex].Init();
 
 			uint newIndex = _topEmptyIndex;
 			_topEmptyIndex++;
 			
-			return newIndex;
+			return newChildOrder;
 		}
 
 		public virtual void RemoveComponent(EntId owner)
