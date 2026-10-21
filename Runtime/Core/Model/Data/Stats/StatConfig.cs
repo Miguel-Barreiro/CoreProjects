@@ -12,10 +12,10 @@ namespace Core.Model.Stats
 		[SerializeField] private float defaultBaseValue = 0;
 		public Fix DefaultBaseValue => defaultBaseValue;
 
-		[SerializeField] private int defaultMaxValue = Fix.MaxInteger;
+		[SerializeField] private float defaultMaxValue = Fix.MaxInteger;
 		public Fix DefaultMaxValue => defaultMaxValue;
 
-		[SerializeField] private int defaultMinValue = 0;
+		[SerializeField] private float defaultMinValue = 0;
 		public Fix DefaultMinValue => defaultMinValue;
 		
 		[SerializeField][TextArea] private string description = "";
