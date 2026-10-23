@@ -23,10 +23,8 @@ namespace Core.Model.Stats
 		
 		[SerializeField] private bool canOverflow = false;
 		public bool CanOverflow => canOverflow;
-		
 
 	}
-
 	
 	public enum OverrideType
 	{
@@ -47,5 +45,15 @@ namespace Core.Model.Stats
 
 		[SerializeField] private OverrideType _overrideType;
 		public OverrideType OverrideType => _overrideType;
+
+		[SerializeField] private DepletedValueOverrideType _depletedValueOverride = DepletedValueOverrideType.MaxValue;
+		public DepletedValueOverrideType depletedValueOverride => _depletedValueOverride;
+
+	}
+	
+	public enum DepletedValueOverrideType
+	{
+		MaxValue = 0,
+		MinValue = 1,
 	}
 }
