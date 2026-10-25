@@ -16,7 +16,8 @@ namespace Core.View
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
 		public void SetEntityViewParent(EntId entId, Transform newParent);
 	}
-
+	
+	
 	public sealed class ViewEntitiesContainer : IViewEntitiesContainer, IOnDestroyEntitySystem
 	{
 		[Inject] private readonly GenericGameObjectPool genericGameObjectPool = null!;
@@ -40,6 +41,35 @@ namespace Core.View
 			}
 
 			GameobjectsByEntityId.Remove(entityID);
+			entityViewAtributes.Dispose();
+		}
+		
+		public bool SwitchOwnership(EntId entityID, EntId newOwnerID)
+		{
+			if (!GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes))
+			{
+				return false;
+			}
+
+			if (entityID == newOwnerID)
+			{
+				return true;
+			}
+
+			EntityViewAtributes newOwnerAtributes = GetOrCreateEntityAttributes(newOwnerID);
+			GameObject? gameObject = entityViewAtributes.GameObject;
+			newOwnerAtributes.GameObject = gameObject;
+			if (gameObject != null)
+			{
+				EntityView entityView = gameObject.GetComponent<EntityView>();
+				if(entityView != null)
+					entityView.EntityID = newOwnerID;
+			}
+			
+			GameobjectsByEntityId.Remove(entityID);
+			entityViewAtributes.Dispose();
+
+			return true;
 		}
 
 
@@ -123,7 +153,7 @@ namespace Core.View
 		{
 			if (!GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes))
 			{
-				entityViewAtributes = new EntityViewAtributes(entityID);
+				entityViewAtributes = EntityViewAtributes.NEW(entityID);
 				GameobjectsByEntityId.Add(entityID, entityViewAtributes);
 			}
 
