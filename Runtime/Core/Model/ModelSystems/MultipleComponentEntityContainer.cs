@@ -168,11 +168,25 @@ namespace Core.Model.ModelSystems
 				return;
 
 			ref EntityComponentsHeader entityHeader = ref EntityComponentsHeaders[entityHeaderIndex];
+			uint topEntityEmptyIndex = _topEntityEmptyIndex - 1;
+			if(entityHeaderIndex >= topEntityEmptyIndex)
+			{
+				for (int i = 0; i < entityHeader.Count; i++)
+				{
+					uint componentIndex = entityHeader.Indexes[i];
+					Components[componentIndex].ID = EntId.Invalid;
+					_topEmptyIndex--;
+				}
+
+				ComponentIndexByOwner.Remove(owner);
+				_topEntityEmptyIndex--;
+				return;
+			}
+			
 
 			for (int i = 0; i < entityHeader.Count; i++)
 				RemoveComponentInternal(entityHeader.Indexes[i]);
 
-			uint topEntityEmptyIndex = _topEntityEmptyIndex - 1;
 			uint lastEntityIndex = EntityComponentsHeaders[topEntityEmptyIndex].Indexes[0];
 			EntId topEntityID = Components[lastEntityIndex].ID;
 			
