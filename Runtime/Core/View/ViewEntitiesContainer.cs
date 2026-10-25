@@ -11,6 +11,7 @@ namespace Core.View
 	public interface IViewEntitiesContainer
 	{
 		public void Destroy(EntId entityID);
+		public EntityViewAtributes? SwitchOwnership(EntId entityID, EntId newOwnerID);
 		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID);
 		public EntityViewAtributes? Spawn(GameObject entityPrefab, EntId entityID, Vector3 position, Quaternion rotation);
 		public EntityViewAtributes? GetEntityViewAtributes(EntId entId);
@@ -44,16 +45,16 @@ namespace Core.View
 			entityViewAtributes.Dispose();
 		}
 		
-		public bool SwitchOwnership(EntId entityID, EntId newOwnerID)
+		public EntityViewAtributes? SwitchOwnership(EntId entityID, EntId newOwnerID)
 		{
 			if (!GameobjectsByEntityId.TryGetValue(entityID, out EntityViewAtributes entityViewAtributes))
 			{
-				return false;
+				return null;
 			}
 
 			if (entityID == newOwnerID)
 			{
-				return true;
+				return entityViewAtributes;
 			}
 
 			EntityViewAtributes newOwnerAtributes = GetOrCreateEntityAttributes(newOwnerID);
@@ -69,7 +70,7 @@ namespace Core.View
 			GameobjectsByEntityId.Remove(entityID);
 			entityViewAtributes.Dispose();
 
-			return true;
+			return newOwnerAtributes;
 		}
 
 
