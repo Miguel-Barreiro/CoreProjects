@@ -69,7 +69,7 @@ namespace Core.View
 			
 			GameobjectsByEntityId.Remove(entityID);
 			entityViewAtributes.Dispose();
-
+			
 			return newOwnerAtributes;
 		}
 
