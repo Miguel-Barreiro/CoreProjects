@@ -167,56 +167,42 @@ namespace Core.Model.ModelSystems
 			if (!ComponentIndexByOwner.TryGetValue(owner, out uint entityHeaderIndex))
 				return;
 
+			// Components of different entities can be interleaved, so every component is compacted
+			// individually. Remove from the back and shrink Count first, so the header never holds
+			// stale indexes that SetNewIndex could match while other components are moved around.
 			ref EntityComponentsHeader entityHeader = ref EntityComponentsHeaders[entityHeaderIndex];
-			uint topEntityEmptyIndex = _topEntityEmptyIndex - 1;
-			if(entityHeaderIndex >= topEntityEmptyIndex)
+			for (int i = (int)entityHeader.Count - 1; i >= 0; i--)
 			{
-				for (int i = 0; i < entityHeader.Count; i++)
-				{
-					uint componentIndex = entityHeader.Indexes[i];
-					Components[componentIndex].ID = EntId.Invalid;
-					_topEmptyIndex--;
-				}
-
-				ComponentIndexByOwner.Remove(owner);
-				_topEntityEmptyIndex--;
-				return;
+				uint componentIndex = entityHeader.Indexes[i];
+				entityHeader.Count = (uint)i;
+				RemoveComponentInternal(componentIndex);
 			}
-			
 
-			for (int i = 0; i < entityHeader.Count; i++)
-				RemoveComponentInternal(entityHeader.Indexes[i]);
+			uint lastEntityHeaderIndex = _topEntityEmptyIndex - 1;
+			if (entityHeaderIndex != lastEntityHeaderIndex)
+			{
+				EntityComponentsHeaders[entityHeaderIndex] = EntityComponentsHeaders[lastEntityHeaderIndex];
+				EntId lastEntityID = Components[EntityComponentsHeaders[entityHeaderIndex].Indexes[0]].ID;
+				ComponentIndexByOwner[lastEntityID] = entityHeaderIndex;
+			}
+			// avoid two headers sharing the same Indexes array
+			EntityComponentsHeaders[lastEntityHeaderIndex] = default;
 
-			uint lastEntityIndex = EntityComponentsHeaders[topEntityEmptyIndex].Indexes[0];
-			EntId topEntityID = Components[lastEntityIndex].ID;
-			
-			EntityComponentsHeaders[entityHeaderIndex] = EntityComponentsHeaders[topEntityEmptyIndex];
-			ComponentIndexByOwner[topEntityID] = entityHeaderIndex;
-			
-			
 			_topEntityEmptyIndex--;
 			ComponentIndexByOwner.Remove(owner);
 		}
 
+		/// Removes the component at index by moving the top component into its place
 		protected virtual void RemoveComponentInternal(uint index)
 		{
-			if (_topEmptyIndex <= 1)
+			uint topIndex = _topEmptyIndex - 1;
+			if (index != topIndex)
 			{
-				if(index > 1)
-					return;
-				Components[index].ID = EntId.Invalid;
-				_topEmptyIndex--;
-				return;
+				EntId topEntID = Components[topIndex].ID;
+				ref EntityComponentsHeader topEntityHeader = ref EntityComponentsHeaders[ComponentIndexByOwner[topEntID]];
+				topEntityHeader.SetNewIndex(topIndex, index);
+				Components[index] = Components[topIndex];
 			}
-			
-			
-			uint topIndex = _topEmptyIndex-1;
-			EntId topEntID = Components[topIndex].ID;
-			uint topEntityIndex = ComponentIndexByOwner[topEntID];
-			ref EntityComponentsHeader entityComponentsHeader = ref EntityComponentsHeaders[topEntityIndex];
-
-			entityComponentsHeader.SetNewIndex(topIndex, index);
-			Components[index] = Components[topIndex];
 
 			Components[topIndex].ID = EntId.Invalid;
 			_topEmptyIndex--;
