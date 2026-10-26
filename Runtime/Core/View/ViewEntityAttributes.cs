@@ -24,8 +24,13 @@ namespace Core.View
 		
 		
 		private static void OnAlloc(EntityViewAtributes obj) { }
-		
-		private static void OnDespawned(EntityViewAtributes obj) { }
+
+		private static void OnDespawned(EntityViewAtributes obj)
+		{
+			obj.ComponentCache.Clear();
+			obj.GameObject = null;
+			obj.ID = EntId.Invalid;
+		}
 
 		private static void OnSpawned(EntityViewAtributes obj) { }
 
