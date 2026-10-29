@@ -42,7 +42,9 @@ namespace Core.VSEngine.Nodes
 
 		[Output(typeConstraint = TypeConstraint.Strict, connectionType = ConnectionType.Multiple), SerializeField]
 		private Fix TimeLeft;
-		
+
+		[SerializeField] private bool Enable = true;
+		public bool Enabled => Enable;
 		
 		[SerializeField] private int _TimerIndex = 0;
 		public int TimerIndex => _TimerIndex;

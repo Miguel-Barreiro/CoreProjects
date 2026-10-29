@@ -85,6 +85,9 @@ namespace Core.VSEngine.Systems
             {
                 foreach (CooldownTimerNode cooldownTimerNode in actionGraph.GetTimerNodes())
                 {
+                    if(!cooldownTimerNode.Enabled)
+                        continue;
+                    
                     StatConfig statConfig = cooldownTimerNode.GetTimerStat() == null? 
                                                 _defaultTimerStat : 
                                                 cooldownTimerNode.GetTimerStat();
@@ -114,6 +117,7 @@ namespace Core.VSEngine.Systems
                 ref VSTimersData childTimerData = ref VSTimersContainer.GetComponentByChildOrder(owner, newChildOrder);
                 childTimerData.CooldownStat = stat;
                 childTimerData.CooldownReset = timer.CooldownReset;
+                childTimerData.Enabled = true;
 
                 for (int i = 0; i < timer.Nodes.Count; i++)
                     childTimerData.AddCooldownNode(timer.Nodes[i]);

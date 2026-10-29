@@ -43,7 +43,8 @@ namespace Core.VSEngine.Systems
         
         public void Init()
         {
-            Enabled = true;
+            // Disabled until VSTimersSystem.AddTimers assigns a CooldownStat, otherwise it would update without a stat
+            Enabled = false;
             _CooldownNodesCount = 0;
             CooldownNodes = new CooldownTimerNode[MAX_TIMER_NODES];
             CooldownReset = CooldownResetType.Restart;
