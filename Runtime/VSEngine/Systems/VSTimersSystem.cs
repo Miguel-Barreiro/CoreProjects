@@ -118,7 +118,8 @@ namespace Core.VSEngine.Systems
                 for (int i = 0; i < timer.Nodes.Count; i++)
                     childTimerData.AddCooldownNode(timer.Nodes[i]);
             }
-            
+
+            mainCooldownData.CooldownStat = _defaultTimerStat;
             mainCooldownData.Enabled = mainCooldownNeeded;
         }
         
