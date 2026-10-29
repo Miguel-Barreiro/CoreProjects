@@ -165,9 +165,10 @@ namespace Core.VSEngine.Systems
                             timerData.Enabled = false;
                             break;
                     }
-                    foreach (CooldownTimerNode timerNode in timerData.CooldownNodes)
+                    // CooldownNodes is a fixed size array, only the first CooldownNodesCount slots are used
+                    for (int nodeIndex = 0; nodeIndex < timerData.CooldownNodesCount; nodeIndex++)
                     {
-                        _vsBaseEngine.RunFromNode(timerNode, timerDataID);
+                        _vsBaseEngine.RunFromNode(timerData.CooldownNodes[nodeIndex], timerDataID);
                     }
                 }
             }
