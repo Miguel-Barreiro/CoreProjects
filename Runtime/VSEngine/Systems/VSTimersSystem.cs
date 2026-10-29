@@ -95,6 +95,9 @@ namespace Core.VSEngine.Systems
                 }
             }
 
+            uint mainCooldownIndex = VSTimersContainer.GetChildIndex(owner, 0);
+            ref VSTimersData mainCooldownData = ref VSTimersContainer.Components[mainCooldownIndex];
+            
             foreach ((StatConfig stat, Timer timer)  in TIMERS_BY_STAT_CACHE)
             {
                 if(timer.Nodes.Count == 0)
@@ -102,6 +105,9 @@ namespace Core.VSEngine.Systems
                 
                 if (stat == _defaultTimerStat)
                 {
+                    for (int i = 0; i < timer.Nodes.Count; i++)
+                        mainCooldownData.AddCooldownNode(timer.Nodes[i]);
+                    
                     mainCooldownNeeded = true;
                     continue;
                 }
@@ -113,8 +119,6 @@ namespace Core.VSEngine.Systems
                     childTimerData.AddCooldownNode(timer.Nodes[i]);
             }
             
-            uint mainCooldownIndex = VSTimersContainer.GetChildIndex(owner, 0);
-            ref VSTimersData mainCooldownData = ref VSTimersContainer.Components[mainCooldownIndex];
             mainCooldownData.Enabled = mainCooldownNeeded;
         }
         

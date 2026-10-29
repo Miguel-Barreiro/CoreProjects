@@ -54,7 +54,9 @@ namespace Core.VSEngine.Systems
             Enabled = false;
             CooldownReset = CooldownResetType.Restart;
             CooldownNodesCount = 0;
-            Array.Clear(CooldownNodes, 0, CooldownNodes.Length);
+            // The container resets every slot on creation, before Init has allocated the array
+            if (CooldownNodes != null)
+                Array.Clear(CooldownNodes, 0, CooldownNodes.Length);
         }
         
         public void AddCooldownNode(CooldownTimerNode node)
