@@ -35,8 +35,13 @@ namespace Core.Editor
 
 		private void BuildFallbackVSEngine()
 		{
+			if (!Container.HasBinding<VSTimersSystem>())
+			{
+				BindInstance(new VSTimersSystem());
+			}
+
 			if (Container.HasBinding<VSEventListenersSystem>()) return;
-			
+
 			VSEngineCore vsSimpleEngine = new VSEngineCore();
 			BindInstance<VSEngineCore>(vsSimpleEngine);
 			BindInstance<VSBaseEngine>(vsSimpleEngine);

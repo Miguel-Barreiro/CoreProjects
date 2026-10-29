@@ -18,7 +18,7 @@ namespace Core.Model.Data
 		[SerializeField] private List<ActionGraph> _actionGraph;
 		public List<ActionGraph> ActionGraphs => _actionGraph;
 
-		[Header("WORK IN PROGRESS")]
+		[Header("STATS")]
 		[SerializeField] private List<StatOverride> _statsOverride;
 		public List<StatOverride> StatsOverride => _statsOverride;
 

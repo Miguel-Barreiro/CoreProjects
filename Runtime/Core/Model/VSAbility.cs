@@ -34,11 +34,14 @@ namespace Core.Model
         public void Init() { }
     }
 
-    public interface IVSAbility : Component<VSAbilityData> { }
+    public interface IVSAbility : Component<VSAbilityData> , IVSTimersComponent
+    { }
     
     
     public sealed class VSAbilitySystem : OnDestroyComponent<VSAbilityData>, OnCreateComponent<VSAbilityData>
     {
+
+        [Inject] private readonly VSTimersSystem VSTimersSystem = null!;
 
         [Inject] private readonly BasicCompContainer<VSAbilityData> VSAbilityContainer = null!;
         [Inject] private readonly VSEventListenersSystem VSEventListenersSystem = null!;
@@ -49,6 +52,7 @@ namespace Core.Model
 
             using CachedList<EventListenNode> eventNodes = ListCache<EventListenNode>.Get();
             using CachedList<EntityEventListenNode> entityEventListenNodes = ListCache<EntityEventListenNode>.Get();
+            
 
             foreach (ActionGraph actionGraph in abilityData.dataConfig.ActionGraphs)
                 ActionGraphUtil.FindListenersFromGraph(actionGraph, eventNodes, entityEventListenNodes);
@@ -59,6 +63,8 @@ namespace Core.Model
             foreach (EventListenNode eventListenNode in eventNodes)
                 VSEventListenersSystem.AddListener(newComponentId, eventListenNode.EventType, eventListenNode);
             
+            
+            VSTimersSystem.AddTimers(newComponentId, abilityData.dataConfig.ActionGraphs);
         }
 
         public void OnDestroyComponent(EntId destroyedComponentId)

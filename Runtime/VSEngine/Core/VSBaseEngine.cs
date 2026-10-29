@@ -6,6 +6,7 @@ using Core.Events;
 using Core.Initialization;
 using Core.Model;
 using Core.VSEngine.NestedVisualScripting;
+using Core.VSEngine.Nodes;
 using Core.VSEngine.Nodes.Events;
 using Core.VSEngine.Nodes.TestNodes;
 using UnityEngine;
@@ -43,6 +44,18 @@ namespace Core.VSEngine
 
         public void RunEntityEvent(BaseEventListenNode node, BaseEntityEvent ev, EntId ownerId)
             => RunInternalEntityEvent(node.graph, node, ev, ownerId);
+
+        // starts a new execution from any executable node (e.g. continuations of finished timers)
+        public void RunFromNode(ExecutableNode startNode, EntId ownerId)
+            => RunInternalFromNode(startNode, ownerId);
+
+        protected virtual void RunInternalFromNode(ExecutableNode startNode, EntId ownerId)
+        {
+            VSExecutionControl vsExecutionControl = VSExecutionControl.NEW();
+            vsExecutionControl.StartWith(this, startNode, ownerId);
+
+            LoopWithoutEvent(vsExecutionControl);
+        }
 
 
 
@@ -260,6 +273,18 @@ namespace Core.VSEngine
                 }
             }
             return null;
+        }
+
+
+        public static List<CooldownTimerNode> GetTimerNodes(ActionGraph actionGraph)
+        {
+            List<CooldownTimerNode> result = new List<CooldownTimerNode>();
+            foreach (Node node in actionGraph.nodes)
+            {
+                if (node is CooldownTimerNode cooldownTimerNode)
+                    result.Add(cooldownTimerNode);
+            }
+            return result;
         }
     }
 }

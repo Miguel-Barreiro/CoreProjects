@@ -148,6 +148,17 @@ namespace Core.Model.ModelSystems
 			Invalid.Reset();
 		}
 
+		public void Reset()
+		{
+			ComponentIndexByOwner.Clear();
+			for (int i = 0; i < ComponentArrayCount; i++)
+			{
+				PushBackArray<TComponentData> array = ComponentArrays[i];
+				foreach (TComponentData componentData in array.Items)
+					componentData.Reset();
+			}
+		}
+
 		// the index 0 is the main array
 		public uint Count => ComponentArrays[0].Count;
 		public uint MaxCount => ComponentArrays[0].MaxCount;

@@ -14,6 +14,8 @@ namespace Core.Model
 		public void RebuildWithMax(uint maxNumber);
 		
 		public void SetupInvalid();
+
+		public void Reset();
 	}
 	
 	public interface ComponentContainer<T> : IGenericComponentContainer
@@ -132,6 +134,15 @@ namespace Core.Model
 			
 			Components = new T[maxNumber];
 			for (int i = 0; i < maxNumber; i++)
+				Components[i].Reset();
+		}
+
+		public void Reset()
+		{
+			_topEmptyIndex = 0;
+			ComponentIndexByOwner.Clear();
+			
+			for (int i = 0; i < Components.Length; i++)
 				Components[i].Reset();
 		}
 

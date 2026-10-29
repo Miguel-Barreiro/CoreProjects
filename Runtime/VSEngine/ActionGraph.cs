@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Core.VSEngine.NestedVisualScripting;
+using Core.VSEngine.Nodes;
+using Core.VSEngine.Systems;
 using UnityEngine;
 using XNode;
 
@@ -31,6 +33,14 @@ namespace Core.VSEngine
 #if UNITY_EDITOR
         public List<LocalVariableDefinition> LocalVariablesMutable => localVariables;
 #endif
+
+        [SerializeField] public List<LocalTriggerDefinition> localTriggers = new();
+        public IReadOnlyList<LocalTriggerDefinition> LocalTriggers => localTriggers;
+
+#if UNITY_EDITOR
+        public List<LocalTriggerDefinition> LocalTriggersMutable => localTriggers;
+#endif
+
         
         public OutputVSNode? OutputsNode => GetOutputsNode();
         public InputVSNode? InputsNode => GetInputsNode();
@@ -39,6 +49,7 @@ namespace Core.VSEngine
         private static Dictionary<ActionGraph, ExecutableNode?> StartNodeCache = new Dictionary<ActionGraph, ExecutableNode?>();
         private static Dictionary<ActionGraph, InputVSNode?> InputNodeCache = new Dictionary<ActionGraph, InputVSNode?>();
         private static Dictionary<ActionGraph, OutputVSNode?> OutputNodeCache = new Dictionary<ActionGraph, OutputVSNode?>();
+        private static Dictionary<ActionGraph, List<CooldownTimerNode>> TimerNodeCache = new Dictionary<ActionGraph, List<CooldownTimerNode>>();
 
         
 #if UNITY_EDITOR
@@ -74,6 +85,7 @@ namespace Core.VSEngine
             StartNodeCache.Clear();
             InputNodeCache.Clear();
             OutputNodeCache.Clear();
+            TimerNodeCache.Clear();
         }
         
         private OutputVSNode? GetOutputsNode()
@@ -93,6 +105,18 @@ namespace Core.VSEngine
             }
             return InputNodeCache[this];
         }
+
+        public IReadOnlyCollection<CooldownTimerNode> GetTimerNodes()
+        {
+            if(TimerNodeCache.TryGetValue(this, out var cachedNodes))
+                return cachedNodes;
+
+            List<CooldownTimerNode> cooldownTimerNodes = VSBaseEngine.GetTimerNodes(this);
+            TimerNodeCache.Add(this, cooldownTimerNodes);
+            
+            return TimerNodeCache[this];
+        }
+
         
         private ExecutableNode? GetStartNode()
         {
@@ -107,6 +131,20 @@ namespace Core.VSEngine
 
         public void OnBeforeSerialize()
         {
+            if(LocalTriggers == null)
+            {
+                localTriggers = new List<LocalTriggerDefinition>();
+            }
+            if(LocalTriggers.Count == 0)
+            {
+                LocalTriggerDefinition defaultTimer = new LocalTriggerDefinition
+                {
+                    Name = "DefaultTimer",
+                    CooldownReset = CooldownResetType.Restart,
+                };
+                localTriggers.Add(defaultTimer);
+            }
+            
             FetchGUIDAndFileId();
         }
 

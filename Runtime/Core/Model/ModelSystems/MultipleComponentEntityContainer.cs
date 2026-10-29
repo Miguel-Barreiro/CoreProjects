@@ -118,8 +118,14 @@ namespace Core.Model.ModelSystems
 			_topEntityEmptyIndex++;
 			_topEmptyIndex++;
 		}
-		
-		
+
+		public ref T GetComponentByChildOrder(EntId entId, uint childOrder)
+		{
+			ref EntityComponentsHeader componentsHeader = ref EntityComponentsHeaders[ComponentIndexByOwner[entId]];
+			uint componentIndex = componentsHeader.Indexes[childOrder];
+			return ref Components[componentIndex];
+		}
+
 		public uint GetChildIndex(EntId entId, uint childOrder)
 		{
 			ref EntityComponentsHeader componentsHeader = ref EntityComponentsHeaders[ComponentIndexByOwner[entId]];
@@ -212,6 +218,19 @@ namespace Core.Model.ModelSystems
 		public void SetupInvalid()
 		{
 			Invalid.Reset();
+		}
+
+		public void Reset()
+		{
+			_topEmptyIndex = 0;
+			_topEntityEmptyIndex = 0;
+			ComponentIndexByOwner.Clear();
+			
+			for (int i = 0; i < Components.Length; i++)
+				Components[i].Reset();
+			
+			for (int i = 0; i < EntityComponentsHeaders.Length; i++)
+				EntityComponentsHeaders[i] = default;
 		}
 
 		public virtual ref T GetComponent(EntId owner)

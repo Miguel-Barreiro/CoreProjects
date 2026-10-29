@@ -58,6 +58,8 @@ namespace Core.Initialization
 			BindInstance(new VSEventListenersEntity());
 			BindInstance(new VSEventListenersSystem());
 
+			BindInstance(new VSTimersSystem());
+
 			VSAbilitySystem vsAbilitySystem = new VSAbilitySystem();
 			BindInstance<VSAbilitySystem>(vsAbilitySystem);
 		}
