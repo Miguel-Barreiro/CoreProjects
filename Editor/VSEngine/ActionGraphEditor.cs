@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Core.VSEngine;
 using Core.VSEngine.Nodes;
+using Core.VSEngine.Systems;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
@@ -12,10 +14,16 @@ namespace Core.Editor.VSEngine
         private Vector2 _scrollPos;
 
         private const float PanelWidth        = 260f;
-        private const float PanelHeight       = 300f;
+        private const float PanelHeight       = 420f;
         private const float Margin            = 10f;
         private const float TypeWidth         = 90f;
         private const float RemoveButtonWidth = 22f;
+
+        // LocalTriggerDefinition._CooldownStat is private, so nameof can't reach it
+        private const string CooldownStatFieldName = "_CooldownStat";
+
+        private static readonly Color DuplicateStatTint = new Color(1f, 0f, 0f, 0.3f);
+        private readonly HashSet<int> _duplicateStatTimers = new HashSet<int>();
 
         // The raw keyboardControl ID that the text field set on MouseDown.
         // Used to re-establish focus after xNode's Controls() clears it on MouseUp.
@@ -101,14 +109,25 @@ namespace Core.Editor.VSEngine
         {
             serializedObject.Update();
 
+            float listHeight = PanelHeight - 8f;
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, GUILayout.Height(listHeight));
+
+            DrawVariablesSection();
+            GUILayout.Space(8f);
+            DrawTimersSection();
+
+            EditorGUILayout.EndScrollView();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawVariablesSection()
+        {
             GUILayout.Space(4f);
             GUILayout.Label("Graph Variables", EditorStyles.boldLabel);
             GUILayout.Space(2f);
 
             SerializedProperty varsProp = serializedObject.FindProperty(nameof(ActionGraph.localVariables));
-
-            float listHeight = PanelHeight - 62f;
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, GUILayout.Height(listHeight));
 
             int removeIndex = -1;
             for (int i = 0; i < varsProp.arraySize; i++)
@@ -116,8 +135,6 @@ namespace Core.Editor.VSEngine
                 DrawVariableRow(varsProp.GetArrayElementAtIndex(i), i, ref removeIndex);
                 EditorGUILayout.Space(2f);
             }
-
-            EditorGUILayout.EndScrollView();
 
             if (removeIndex >= 0)
             {
@@ -136,8 +153,88 @@ namespace Core.Editor.VSEngine
                 newElem.FindPropertyRelative(nameof(LocalVariableDefinition.PositionValue)).vector3Value  = Vector3.zero;
                 newElem.FindPropertyRelative(nameof(LocalVariableDefinition.TileCoordValue)).vector2IntValue = Vector2Int.zero;
             }
+        }
 
-            serializedObject.ApplyModifiedProperties();
+        private void DrawTimersSection()
+        {
+            GUILayout.Label("Timers", EditorStyles.boldLabel);
+            GUILayout.Space(2f);
+
+            SerializedProperty timersProp = serializedObject.FindProperty(nameof(ActionGraph.localTriggers));
+
+            ((ActionGraph)target).FindTimersWithDuplicateStats(_duplicateStatTimers);
+            if (_duplicateStatTimers.Count > 0)
+                EditorGUILayout.HelpBox("Each timer must use a different Cooldown Stat.", MessageType.Error);
+
+            int removeIndex = -1;
+            for (int i = 0; i < timersProp.arraySize; i++)
+            {
+                DrawTimerRow(timersProp.GetArrayElementAtIndex(i), i, _duplicateStatTimers.Contains(i), ref removeIndex);
+                EditorGUILayout.Space(2f);
+            }
+
+            // Index 0 is the default timer and must never be removed
+            if (removeIndex > 0)
+            {
+                timersProp.DeleteArrayElementAtIndex(removeIndex);
+            }
+
+            GUILayout.Space(2f);
+            if (GUILayout.Button("+ Add Timer"))
+            {
+                timersProp.InsertArrayElementAtIndex(timersProp.arraySize);
+                // Reset the new element to defaults (InsertArrayElementAtIndex copies the previous one)
+                SerializedProperty newElem = timersProp.GetArrayElementAtIndex(timersProp.arraySize - 1);
+                newElem.FindPropertyRelative(nameof(LocalTriggerDefinition.Name)).stringValue = "";
+                newElem.FindPropertyRelative(nameof(LocalTriggerDefinition.CooldownReset)).enumValueIndex = (int)CooldownResetType.Restart;
+                newElem.FindPropertyRelative(CooldownStatFieldName).objectReferenceValue = null;
+            }
+        }
+
+        private void DrawTimerRow(SerializedProperty elem, int index, bool hasDuplicateStat, ref int removeIndex)
+        {
+            bool isDefault = index == 0;
+            SerializedProperty nameProp  = elem.FindPropertyRelative(nameof(LocalTriggerDefinition.Name));
+            SerializedProperty resetProp = elem.FindPropertyRelative(nameof(LocalTriggerDefinition.CooldownReset));
+            SerializedProperty statProp  = elem.FindPropertyRelative(CooldownStatFieldName);
+
+            Rect rowRect = EditorGUILayout.BeginVertical();
+            if (hasDuplicateStat)
+                EditorGUI.DrawRect(rowRect, DuplicateStatTint);
+
+            // ── Row 1: name + remove button ──────────────────────────────
+            EditorGUILayout.BeginHorizontal();
+            if (isDefault)
+            {
+                using (new EditorGUI.DisabledScope(true))
+                {
+                    EditorGUILayout.TextField(ActionGraph.DefaultTimerName, GUILayout.ExpandWidth(true));
+                    GUILayout.Button("-", GUILayout.Width(RemoveButtonWidth));
+                }
+            }
+            else
+            {
+                GUI.SetNextControlName("timerName_" + index);
+                EditorGUI.BeginChangeCheck();
+                string newName = EditorGUILayout.TextField(nameProp.stringValue, GUILayout.ExpandWidth(true));
+                if (EditorGUI.EndChangeCheck())
+                    nameProp.stringValue = newName;
+                if (GUILayout.Button("-", GUILayout.Width(RemoveButtonWidth)))
+                    removeIndex = index;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // ── Row 2: reset type + cooldown stat ────────────────────────
+            // The default timer uses the global default timer stat, so it has no stat field.
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(resetProp, GUIContent.none, GUILayout.Width(TypeWidth));
+            if (isDefault)
+                GUILayout.Label("Default stat", EditorStyles.miniLabel);
+            else
+                EditorGUILayout.PropertyField(statProp, GUIContent.none);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawVariableRow(SerializedProperty elem, int index, ref int removeIndex)

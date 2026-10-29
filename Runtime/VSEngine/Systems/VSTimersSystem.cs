@@ -87,9 +87,9 @@ namespace Core.VSEngine.Systems
             {
                 foreach (CooldownTimerNode cooldownTimerNode in actionGraph.GetTimerNodes())
                 {
-                    StatConfig statConfig = cooldownTimerNode.TimerStat == null? 
+                    StatConfig statConfig = cooldownTimerNode.GetTimerStat() == null? 
                                                 _defaultTimerStat : 
-                                                cooldownTimerNode.TimerStat;
+                                                cooldownTimerNode.GetTimerStat();
                     Timer timer = TIMERS_BY_STAT_CACHE[statConfig];
                     timer.Nodes.Add(cooldownTimerNode);
                 }

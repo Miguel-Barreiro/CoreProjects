@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Model.Stats;
 using Core.VSEngine.NestedVisualScripting;
 using Core.VSEngine.Nodes;
 using Core.VSEngine.Systems;
@@ -34,12 +35,19 @@ namespace Core.VSEngine
         public List<LocalVariableDefinition> LocalVariablesMutable => localVariables;
 #endif
 
+        public const string DefaultTimerName = "DefaultTimer";
+
+        // Index 0 is always the default timer and cannot be removed.
         [SerializeField] public List<LocalTriggerDefinition> localTriggers = new();
         public IReadOnlyList<LocalTriggerDefinition> LocalTriggers => localTriggers;
 
 #if UNITY_EDITOR
         public List<LocalTriggerDefinition> LocalTriggersMutable => localTriggers;
 #endif
+
+        // Used to only log the duplicate stat warning when it changes, since OnBeforeSerialize runs very often in the editor
+        [System.NonSerialized] private readonly HashSet<int> _duplicateStatTimers = new();
+        [System.NonSerialized] private string? _lastDuplicateStatWarning;
 
         
         public OutputVSNode? OutputsNode => GetOutputsNode();
@@ -139,13 +147,55 @@ namespace Core.VSEngine
             {
                 LocalTriggerDefinition defaultTimer = new LocalTriggerDefinition
                 {
-                    Name = "DefaultTimer",
+                    Name = DefaultTimerName,
                     CooldownReset = CooldownResetType.Restart,
                 };
                 localTriggers.Add(defaultTimer);
             }
-            
+
+            LogDuplicateTimerStats();
             FetchGUIDAndFileId();
+        }
+
+        /// <summary>
+        /// Fills <paramref name="result"/> with the indices of local timers that share their CooldownStat with another local timer.
+        /// The default timer (index 0) uses the global default stat and timers without a stat are ignored.
+        /// </summary>
+        public void FindTimersWithDuplicateStats(HashSet<int> result)
+        {
+            result.Clear();
+            for (int i = 1; i < localTriggers.Count; i++)
+            {
+                StatConfig stat = localTriggers[i].CooldownStat;
+                if (stat == null)
+                    continue;
+
+                for (int j = i + 1; j < localTriggers.Count; j++)
+                {
+                    if (localTriggers[j].CooldownStat != stat)
+                        continue;
+                    result.Add(i);
+                    result.Add(j);
+                }
+            }
+        }
+
+        private void LogDuplicateTimerStats()
+        {
+            FindTimersWithDuplicateStats(_duplicateStatTimers);
+
+            string? warning = null;
+            if (_duplicateStatTimers.Count > 0)
+            {
+                List<string> timerNames = new List<string>();
+                foreach (int index in _duplicateStatTimers)
+                    timerNames.Add($"'{localTriggers[index].Name}' ({localTriggers[index].CooldownStat.name})");
+                warning = $"ActionGraph '{name}': local timers must each use a different CooldownStat. Shared stats in: {string.Join(", ", timerNames)}";
+            }
+
+            if (warning != null && warning != _lastDuplicateStatWarning)
+                Debug.LogWarning(warning, this);
+            _lastDuplicateStatWarning = warning;
         }
 
         public void FetchGUIDAndFileId()
