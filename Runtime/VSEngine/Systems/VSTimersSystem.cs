@@ -40,9 +40,10 @@ namespace Core.VSEngine.Systems
             _defaultTimerStat = statConfig;
         }
         
-        private struct Timer
+        private class Timer
         {
             public StatConfig Stat;
+            public CooldownResetType CooldownReset;
             public List<CooldownTimerNode> Nodes;
         } 
         
@@ -59,6 +60,7 @@ namespace Core.VSEngine.Systems
                 mainTimer = new Timer
                 {
                     Stat = _defaultTimerStat, 
+                    CooldownReset = CooldownResetType.Restart,
                     Nodes = new List<CooldownTimerNode>()
                 };
                 TIMERS_BY_STAT_CACHE.Add(_defaultTimerStat, mainTimer);
@@ -74,12 +76,8 @@ namespace Core.VSEngine.Systems
                     if(triggerIndex == 1)
                         continue;
 
-                    Timer timer;
-                    if (!TIMERS_BY_STAT_CACHE.TryGetValue(localTrigger.CooldownStat, out timer))
-                    {
-                        timer = new Timer();
-                        TIMERS_BY_STAT_CACHE[localTrigger.CooldownStat] = timer;
-                    }
+                    Timer newTimer = GetOrCreateTimer(localTrigger.CooldownStat);
+                    newTimer.CooldownReset = localTrigger.CooldownReset;
                 }
             }
 
@@ -90,7 +88,7 @@ namespace Core.VSEngine.Systems
                     StatConfig statConfig = cooldownTimerNode.GetTimerStat() == null? 
                                                 _defaultTimerStat : 
                                                 cooldownTimerNode.GetTimerStat();
-                    Timer timer = TIMERS_BY_STAT_CACHE[statConfig];
+                    Timer timer = GetOrCreateTimer(statConfig);
                     timer.Nodes.Add(cooldownTimerNode);
                 }
             }
@@ -115,12 +113,30 @@ namespace Core.VSEngine.Systems
                 uint newChildOrder = VSTimersContainer.AddComponent(owner);
                 ref VSTimersData childTimerData = ref VSTimersContainer.GetComponentByChildOrder(owner, newChildOrder);
                 childTimerData.CooldownStat = stat;
+                childTimerData.CooldownReset = timer.CooldownReset;
+
                 for (int i = 0; i < timer.Nodes.Count; i++)
                     childTimerData.AddCooldownNode(timer.Nodes[i]);
             }
 
+            mainCooldownData.CooldownReset = CooldownResetType.Restart;
             mainCooldownData.CooldownStat = _defaultTimerStat;
             mainCooldownData.Enabled = mainCooldownNeeded;
+            
+            
+            Timer GetOrCreateTimer(StatConfig stat)
+            {
+                if (!TIMERS_BY_STAT_CACHE.TryGetValue(stat, out Timer timer))
+                {
+                    timer = new Timer
+                    {
+                        Stat = stat,
+                        Nodes = new List<CooldownTimerNode>()
+                    };
+                    TIMERS_BY_STAT_CACHE.Add(stat, timer);
+                }
+                return timer;
+            }
         }
         
         public void UpdateComponents(float deltaTime)
