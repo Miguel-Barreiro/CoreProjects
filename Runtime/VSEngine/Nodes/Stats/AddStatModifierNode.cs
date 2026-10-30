@@ -40,27 +40,27 @@ namespace Core.VSEngine.Nodes.Stats
 			OperationResult<StatConfig> statResult = Resolve<StatConfig>(nameof(Stat));
 			if (statResult.IsFailure)
 			{
-				Debug.LogError($"Failed to resolve Stat for AddStatModifierNode {name} in graph {graph.name}: {statResult}");
+				Debug.LogError($"Failed to resolve Stat for AddStatModifierNode {name} in graph {graph.name}: { statResult.Exception }");
 				return;
 			}
 			OperationResult<Fix> valueResult = Resolve<Fix>(nameof(Value));
 			if (valueResult.IsFailure)
 			{
-				Debug.LogError($"Failed to resolve NewValue for AddStatModifierNode {name} in graph {graph.name}: {valueResult}");
+				Debug.LogError($"Failed to resolve NewValue for AddStatModifierNode {name} in graph {graph.name}: {valueResult.Exception}");
 				return;
 			}
 
 			OperationResult<EntId> ownerResult = Resolve<EntId>(nameof(Owner));
 			if (ownerResult.IsFailure)
 			{
-				Debug.LogError($"Failed to resolve owner for AddStatModifierNode {name} in graph {graph.name}: {ownerResult}");
+				Debug.LogError($"Failed to resolve owner for AddStatModifierNode {name} in graph {graph.name}: {ownerResult.Exception}");
 				return;
 			}
 
 			OperationResult<EntId> targetResult = Resolve<EntId>(nameof(Target));
 			if (targetResult.IsFailure)
 			{
-				Debug.LogError($"Failed to resolve target for AddStatModifierNode {name} in graph {graph.name}: {targetResult}");
+				Debug.LogError($"Failed to resolve target for AddStatModifierNode {name} in graph {graph.name}: {targetResult.Exception}");
 				return;
 			}
 			
