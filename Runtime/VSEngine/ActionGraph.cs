@@ -58,7 +58,8 @@ namespace Core.VSEngine
         private static Dictionary<ActionGraph, InputVSNode?> InputNodeCache = new Dictionary<ActionGraph, InputVSNode?>();
         private static Dictionary<ActionGraph, OutputVSNode?> OutputNodeCache = new Dictionary<ActionGraph, OutputVSNode?>();
         private static Dictionary<ActionGraph, List<CooldownTimerNode>> TimerNodeCache = new Dictionary<ActionGraph, List<CooldownTimerNode>>();
-
+        private static Dictionary<ActionGraph, List<OnInitNode>> InitNodeCache = new Dictionary<ActionGraph, List<OnInitNode>>();
+        private static Dictionary<ActionGraph, List<OnEndNode>> EndNodeCache = new Dictionary<ActionGraph, List<OnEndNode>>();
         
 #if UNITY_EDITOR
 
@@ -94,6 +95,8 @@ namespace Core.VSEngine
             InputNodeCache.Clear();
             OutputNodeCache.Clear();
             TimerNodeCache.Clear();
+            InitNodeCache.Clear();
+            EndNodeCache.Clear();
         }
         
         private OutputVSNode? GetOutputsNode()
@@ -124,6 +127,28 @@ namespace Core.VSEngine
             
             return TimerNodeCache[this];
         }
+        
+        public IReadOnlyCollection<OnInitNode> GetInitNodes()
+        {
+            if(InitNodeCache.TryGetValue(this, out var cachedNodes))
+                return cachedNodes;
+
+            List<OnInitNode> onInitNodes = VSBaseEngine.GetInitNodes(this);
+            InitNodeCache.Add(this, onInitNodes);
+            
+            return InitNodeCache[this];
+        }
+
+        public IReadOnlyCollection<OnEndNode> GetEndNodes()
+        {
+            if(EndNodeCache.TryGetValue(this, out var cachedNodes))
+                return cachedNodes;
+
+            List<OnEndNode> onEndNodes = VSBaseEngine.GetEndNodes(this);
+            EndNodeCache.Add(this, onEndNodes);
+            
+            return EndNodeCache[this];
+        }
 
         
         private ExecutableNode? GetStartNode()
@@ -135,6 +160,8 @@ namespace Core.VSEngine
             return StartNodeCache[this];
         }
 
+        
+        
         public void OnAfterDeserialize() { }
 
         public void OnBeforeSerialize()

@@ -11,7 +11,7 @@ namespace Core.VSEngine.Nodes
 		public const string TEST_MENU = "TEST";
 		public const string GAME_MENU = "Game";
 		public const string LIST_MENU = "List";
-		
+		public const string STATS_MENU = "Stats";
 		
 		//submenus
 		public const string UNIT_TEST_MENU = "UnitTests";

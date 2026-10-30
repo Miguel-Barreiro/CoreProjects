@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Core.Model.Data;
 using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.Utils.CachedDataStructures;
 using Core.VSEngine;
+using Core.VSEngine.Nodes;
 using Core.VSEngine.Nodes.Events;
 using Core.VSEngine.Systems;
 using Zenject;
@@ -40,6 +42,7 @@ namespace Core.Model
     
     public sealed class VSAbilitySystem : OnDestroyComponent<VSAbilityData>, OnCreateComponent<VSAbilityData>
     {
+        [Inject] private VSBaseEngine _vsBaseEngine;
 
         [Inject] private readonly VSTimersSystem VSTimersSystem = null!;
 
@@ -65,6 +68,14 @@ namespace Core.Model
             
             
             VSTimersSystem.AddTimers(newComponentId, abilityData.dataConfig.ActionGraphs);
+            
+            foreach (ActionGraph actionGraph in abilityData.dataConfig.ActionGraphs)
+            {
+                IReadOnlyCollection<OnInitNode> initNodes = actionGraph.GetInitNodes();
+                foreach (OnInitNode onInitNode in initNodes)
+                    _vsBaseEngine.RunFromNode(onInitNode, newComponentId);
+
+            }
         }
 
         public void OnDestroyComponent(EntId destroyedComponentId)
@@ -83,6 +94,13 @@ namespace Core.Model
             foreach (EventListenNode eventListenNode in eventNodes)
                 VSEventListenersSystem.RemoveListener(destroyedComponentId, eventListenNode.EventType, eventListenNode);
 
+            
+            foreach (ActionGraph actionGraph in abilityData.dataConfig.ActionGraphs)
+            {
+                IReadOnlyCollection<OnEndNode> endNodes = actionGraph.GetEndNodes();
+                foreach (OnEndNode onEndNode in endNodes)
+                    _vsBaseEngine.RunFromNode(onEndNode, destroyedComponentId);
+            }
         }
 
         public bool Active { get; set; } = true;

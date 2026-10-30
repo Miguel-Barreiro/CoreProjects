@@ -286,5 +286,28 @@ namespace Core.VSEngine
             }
             return result;
         }
+        
+        public static List<OnInitNode> GetInitNodes(ActionGraph actionGraph)
+        {
+            List<OnInitNode> result = new List<OnInitNode>();
+            foreach (Node node in actionGraph.nodes)
+            {
+                if (node is OnInitNode onInitNode)
+                    result.Add(onInitNode);
+            }
+            return result;
+        }
+
+        public static List<OnEndNode> GetEndNodes(ActionGraph actionGraph)
+        {
+            List<OnEndNode> result = new List<OnEndNode>();
+            foreach (Node node in actionGraph.nodes)
+            {
+                if (node is OnEndNode onEndNode)
+                    result.Add(onEndNode);
+            }
+            return result;
+        }
+        
     }
 }
