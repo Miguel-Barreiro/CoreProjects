@@ -203,8 +203,7 @@ namespace Core.VSEngine
                 outputsNode.SetOutputValues(outputs);
                 scriptExecution.FromNode.CacheOutputValues(outputs);
             }
-            
-            nestedScriptExecutionStack.Pop();
+
         }
 
 
@@ -381,5 +380,11 @@ namespace Core.VSEngine
         public void Dispose() { Pool.Despawn(this as VSExecutionControl); }
 
 
+        public void EndExecution()
+        {
+            
+            ScriptExecution.EndExecution();
+            Dispose();
+        }
     }
 }

@@ -94,7 +94,8 @@ namespace Core.VSEngine
 
             try
             {
-                while (stop > 0 && vsExecutionControl.CurrentNode != null )
+                while (stop > 0 &&
+                       vsExecutionControl.CurrentNode != null)
                 {
                     stop--;
                     vsExecutionControl.ExecuteCurrentNode();
@@ -106,8 +107,12 @@ namespace Core.VSEngine
                 string graphName = vsExecutionControl.CurrentScriptExecution.Graph.name;
                 string currentNodeName = vsExecutionControl.CurrentNode.name;
                 Log.LogError($"Exception while executing test in <{graphName}>/<{currentNodeName}>:\n{e.Message}");
-#endif
                 throw;
+#endif
+            }
+            finally
+            {
+                vsExecutionControl.EndExecution();
             }
         }
 
@@ -116,7 +121,7 @@ namespace Core.VSEngine
                                                 BaseEventListenNode eventListenNode,
                                                 BaseEvent vsEvent, EntId ownerId)
         {
-            VSExecutionControl vsExecutionControl = new VSExecutionControl();
+            VSExecutionControl vsExecutionControl = VSExecutionControl.NEW();
             
             if (!vsEvent.IsPropagating)
             {
@@ -144,6 +149,9 @@ namespace Core.VSEngine
                 Log.LogError($"Exception while executing {vsEvent.GetType().Name} in <{graphName}>/<{currentNodeName}>:\n{e.Message}");
 #endif
                 throw;
+            }finally
+            {
+                vsExecutionControl.EndExecution();
             }
 
             // Log.LogMessage($"Finished executing {vsEvent.GetType().Name} for {eventListenNode.name}", LogPriority.Low);
@@ -162,6 +170,8 @@ namespace Core.VSEngine
                 stop--;
                 vsExecutionControl.ExecuteCurrentNode();
             }
+                
+            vsExecutionControl.EndExecution();
         }
 
         // protected virtual void RunInternal(NodeGraph nodeGraph,
