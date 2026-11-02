@@ -187,7 +187,7 @@ namespace Core.VSEngine
             public List<object?> List;
         }
         
-        public static List<T> NewList<T>() where T : class
+        public static List<T> NewList<T>()
         {
             if(!TypeObjectCache.TryGetValue(typeof(T), out StaticMemoryPool<List<object?>> cache))
             {
