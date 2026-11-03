@@ -10,7 +10,7 @@ namespace Core.VSEngine.Nodes.Stats
 {
 	
 	[CreateNodeMenu(VSNodeMenuNames.STATS_MENU+"/Get Stat Value", order = VSNodeMenuNames.IMPORTANT)]
-	public sealed class GetStatValueNode : ValueOnlyNode
+	public sealed class GetStatValueNode : SimpleValueNode<Fix>
 	{
 		[Inject] private readonly StatsSystem StatsSystem = null!;
 		
