@@ -30,7 +30,7 @@ namespace Core.VSEngine.Nodes
 		public const string FLOW_NODES_TINT = DEFAULT_TINT;
 		// public const string FLOW_NODES_TINT = "#0F3629";
 		public const string LIST_NODES_TINT = "#3d4254";
-		
+		public const string STAT_NODES_TINT = "#3d4254";
 		
 		public const string DEBUG_NODES_TINT = "#452438";
 		public const string DEBUG_TEST_NODES_TINT = "#530e68";

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Core.VSEngine.Nodes
 {
 	[CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/Bool", order = VSNodeMenuNames.IMPORTANT)]
-	[NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
+	
 	public class BoolNode : SimpleValueNode<bool>
 	{
 		[SerializeField, HideLabel]

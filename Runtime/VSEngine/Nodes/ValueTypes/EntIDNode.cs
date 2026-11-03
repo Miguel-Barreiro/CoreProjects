@@ -7,9 +7,8 @@ using Zenject;
 
 namespace Core.VSEngine.Nodes
 {
-	[NodeWidth(300)]
+	[NodeWidth(200)]
 	[CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/EntID", order = VSNodeMenuNames.IMPORTANT)]
-	[NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
 	public class EntIDNode : SimpleValueNode<EntId>
 	{
 		[Inject] private readonly IEntityHierarchySystem IEntityHierarchySystem = null!;

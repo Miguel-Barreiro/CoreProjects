@@ -12,7 +12,7 @@ namespace Core.VSEngine.Nodes.Stats
 {
 	
 	[Node.CreateNodeMenu(VSNodeMenuNames.STATS_MENU+"/Add Modifier", order = VSNodeMenuNames.IMPORTANT)]
-	[Node.NodeTint(VSNodeMenuNames.FLOW_NODES_TINT)]
+	[Node.NodeTint(VSNodeMenuNames.STAT_NODES_TINT)]
 	[Node.NodeWidth(220)]
 	public sealed class AddStatModifierNode : BasicFlowNode
 	{

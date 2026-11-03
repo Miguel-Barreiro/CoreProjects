@@ -7,7 +7,6 @@ namespace Core.VSEngine.Nodes
 {
     [NodeWidth(300)]
     [CreateNodeMenu(VSNodeMenuNames.VALUES_MENU +"/String", order = VSNodeMenuNames.IMPORTANT)]
-    [NodeTint(VSNodeMenuNames.VALUES_NODES_TINT)]
     public class StringNode : SimpleValueNode<string>
     {
         [SerializeField, HideLabel]
