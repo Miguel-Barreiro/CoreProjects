@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Core.Utils
@@ -16,33 +17,42 @@ namespace Core.Utils
 	}
 
 
-	public struct PushBackArray<T> : IPushBackArray<T>
+	public interface IArrayItems<T> 
 	{
-		private T[] items;
+		public uint Length { get; }
+		public T[] Items { get; }
+	}
+
+	public struct PushBackArray<T, TArray> : IPushBackArray<T> 
+		where TArray : struct, IArrayItems<T>
+	{
+		// [MarshalAs(UnmanagedType.ByValArray, SizeConst=MAX_STATUS_EFFECTS)]
+		// private T[] items;
+		private TArray array;
 		public uint count;
 
-		public T[] Items=> items;
+		public T[] Items=> array.Items;
 		
 		public uint Count => count;
-		public uint MaxCount => (uint) items.Length;
+		public uint MaxCount => (uint) array.Length;
 		
 		public PushBackArray(uint size)
 		{
-			items = new T[size];
+			array = default(TArray);
 			this.count = 0;
 		}
 		
 		public bool SetupNew(out uint newIndex)
 		{
-			if(count >= items.Length)
+			if(count >= array.Length)
 			{
-				Debug.LogError($"no space for new item, count: {count}, max: {items.Length}"); 
+				Debug.LogError($"no space for new item, count: {count}, max: {array.Length}"); 
 				newIndex = uint.MaxValue;
 				return false;
 			}
 
 			newIndex = count;
-			items[newIndex] = default(T);
+			array.Items[newIndex] = default(T);
 			count++;
 			
 			return true;
@@ -50,15 +60,15 @@ namespace Core.Utils
 
 		public bool Add(T item, out uint newIndex)
 		{
-			if(count >= items.Length)
+			if(count >= array.Length)
 			{
-				Debug.LogError($"no space for new item, count: {count}, max: {items.Length}"); 
+				Debug.LogError($"no space for new item, count: {count}, max: {array.Length}"); 
 				newIndex = uint.MaxValue;
 				return false;
 			}
 
 			newIndex = count;
-			items[newIndex] = item;
+			array.Items[newIndex] = item;
 			count++;
 			
 			return true;
@@ -70,15 +80,15 @@ namespace Core.Utils
 			{
 				Debug.LogError($"index out of range, index: {index}, count: {count}");
 				changedIndex = uint.MaxValue;
-				return ref items[0];
+				return ref array.Items[0];
 			}
 
 			uint top = count - 1;
-			items[index] = items[top];
+			array.Items[index] = array.Items[top];
 			count--;
 
 			changedIndex = index;
-			return ref items[index]; 
+			return ref array.Items[index]; 
 		}
 		
 		public ref T? GetAt(int index)
@@ -86,10 +96,10 @@ namespace Core.Utils
 			if(index >= count)
 			{
 				Debug.LogError($"index out of range, index: {index}, count: {count}");
-				return ref items[0];
+				return ref array.Items[0];
 			}
 			
-			return ref items[index];
+			return ref array.Items[index];
 		}
 		
 
@@ -97,10 +107,10 @@ namespace Core.Utils
 		{
 			count = 0;
 			
-			if (items.Length == size)
-				return;
-			
-			items = new T[size];
+			// if (array.Items.Length == size)
+			// 	return;
+			// array.
+			// array.Items = new T[size];
 		}
 	}
 }
