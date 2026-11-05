@@ -16,6 +16,7 @@ namespace Core.Initialization
         // public UniTask AddScene(string sceneName);
         public UniTask<OperationResult> SwitchScene(string sceneName);
         // public UniTask RemoveScene(string sceneName);
+        bool IsSwitchingScene { get; }
     }
 
 
@@ -26,6 +27,8 @@ namespace Core.Initialization
         [Inject] private readonly SystemsController SystemsController = null!;
         
         private List<string> currentSceneNames = new List<string>();
+
+        public bool IsSwitchingScene => loadingSceneTask != null || endOfFrameTask != null;
         
         #region Public
 
@@ -47,18 +50,26 @@ namespace Core.Initialization
                 Debug.LogError(sceneIsAlreadyLoadingMessage);
                 return OperationResult.Failure(sceneIsAlreadyLoadingMessage);
             }
+            
+            
             endOfFrameTask = new UniTaskCompletionSource<OperationResult>();
             currentLoadingSceneName = sceneName;
+            
+            systemsController.PauseLoop();
             
             SystemsController.OnEndFrame += LoadSceneAtEndFrame;
             await endOfFrameTask.Task;
             SystemsController.OnEndFrame -= LoadSceneAtEndFrame;
             endOfFrameTask = null;
+            
 
             if(loadingSceneTask == null)
             {
                 string errorMessage = $"Failed to load scene({sceneName}).";
                 Debug.LogError(errorMessage);
+                
+                systemsController.ResumeLoop();
+                
                 return OperationResult.Failure(errorMessage);
             }
 
@@ -67,6 +78,8 @@ namespace Core.Initialization
             currentLoadingSceneName = NO_SCENE_LOADING;
             loadingSceneTask = null;
             endOfFrameTask = null;
+            
+            systemsController.ResumeLoop();
             
             return result;
             
@@ -80,6 +93,7 @@ namespace Core.Initialization
                 endOfFrameTask.TrySetResult(OperationResult.Success());
             }
         }
+
 
 
         // public UniTask RemoveScene(string sceneName)

@@ -7,27 +7,25 @@ using UnityEngine;
 namespace Core.Model.ModelSystems
 {
 	
-	public abstract class MultiArrayComponentContainer<TComponentData, TArray> : 
-			BaseMultiArrayComponentContainer<TComponentData, DefaultComponentAttributes, TArray>
+	public abstract class MultiArrayComponentContainer<TComponentData> : 
+			BaseMultiArrayComponentContainer<TComponentData, DefaultComponentAttributes>
 		where TComponentData : struct, IComponentData
-		where TArray : struct, IArrayItems<TComponentData>
 	{
 		protected MultiArrayComponentContainer(uint maxNumber) : base(maxNumber) { }
 	}
 	
 	
 	
-	public abstract class BaseMultiArrayComponentContainer<TComponentData, TComponentAttribute, TArray>  : ComponentContainer<TComponentData>
+	public abstract class BaseMultiArrayComponentContainer<TComponentData, TComponentAttribute>  : ComponentContainer<TComponentData>
 		where TComponentData : struct, IComponentData
 		where TComponentAttribute : BaseComponentAttributes<TComponentAttribute>, new()
-		where TArray : struct, IArrayItems<TComponentData>
 	{
 		
 
 		protected abstract int ComponentArrayCount { get; }
 		
 		// the index 0 is the main array
-		public PushBackArray<TComponentData, TArray>[] ComponentArrays;
+		public PushBackArray<TComponentData>[] ComponentArrays;
 		
 		private readonly Dictionary<EntId, TComponentAttribute> ComponentIndexByOwner = new Dictionary<EntId, TComponentAttribute>();
 		
@@ -68,16 +66,16 @@ namespace Core.Model.ModelSystems
 			
 			TComponentData componentData = GetComponent(target);
 			
-			ref PushBackArray<TComponentData, TArray> pushBackArray = ref ComponentArrays[arrayType];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
 			RemoveFromArray(index, ref pushBackArray);
 			
-			ref PushBackArray<TComponentData, TArray> newPushBackArray = ref ComponentArrays[newArrayIndex];
+			ref PushBackArray<TComponentData> newPushBackArray = ref ComponentArrays[newArrayIndex];
 			newPushBackArray.Add(componentData, out uint newIndex);
 			attributes.Index = newIndex;
 			attributes.ArrayType = newArrayIndex;
 		}
 		
-		protected void RemoveFromArray(uint index, ref PushBackArray<TComponentData, TArray> pushBackArray)
+		protected void RemoveFromArray(uint index, ref PushBackArray<TComponentData> pushBackArray)
 		{
 			pushBackArray.Remove(index, out uint changedIndex);
 			
@@ -96,7 +94,7 @@ namespace Core.Model.ModelSystems
 				return;
 			}
 
-			ref PushBackArray<TComponentData, TArray> pushBackArray = ref ComponentArrays[0];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[0];
 			if (!pushBackArray.SetupNew(out uint newIndex))
 			{
 				Debug.LogError($"No available space for new component(TestDD1ComponentData), FILLED[{pushBackArray.Count}] ");
@@ -117,7 +115,7 @@ namespace Core.Model.ModelSystems
 			uint arrayType = attributes.ArrayType;
 			uint index = attributes.Index;
 
-			ref PushBackArray<TComponentData, TArray> pushBackArray = ref ComponentArrays[arrayType];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
 			
 			RemoveFromArray(index, ref pushBackArray);
 			ComponentIndexByOwner.Remove(owner);
@@ -133,7 +131,7 @@ namespace Core.Model.ModelSystems
 			uint arrayType = attributes.ArrayType;
 			uint index = attributes.Index;
 
-			ref PushBackArray<TComponentData, TArray> pushBackArray = ref ComponentArrays[arrayType];
+			ref PushBackArray<TComponentData> pushBackArray = ref ComponentArrays[arrayType];
 			return ref pushBackArray.Items[index];
 		}
 		
@@ -142,12 +140,9 @@ namespace Core.Model.ModelSystems
 		public virtual void RebuildWithMax(uint maxNumber)
 		{
 			ComponentIndexByOwner.Clear();
-			ComponentArrays = new PushBackArray<TComponentData, TArray>[ComponentArrayCount];
+			ComponentArrays = new PushBackArray<TComponentData>[ComponentArrayCount];
 			for (int i = 0; i < ComponentArrayCount; i++)
-			{
-				TArray array = new TArray();
-				ComponentArrays[i] = new PushBackArray<TComponentData, TArray>(array);
-			}
+				ComponentArrays[i] = new PushBackArray<TComponentData>(maxNumber);
 
 		}
 
@@ -161,7 +156,7 @@ namespace Core.Model.ModelSystems
 			ComponentIndexByOwner.Clear();
 			for (int i = 0; i < ComponentArrayCount; i++)
 			{
-				PushBackArray<TComponentData, TArray> array = ComponentArrays[i];
+				PushBackArray<TComponentData> array = ComponentArrays[i];
 				foreach (TComponentData componentData in array.Items)
 					componentData.Reset();
 			}

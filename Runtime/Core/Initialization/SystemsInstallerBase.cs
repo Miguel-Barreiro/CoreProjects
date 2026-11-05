@@ -8,8 +8,6 @@ using Core.View;
 using Core.View.UI;
 using Core.Zenject.Source.Main;
 using Cysharp.Threading.Tasks;
-using SRDebugger;
-using SRDebugger.Internal;
 using UnityEngine;
 
 namespace Core.Initialization
