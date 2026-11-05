@@ -40,10 +40,7 @@ namespace Core.VSEngine.Nodes
 	
 	public enum EntityTarget
 	{
-		[LabelText("Graph Owner")]
 		Owner,
-		
-		[LabelText("Target Entity")]
 		Parent,
 		
 	}

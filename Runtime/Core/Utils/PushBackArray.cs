@@ -36,9 +36,9 @@ namespace Core.Utils
 		public uint Count => count;
 		public uint MaxCount => (uint) array.Length;
 		
-		public PushBackArray(uint size)
+		public PushBackArray(TArray itemsArray)
 		{
-			array = default(TArray);
+			array = itemsArray;
 			this.count = 0;
 		}
 		

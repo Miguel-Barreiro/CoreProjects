@@ -144,7 +144,11 @@ namespace Core.Model.ModelSystems
 			ComponentIndexByOwner.Clear();
 			ComponentArrays = new PushBackArray<TComponentData, TArray>[ComponentArrayCount];
 			for (int i = 0; i < ComponentArrayCount; i++)
-				ComponentArrays[i] = new PushBackArray<TComponentData, TArray>(maxNumber);
+			{
+				TArray array = new TArray();
+				ComponentArrays[i] = new PushBackArray<TComponentData, TArray>(array);
+			}
+
 		}
 
 		public void SetupInvalid()
