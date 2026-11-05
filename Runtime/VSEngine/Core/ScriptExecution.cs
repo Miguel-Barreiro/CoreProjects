@@ -174,55 +174,8 @@ namespace Core.VSEngine
         
         
         #endregion
-
-
-        #region Data Caches
-
-        protected static readonly List<CachedList> AllUsedLists = new();
-        protected static readonly Dictionary<Type, StaticMemoryPool<List<object?>>> TypeObjectCache = new();
-
-        protected struct CachedList
-        {
-            public Type Type;
-            public List<object?> List;
-        }
         
-        public static List<T> NewList<T>()
-        {
-            if(!TypeObjectCache.TryGetValue(typeof(T), out StaticMemoryPool<List<object?>> cache))
-            {
-                cache = new StaticMemoryPool<List<object?>>(OnSpawned, OnDespawned, OnAllocMethod);
-                TypeObjectCache[typeof(T)] = cache;
-            }
-            
-            List<object?> list = cache.Spawn();
-            AllUsedLists.Add(new CachedList()
-            {
-                 Type = typeof(T),
-                 List = list
-             });
-            return (list as List<T>)!;
-        }
         
-        private static void OnDespawned(List<object?> obj)
-        {
-            obj.Clear();
-        }
-        private static void OnAllocMethod(List<object?> obj) { obj.Clear(); }
-        private static void OnSpawned(List<object?> obj) { }
-        
-        #endregion
-
-
-        public static void EndExecution()
-        {
-            foreach (CachedList cachedList in AllUsedLists)
-            {
-                Type type = cachedList.Type;
-                List<object?> list = cachedList.List;
-                TypeObjectCache[type].Despawn(list);
-            }
-        }
     }
     
     

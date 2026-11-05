@@ -355,7 +355,6 @@ namespace Core.VSEngine
         }
 
         
-        
         protected static readonly StaticMemoryPool<VSExecutionControl> Pool =
             new StaticMemoryPool<VSExecutionControl>(OnSpawned, OnDespawned);
 
@@ -382,8 +381,6 @@ namespace Core.VSEngine
 
         public void EndExecution()
         {
-            
-            ScriptExecution.EndExecution();
             Dispose();
         }
     }
