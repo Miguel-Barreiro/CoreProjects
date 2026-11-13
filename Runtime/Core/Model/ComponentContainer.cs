@@ -105,7 +105,10 @@ namespace Core.Model
 			ComponentIndexByOwner[topEntityID] = index;
 			Components[index] = Components[lastComponentIndex];
 
-			Components[lastComponentIndex].ID = EntId.Invalid;
+			// Reset (not just invalidate) the vacated slot: the struct copy above shares any reference-type
+			// fields (e.g. HierarchyData.ChildsID) between both slots, and reusing this slot later would
+			// otherwise mutate the moved component's data.
+			Components[lastComponentIndex].Reset();
 			_topEmptyIndex--;
 		}
 
