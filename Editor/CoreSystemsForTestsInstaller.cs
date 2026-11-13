@@ -1,4 +1,5 @@
 using Core.Initialization;
+using Core.Model;
 using Core.Model.ModelSystems;
 using Core.Systems;
 using Core.VSEngine;
@@ -52,6 +53,12 @@ namespace Core.Editor
 
 		public override void ResetComponentContainers(DataContainersController dataContainersController)
 		{
+			dataContainersController.ResizeComponentsContainer<RandomData>(20);
+			dataContainersController.ResizeComponentsContainer<HierarchyData>(20);
+			dataContainersController.ResizeComponentsContainer<VSAbilityData>(20);
+			dataContainersController.ResizeComponentsContainer<VSTimersData>(20);
+			dataContainersController.ResizeComponentsContainer<VSEventListenersData>(20);
+			
 			Test.ResetComponentContainersInternal(dataContainersController);
 		}
 		
