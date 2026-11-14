@@ -17,6 +17,8 @@ namespace Core.Model
     {
         public EntId ID { get; }
 
+        public virtual ulong GetStartTags() { return 0; }
+    
         protected Entity()
         {
             ID = EntitiesContainer.GenerateNewEntityID();

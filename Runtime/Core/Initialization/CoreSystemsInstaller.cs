@@ -39,13 +39,13 @@ namespace Core.Initialization
             BuildModelSystems();
             
             BuildRandomSystem();
+            
         }
-
 
         private void BuildRandomSystem()
         {
-            RandomSystem randomSystem = new RandomSystem();
-            BindInstance<IRandomSystem>(randomSystem);
+            RandomSystemImplementation randomSystemImplementation = new RandomSystemImplementation();
+            BindInstance<IRandomSystem>(randomSystemImplementation);
 			
             RandomModel randomModel = new RandomModel();
             BindInstance(randomModel);
