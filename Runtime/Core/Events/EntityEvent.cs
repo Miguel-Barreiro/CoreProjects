@@ -1,6 +1,7 @@
 using System;
 using Core.Initialization;
 using Core.Model;
+using Core.VSEngine;
 using Core.Zenject.Source.Factories.Pooling.Static;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ namespace Core.Events
 {
 	public abstract class BaseEntityEvent : IBaseEvent, IDisposable
 	{
+		[VSField(IsWritable = false, IsReadable = true)]
 		public EntId EntityID { get; private set; } = EntId.Invalid;
 		
 		internal void SetTargetEntityID(EntId targetEntityID)
