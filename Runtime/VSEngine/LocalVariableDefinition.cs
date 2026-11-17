@@ -33,7 +33,7 @@ namespace Core.VSEngine
                 NodeElementType.Bools => BoolValue,
                 NodeElementType.Positions => Vector3.zero,
                 NodeElementType.TileCoordinates => TileCoordValue,
-                NodeElementType.Tags => new Tag(),
+                NodeElementType.Tags => 0,
                 NodeElementType.Entities => DefaultEntityValue,
                 _ => throw new ArgumentOutOfRangeException(nameof(Type))
             };

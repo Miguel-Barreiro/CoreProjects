@@ -2,7 +2,6 @@ using System;
 using Core.Model;
 using FixedPointy;
 using UnityEngine;
-using Vector3 = System.Numerics.Vector3;
 
 namespace Core.VSEngine.Nodes
 {
@@ -27,7 +26,7 @@ namespace Core.VSEngine.Nodes
 				NodeElementType.Bools => typeof(bool),
 				NodeElementType.Positions => typeof(Vector3),
 				NodeElementType.TileCoordinates => typeof(Vector2Int),
-				NodeElementType.Tags => typeof(Tag),
+				NodeElementType.Tags => typeof(ulong),
 			};
 		}
         
@@ -40,7 +39,7 @@ namespace Core.VSEngine.Nodes
 				NodeElementType.Bools => (bool)a == (bool)b,
 				NodeElementType.TileCoordinates => (Vector2Int)a == (Vector2Int)b,
 				NodeElementType.Positions => (Vector3)a == (Vector3)b, 
-				NodeElementType.Tags => (Tag)a == (Tag)b,
+				NodeElementType.Tags => (ulong)a == (ulong)b,
 			};
 		}
 	}
