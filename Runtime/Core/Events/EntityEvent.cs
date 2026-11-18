@@ -10,7 +10,7 @@ namespace Core.Events
 	public abstract class BaseEntityEvent : IBaseEvent, IDisposable
 	{
 		[VSField(IsWritable = false, IsReadable = true)]
-		public EntId EntityID { get; private set; } = EntId.Invalid;
+		public EntId EntityID = EntId.Invalid;
 		
 		internal void SetTargetEntityID(EntId targetEntityID)
 		{
